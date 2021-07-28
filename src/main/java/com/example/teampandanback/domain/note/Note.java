@@ -1,12 +1,13 @@
 package com.example.teampandanback.domain.note;
 
-import com.example.teampandanback.domain.user.User;
+import com.example.teampandanback.dto.note.NoteRequestDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @Entity
@@ -33,4 +34,16 @@ public class Note {
     private Step step;
 
 
+    public LocalDateTime chageType (String dateString) {
+        String newDateString = dateString + " 00:00:00";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime date = LocalDateTime.parse(newDateString, formatter);
+        return date;
+
+    }
+    public void update(NoteRequestDto noteRequestDto) {
+        this.title = noteRequestDto.getTitle();
+        this.content = noteRequestDto.getContent();
+        this.deadline = chageType(noteRequestDto.getDeadline());
+    }
 }
