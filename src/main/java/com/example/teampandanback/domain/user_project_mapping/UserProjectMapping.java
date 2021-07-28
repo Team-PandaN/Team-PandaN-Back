@@ -1,5 +1,6 @@
 package com.example.teampandanback.domain.user_project_mapping;
 
+import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.user.Role;
 import com.example.teampandanback.domain.user.User;
 import lombok.Builder;
