@@ -27,14 +27,14 @@ public class UserProjectMapping {
     @JoinColumn(nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(nullable = false)
-    private Project project;
+//    @ManyToOne
+//    @JoinColumn(nullable = false)
+//    private Project project;
 
     @Builder
-    public UserProjectMapping(Role role, User user, Project project) {
+    public UserProjectMapping(Role role, User user) {
         this.role = role;
         this.user = user;
-        this.project = project;
+//        this.project = project;
     }
 }
