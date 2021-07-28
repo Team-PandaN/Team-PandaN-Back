@@ -1,0 +1,48 @@
+plugins {
+    id 'org.springframework.boot' version '2.5.3'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    //spring-web and test
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    //lombok
+    implementation 'org.projectlombok:lombok'
+    annotationProcessor("org.projectlombok:lombok")
+
+    //jpa
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    //database
+    //h2
+    implementation('com.h2database:h2')
+
+    // mustache server-template-engine
+    implementation('org.springframework.boot:spring-boot-starter-mustache')
+
+    // spring-security
+    //      소셜 로그인 등 클라이언트 입장에서 소셜 기능 구현 시 필요한 의존성입니다.
+    //      spring-security-oauth2-client와 spring-security-oauth2-jose를 기본으로 관리 해 줍니다.
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    testImplementation("org.springframework.security:spring-security-test")
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // spring-session-jdbc
+    //      MySQL과 같은 데이터베이스를 세션 저장소로 사용한다.
+    implementation 'org.springframework.session:spring-session-jdbc'
+}
+
+test {
+    useJUnitPlatform()
+}
