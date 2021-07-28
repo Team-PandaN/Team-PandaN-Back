@@ -1,21 +1,11 @@
 package com.example.teampandanback.controller;
 
-import com.example.teampandanback.dto.project.ProejctRequestDto;
-import com.example.teampandanback.dto.project.ProjectListResponseDto;
-import com.example.teampandanback.dto.project.ProjectResponseDto;
-import com.example.teampandanback.dto.project.StringEncryptResponseDto;
+import com.example.teampandanback.dto.project.*;
 import com.example.teampandanback.service.EncryptService;
+import com.example.teampandanback.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import com.example.teampandanback.dto.project.ProejctRequestDto;
-import com.example.teampandanback.dto.project.ProjectDeleteResponseDto;
-import com.example.teampandanback.dto.project.ProjectListResponseDto;
-import com.example.teampandanback.dto.project.ProjectResponseDto;
-import com.example.teampandanback.service.ProjectService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -43,14 +33,14 @@ public class ProjectController {
 
     // Project 생성
     @PostMapping("")
-    public ProjectResponseDto createProject(@RequestBody ProejctRequestDto requestDto){
+    public ProjectResponseDto createProject(@RequestBody ProjectRequestDto requestDto){
         return projectService.createProject(requestDto);
     }
 
     // Project 수정
     @PutMapping("/{projectId}")
     public ProjectResponseDto updateProject(@PathVariable("projectId") Long projectId,
-                                            @RequestBody ProejctRequestDto requestDto){
+                                            @RequestBody ProjectRequestDto requestDto){
         return projectService.updateProject(projectId, requestDto);
     }
 
