@@ -14,8 +14,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CustomOAuth2UserService customOAuth2UserService;
 
-    @Value("${front.blossomwhale.url}")
-    private String frontUrl;
+//    @Value("${front.blossomwhale.url}")
+//    private String frontUrl;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -24,7 +24,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .headers().frameOptions().disable() // h2-console 화면을 사용하기 위해 해당 옵션 (들)을 disable합니다.
                 .and()
                     .authorizeRequests() // URL별 권한 관리를 설정하는 옵션의 시작점입니다.
-                    .antMatchers("/","/css/**","/images/**","/js/**","/h2-console/**").permitAll()
+                    .antMatchers("/**","/css/**","/images/**","/js/**","/h2-console/**").permitAll()
                     .antMatchers("/api/v1/**").hasRole(Role.USER.name())
                     .anyRequest().authenticated()
                 .and()
@@ -33,8 +33,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                     .oauth2Login()
                         .userInfoEndpoint()
-                            .userService(customOAuth2UserService) //OAuth2 로그인 성공 이후 사용자 정보를 가져올 때의 설정들을 담당.
-                    .and()
-                    .defaultSuccessUrl(frontUrl,true);
+                            .userService(customOAuth2UserService); //OAuth2 로그인 성공 이후 사용자 정보를 가져올 때의 설정들을 담당.
+//                    .and()
+//                    .defaultSuccessUrl(frontUrl,true);
     }
 }

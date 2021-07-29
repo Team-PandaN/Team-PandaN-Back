@@ -18,22 +18,23 @@ public class UserProjectMapping {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "SEQ")
     private Long seq;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, name = "ROLE")
     private Role role;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(nullable = false, name = "USER_ID")
     private User user;
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(nullable = false, name = "PROJECT_ID")
     private Project project;
 
     @Builder
-    public UserProjectMapping(Role role, User user, Project project) {
+    public UserProjectMapping(Role role, User user) {
         this.role = role;
         this.user = user;
         this.project = project;
