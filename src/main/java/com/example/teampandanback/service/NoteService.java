@@ -20,7 +20,7 @@ public class NoteService {
 
     private final NoteRepository noteRepository;
 
-    public static LocalDate changeType (String dateString) {
+    public static LocalDate changeType(String dateString) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate date = LocalDate.parse(dateString, formatter);
         return date;
@@ -29,7 +29,7 @@ public class NoteService {
     @Transactional
     public NoteResponseDto readNoteDetail(Long noteId) {
         Note note = noteRepository.findById(noteId)
-                .orElseThrow(()-> new ApiRequestException("작성된 노트가 없습니다."));
+                .orElseThrow(() -> new ApiRequestException("작성된 노트가 없습니다."));
         return NoteResponseDto.builder()
                 .noteId(note.getNoteId())
                 .title(note.getTitle())
@@ -39,9 +39,9 @@ public class NoteService {
     }
 
     @Transactional
-    public NoteResponseDto updateNoteDetail(Long noteId,NoteRequestDto noteRequestDto) {
+    public NoteResponseDto updateNoteDetail(Long noteId, NoteRequestDto noteRequestDto) {
         Note note = noteRepository.findById(noteId)
-                .orElseThrow(()-> new ApiRequestException("수정 할 노트가 없습니다."));
+                .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
         note.update(noteRequestDto);
         return NoteResponseDto.builder()
                 .noteId(note.getNoteId())
@@ -52,7 +52,7 @@ public class NoteService {
     }
 
     @Transactional
-    public NoteResponseDto createNote(Long projectId, NoteRequestDto noteRequestDto){
+    public NoteResponseDto createNote(Long projectId, NoteRequestDto noteRequestDto) {
         LocalDate deadline = changeType(noteRequestDto.getDeadline());
         Note notwraw = Note.of(noteRequestDto, deadline);
         Note note = noteRepository.save(Note.of(noteRequestDto, deadline));
@@ -66,6 +66,7 @@ public class NoteService {
                 .noteId(noteId)
                 .build();
     }
+
     @Transactional
     public KanbanNoteSearchResponseDto readKanbanNote(Long projectId) {
         List<NoteOfProjectResponseDto> noteOfProjectResponseDtoList = new ArrayList<>();
@@ -74,7 +75,7 @@ public class NoteService {
         List<NoteResponseDto> noteResponseDtoList3 = new ArrayList<>();
         List<NoteResponseDto> noteResponseDtoList4 = new ArrayList<>();
 
-        for (Note note : noteRepository.findNoteByProject_projectId(projectId)){
+        for (Note note : noteRepository.findNoteByProject_projectId(projectId)) {
             if (note.getStep().equals(Step.STORAGE)) {
                 noteResponseDtoList1.add(NoteResponseDto.builder()
                         .noteId(note.getNoteId())
@@ -89,7 +90,7 @@ public class NoteService {
                 .noteResponseDtoList(noteResponseDtoList1)
                 .build());
 
-        for (Note note : noteRepository.findNoteByProject_projectId(projectId)){
+        for (Note note : noteRepository.findNoteByProject_projectId(projectId)) {
             if (note.getStep().equals(Step.TODO)) {
                 noteResponseDtoList2.add(NoteResponseDto.builder()
                         .noteId(note.getNoteId())
@@ -104,7 +105,7 @@ public class NoteService {
                 .noteResponseDtoList(noteResponseDtoList2)
                 .build());
 
-        for (Note note : noteRepository.findNoteByProject_projectId(projectId)){
+        for (Note note : noteRepository.findNoteByProject_projectId(projectId)) {
             if (note.getStep().equals(Step.PROCESSING)) {
                 noteResponseDtoList3.add(NoteResponseDto.builder()
                         .noteId(note.getNoteId())
@@ -119,7 +120,7 @@ public class NoteService {
                 .noteResponseDtoList(noteResponseDtoList3)
                 .build());
 
-        for (Note note : noteRepository.findNoteByProject_projectId(projectId)){
+        for (Note note : noteRepository.findNoteByProject_projectId(projectId)) {
             if (note.getStep().equals(Step.DONE)) {
                 noteResponseDtoList4.add(NoteResponseDto.builder()
                         .noteId(note.getNoteId())
@@ -139,23 +140,21 @@ public class NoteService {
                 .build();
     }
 
-
     @Transactional
-    public NoteSerchResponseDto readOrdinaryNote(Long projectId) {
+    public NoteSearchResponseDto readOrdinaryNote(Long projectId) {
         List<NoteResponseDto> noteResponseDtoList = new ArrayList<>();
-        for (Note note : noteRepository.findNoteByProject_projectId(projectId)){
+
+        for (Note note : noteRepository.findNoteByProject_projectId(projectId)) {
             noteResponseDtoList.add(NoteResponseDto.builder()
                     .noteId(note.getNoteId())
                     .title(note.getTitle())
                     .content(note.getContent())
                     .deadline(note.getDeadline())
                     .build());
-            }
-        return NoteSerchResponseDto.builder()
-                .noteResponseDtoList(noteResponseDtoList)
+        }
+
+        return NoteSearchResponseDto.builder()
+                .notes(noteResponseDtoList)
                 .build();
     }
-
-
-
 }

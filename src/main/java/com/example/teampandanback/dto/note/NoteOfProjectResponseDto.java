@@ -9,12 +9,12 @@ import java.util.List;
 @Getter
 public class NoteOfProjectResponseDto {
     private final Step step;
-    private final List<NoteResponseDto> noteResponseDtoList;
+    private final List<NoteResponseDto> notes;
 
     @Builder
     public NoteOfProjectResponseDto(Step step, List<NoteResponseDto> noteResponseDtoList) {
         this.step = step;
-        this.noteResponseDtoList = noteResponseDtoList;
+        this.notes = noteResponseDtoList;
     }
 
 }
