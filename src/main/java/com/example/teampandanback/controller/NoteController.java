@@ -35,13 +35,13 @@ public class NoteController {
     }
 
     //노트 삭제
-    @DeleteMapping("notes/{noteId}")
+    @DeleteMapping("/notes/{noteId}")
     public NoteDeleteResponseDto deleteNote (@PathVariable("noteId") Long noteId) {
         return noteService.deleteNote(noteId);
     }
 
-    //
-    @PostMapping("notes/{projectId}/notes")
+    //노트 생성
+    @PostMapping("/notes/{projectId}")
     public NoteResponseDto createNote (@PathVariable Long projectId, @RequestBody NoteRequestDto noteRequestDto){
         return noteService.createNote(projectId, noteRequestDto);
     }
