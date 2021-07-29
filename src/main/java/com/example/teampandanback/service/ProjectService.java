@@ -29,9 +29,13 @@ public class ProjectService {
 
     // Project 목록 조회
     @Transactional
-    public List<ProjectResponseDto> readProjectList(){
-         return projectRepository.findAll()
-                 .stream().map(ProjectResponseDto::of).collect(Collectors.toList());
+    public List<ProjectResponseDto> readProjectList(SessionUser sessionUser){
+        List<UserProjectMapping> userProjectMappingList = userProjectMappingRepository.findByUser_UserId(sessionUser.getUserId());
+
+        return userProjectMappingList
+                .stream()
+                .map(userProjectMapping -> ProjectResponseDto.of(userProjectMapping.getProject()))
+                .collect(Collectors.toList());
     }
 
     // Project 생성
@@ -57,9 +61,15 @@ public class ProjectService {
 
     // Project 수정
     @Transactional
-    public ProjectResponseDto updateProject(Long projectId, ProjectRequestDto requestDto){
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(()-> new ApiRequestException("수정할 프로젝트가 없습니다."));
+    public ProjectResponseDto updateProject(Long projectId, ProjectRequestDto requestDto, SessionUser sessionUser){
+
+        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(),projectId);
+
+        if(!userProjectMapping.getRole().equals(UserProjectRole.OWNER)){
+            throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
+        }
+
+        Project project = userProjectMapping.getProject();
         project.update(requestDto);
 
         return ProjectResponseDto.of(project);
@@ -67,7 +77,13 @@ public class ProjectService {
 
     // Project 삭제
     @Transactional
-    public ProjectDeleteResponseDto deleteProject(Long projectId){
+    public ProjectDeleteResponseDto deleteProject(Long projectId, SessionUser sessionUser){
+        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(),projectId);
+
+        if(!userProjectMapping.getRole().equals(UserProjectRole.OWNER)){
+            throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
+        }
+        userProjectMappingRepository.deleteByProject_ProjectId(projectId);
         projectRepository.deleteById(projectId);
 
         return ProjectDeleteResponseDto.builder()

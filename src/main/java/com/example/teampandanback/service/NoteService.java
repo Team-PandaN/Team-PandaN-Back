@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +19,12 @@ import java.util.List;
 public class NoteService {
 
     private final NoteRepository noteRepository;
+
+    public static LocalDate changeType (String dateString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate date = LocalDate.parse(dateString, formatter);
+        return date;
+    }
 
     @Transactional
     public NoteResponseDto readNoteDetail(Long noteId) {
@@ -44,6 +52,14 @@ public class NoteService {
     }
 
     @Transactional
+    public NoteResponseDto createNote(Long projectId, NoteRequestDto noteRequestDto){
+        LocalDate deadline = changeType(noteRequestDto.getDeadline());
+        Note notwraw = Note.of(noteRequestDto, deadline);
+        Note note = noteRepository.save(Note.of(noteRequestDto, deadline));
+        return NoteResponseDto.of(note);
+    }
+
+    @Transactional
     public NoteDeleteResponseDto deleteNote(Long noteId) {
         noteRepository.deleteById(noteId);
         return NoteDeleteResponseDto.builder()
@@ -59,7 +75,7 @@ public class NoteService {
         List<NoteResponseDto> noteResponseDtoList4 = new ArrayList<>();
 
         for (Note note : noteRepository.findNoteByProject_projectId(projectId)){
-            if (note.getStep().equals(Step.창고)) {
+            if (note.getStep().equals(Step.STORAGE)) {
                 noteResponseDtoList1.add(NoteResponseDto.builder()
                         .noteId(note.getNoteId())
                         .title(note.getTitle())
@@ -69,12 +85,12 @@ public class NoteService {
             }
         }
         noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
-                .step(Step.창고)
+                .step(Step.STORAGE)
                 .noteResponseDtoList(noteResponseDtoList1)
                 .build());
 
         for (Note note : noteRepository.findNoteByProject_projectId(projectId)){
-            if (note.getStep().equals(Step.할것)) {
+            if (note.getStep().equals(Step.TODO)) {
                 noteResponseDtoList2.add(NoteResponseDto.builder()
                         .noteId(note.getNoteId())
                         .title(note.getTitle())
@@ -84,12 +100,12 @@ public class NoteService {
             }
         }
         noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
-                .step(Step.할것)
+                .step(Step.TODO)
                 .noteResponseDtoList(noteResponseDtoList2)
                 .build());
 
         for (Note note : noteRepository.findNoteByProject_projectId(projectId)){
-            if (note.getStep().equals(Step.진행중)) {
+            if (note.getStep().equals(Step.PROCESSING)) {
                 noteResponseDtoList3.add(NoteResponseDto.builder()
                         .noteId(note.getNoteId())
                         .title(note.getTitle())
@@ -99,12 +115,12 @@ public class NoteService {
             }
         }
         noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
-                .step(Step.진행중)
+                .step(Step.PROCESSING)
                 .noteResponseDtoList(noteResponseDtoList3)
                 .build());
 
         for (Note note : noteRepository.findNoteByProject_projectId(projectId)){
-            if (note.getStep().equals(Step.끝)) {
+            if (note.getStep().equals(Step.DONE)) {
                 noteResponseDtoList4.add(NoteResponseDto.builder()
                         .noteId(note.getNoteId())
                         .title(note.getTitle())
@@ -114,7 +130,7 @@ public class NoteService {
             }
         }
         noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
-                .step(Step.끝)
+                .step(Step.DONE)
                 .noteResponseDtoList(noteResponseDtoList4)
                 .build());
 

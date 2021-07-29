@@ -20,36 +20,38 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @GetMapping("/{projectId}/invites")
-    public ResponseEntity<StringEncryptResponseDto> findTagByCategoryId(@PathVariable("projectId") Long projectId ) {
+    public ResponseEntity<StringEncryptResponseDto> findTagByCategoryId(@PathVariable("projectId") Long projectId) {
         log.info(">>> Encrypting >>>");
         return ResponseEntity.ok().body(encryptService.encodeString(projectId));
     }
 
     // Project 목록 조회
     @GetMapping("")
-    public ProjectListResponseDto readProjectList(){
+    public ProjectListResponseDto readProjectList(@LoginUser SessionUser sessionUser) {
         return ProjectListResponseDto.builder()
-                .projectResponseDtoList(projectService.readProjectList())
+                .projectResponseDtoList(projectService.readProjectList(sessionUser))
                 .build();
     }
 
     // Project 생성
     @PostMapping("")
-    public ProjectResponseDto createProject(@RequestBody ProjectRequestDto requestDto, @LoginUser SessionUser sessionUser){
+    public ProjectResponseDto createProject(@RequestBody ProjectRequestDto requestDto, @LoginUser SessionUser sessionUser) {
         return projectService.createProject(requestDto, sessionUser);
     }
 
     // Project 수정
     @PutMapping("/{projectId}")
     public ProjectResponseDto updateProject(@PathVariable("projectId") Long projectId,
-                                            @RequestBody ProjectRequestDto requestDto){
-        return projectService.updateProject(projectId, requestDto);
+                                            @RequestBody ProjectRequestDto requestDto,
+                                            @LoginUser SessionUser sessionUser) {
+        return projectService.updateProject(projectId, requestDto, sessionUser);
     }
 
     // Project 삭제
     @DeleteMapping("/{projectId}")
-    public ProjectDeleteResponseDto deleteProject(@PathVariable("projectId") Long projectId){
-        return projectService.deleteProject(projectId);
+    public ProjectDeleteResponseDto deleteProject(@PathVariable("projectId") Long projectId,
+                                                  @LoginUser SessionUser sessionUser) {
+        return projectService.deleteProject(projectId, sessionUser);
     }
 
 
