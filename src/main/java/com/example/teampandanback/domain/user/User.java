@@ -1,5 +1,6 @@
 package com.example.teampandanback.domain.user;
 
+import com.example.teampandanback.domain.Timestamped;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
