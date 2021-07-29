@@ -7,6 +7,7 @@ import com.example.teampandanback.dto.note.request.NoteRequestDto;
 import com.example.teampandanback.dto.note.response.*;
 import com.example.teampandanback.service.NoteService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -20,6 +21,16 @@ public class NoteController {
     @GetMapping("/projects/{projectId}/kanbans")
     public KanbanNoteSearchResponseDto kanbanNoteSearchResponse(@PathVariable("projectId") Long projectId){
         return noteService.readKanbanNote(projectId);
+    }
+
+    // 내가 쓴 노트 조회
+    // #5
+    // What: 내가 쓴 노트를 조회할 시 서버가 요청을 받을 GetMapping 함수를 만들었습니다.
+    // Why: projectId 받기 위해 Getmapping 을 써야 합니다.
+    // How: 프로젝트ID 를 SessionUser 와 noteService 에 넘겨주면 NoteMineOnlyResponseDto 를 전달받습니다.
+    @GetMapping("/projects/{projectId}/mynotes")
+    public NoteMineOnlyResponseDto readNotesMineOnly(@PathVariable("projectId") Long projectId, @LoginUser SessionUser sessionUser) {
+        return noteService.readNotesMineOnly(projectId, sessionUser);
     }
 
     //노트 상세 조회

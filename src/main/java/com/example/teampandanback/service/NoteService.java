@@ -25,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -103,6 +104,49 @@ public class NoteService {
         // [노트 생성] 전달받은 noteCreateRequestDto를 Note.java에 정의한 of 메소드에 전달하여 빌더 패턴에 넣는다.
         Note note = noteRepository.save(Note.of(noteCreateRequestDto, deadline, step, user, project));
         return NoteCreateResponseDto.of(note);
+    }
+
+    public NoteMineOnlyResponseDto readNotesMineOnly(Long projectId, SessionUser sessionUser){
+        // #5-1
+        // Optional도 사용하고 싶고, 프로젝트/노트 사이의 관계도 다시 생각해보고 싶습니다.
+        List<Note> noteList = noteRepository.findNoteByProject_projectId(projectId);
+        List<NoteResponseDto> myNoteList = noteList
+                .stream()
+                //fetchType.Lazy 라면 getUser() 할 때마다 쿼리가 발생할까요?
+                //실제 발생하는 쿼리를 보니 제가 완전히 오해했다는 생각이 듭니다. lazy가 쿼리를 발생을 똑똑하게 시킵니다.
+                .filter(note -> note.getUser().getUserId().equals(sessionUser.getUserId()))
+                .map(NoteResponseDto::of)
+                .collect(Collectors.toList());
+                //Hibernate:
+        //    select
+        //        user0_.user_id as user_id1_2_0_,
+        //        user0_.email as email2_2_0_,
+        //        user0_.name as name3_2_0_,
+        //        user0_.picture as picture4_2_0_,
+        //        user0_.role as role5_2_0_
+        //    from
+        //        user user0_
+        //    where
+        //        user0_.user_id=?
+        //Hibernate:
+        //    select
+        //        note0_.note_id as note_id1_0_,
+        //        note0_.created_date as created_2_0_,
+        //        note0_.modified_date as modified3_0_,
+        //        note0_.content as content4_0_,
+        //        note0_.deadline as deadline5_0_,
+        //        note0_.project_id as project_8_0_,
+        //        note0_.step as step6_0_,
+        //        note0_.title as title7_0_,
+        //        note0_.user_id as user_id9_0_
+        //    from
+        //        note note0_
+        //    left outer join
+        //        project project1_
+        //            on note0_.project_id=project1_.project_id
+        //    where
+        //        project1_.project_id=?
+        return NoteMineOnlyResponseDto.of(myNoteList);
     }
 
 
