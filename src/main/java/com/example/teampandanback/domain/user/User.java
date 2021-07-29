@@ -13,19 +13,20 @@ public class User{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "USER_ID")
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "NAME")
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "EMAIL")
     private String email;
 
-    @Column
+    @Column(name = "PICTURE")
     private String picture;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, name = "ROLE")
     private Role role;
 
     @Builder
