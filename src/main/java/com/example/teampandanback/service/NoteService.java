@@ -3,10 +3,7 @@ package com.example.teampandanback.service;
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.domain.note.Step;
-import com.example.teampandanback.domain.project.Project;
-import com.example.teampandanback.domain.project.ProjectRepository;
 import com.example.teampandanback.dto.note.*;
-import com.example.teampandanback.dto.project.ProjectResponseDto;
 import com.example.teampandanback.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -56,51 +53,75 @@ public class NoteService {
     @Transactional
     public KanbanNoteSearchResponseDto readKanbanNote(Long projectId) {
         List<NoteOfProjectResponseDto> noteOfProjectResponseDtoList = new ArrayList<>();
-        List<NoteResponseDto> noteResponseDtoList = new ArrayList<>();
-        List<Note> noteLists = noteRepository.findByProjectId(projectId);
-        for (Note note : noteRepository.findByProjectId(projectId)){
-//            창고, 할것, 진행중, 끝
-            for (Step stepType : Step.values()){
-                if (note.getStep().equals(stepType)) {
-                    noteResponseDtoList.add(NoteResponseDto.builder()
-                            .noteId(note.getNoteId())
-                            .title(note.getTitle())
-                            .content(note.getContent())
-                            .deadline(note.getDeadline())
-                            .build());
-                    noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
-                            .step(note.getStep())
-                            .noteResponseDtoList(noteResponseDtoList)
-                            .build());
-                }
+        List<NoteResponseDto> noteResponseDtoList1 = new ArrayList<>();
+        List<NoteResponseDto> noteResponseDtoList2 = new ArrayList<>();
+        List<NoteResponseDto> noteResponseDtoList3 = new ArrayList<>();
+        List<NoteResponseDto> noteResponseDtoList4 = new ArrayList<>();
+
+        for (Note note : noteRepository.findNoteByProject_projectId(projectId)){
+            if (note.getStep().equals(Step.창고)) {
+                noteResponseDtoList1.add(NoteResponseDto.builder()
+                        .noteId(note.getNoteId())
+                        .title(note.getTitle())
+                        .content(note.getContent())
+                        .deadline(note.getDeadline())
+                        .build());
             }
         }
+        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
+                .step(Step.창고)
+                .noteResponseDtoList(noteResponseDtoList1)
+                .build());
+
+        for (Note note : noteRepository.findNoteByProject_projectId(projectId)){
+            if (note.getStep().equals(Step.할것)) {
+                noteResponseDtoList2.add(NoteResponseDto.builder()
+                        .noteId(note.getNoteId())
+                        .title(note.getTitle())
+                        .content(note.getContent())
+                        .deadline(note.getDeadline())
+                        .build());
+            }
+        }
+        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
+                .step(Step.할것)
+                .noteResponseDtoList(noteResponseDtoList2)
+                .build());
+
+        for (Note note : noteRepository.findNoteByProject_projectId(projectId)){
+            if (note.getStep().equals(Step.진행중)) {
+                noteResponseDtoList3.add(NoteResponseDto.builder()
+                        .noteId(note.getNoteId())
+                        .title(note.getTitle())
+                        .content(note.getContent())
+                        .deadline(note.getDeadline())
+                        .build());
+            }
+        }
+        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
+                .step(Step.진행중)
+                .noteResponseDtoList(noteResponseDtoList3)
+                .build());
+
+        for (Note note : noteRepository.findNoteByProject_projectId(projectId)){
+            if (note.getStep().equals(Step.끝)) {
+                noteResponseDtoList4.add(NoteResponseDto.builder()
+                        .noteId(note.getNoteId())
+                        .title(note.getTitle())
+                        .content(note.getContent())
+                        .deadline(note.getDeadline())
+                        .build());
+            }
+        }
+        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
+                .step(Step.끝)
+                .noteResponseDtoList(noteResponseDtoList4)
+                .build());
+
         return KanbanNoteSearchResponseDto.builder()
                 .noteOfProjectResponseDtoList(noteOfProjectResponseDtoList)
                 .build();
     }
 
 
-
 }
-
-
-//    List<Note> noteList = noteRepository.findAll();
-//        for (Note note : noteList){
-//                if (note.getProject().getProjectId().equals(projectId)) {
-//                for (Step stepType : Step.values()){
-//                if (note.getStep().equals(stepType)) {
-//                noteResponseDtoList.add(NoteResponseDto.builder()
-//                .noteId(note.getNoteId())
-//                .title(note.getTitle())
-//                .content(note.getContent())
-//                .deadline(note.getDeadline())
-//                .build());
-//                noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
-//                .step(note.getStep())
-//                .noteResponseDtoList(noteResponseDtoList)
-//                .build());
-//                }
-//                }
-//                }
-////            창고, 할것, 진행중, 끝

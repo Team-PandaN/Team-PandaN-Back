@@ -1,6 +1,5 @@
 package com.example.teampandanback.controller;
 
-import com.example.teampandanback.config.auth.LoginUser;
 import com.example.teampandanback.dto.note.KanbanNoteSearchResponseDto;
 import com.example.teampandanback.dto.note.NoteDeleteResponseDto;
 import com.example.teampandanback.dto.note.NoteRequestDto;

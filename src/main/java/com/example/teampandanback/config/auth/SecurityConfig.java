@@ -2,7 +2,6 @@ package com.example.teampandanback.config.auth;
 
 import com.example.teampandanback.domain.user.Role;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -26,7 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .authorizeRequests() // URL별 권한 관리를 설정하는 옵션의 시작점입니다.
                     .antMatchers("/**","/css/**","/images/**","/js/**","/h2-console/**").permitAll()
                     .antMatchers("/api/v1/**").hasRole(Role.USER.name())
-//                    .anyRequest().authenticated()
+                    .anyRequest().authenticated()
                 .and()
                     .logout()
                         .logoutSuccessUrl("/")
