@@ -1,5 +1,7 @@
 package com.example.teampandanback.controller;
 
+import com.example.teampandanback.config.auth.LoginUser;
+import com.example.teampandanback.dto.note.KanbanNoteSearchResponseDto;
 import com.example.teampandanback.dto.note.NoteDeleteResponseDto;
 import com.example.teampandanback.dto.note.NoteRequestDto;
 import com.example.teampandanback.dto.note.NoteResponseDto;
@@ -14,15 +16,10 @@ public class NoteController {
 
     private final NoteService noteService;
 
-//    @GetMapping("/{projectId}/kanbans")
-//    public KanbanNoteSearchResponseDto kanbanNoteSearchResponse(@PathVariable("projectId") Long projectId){
-//
-//    }
-
 
     @GetMapping("/notes/{noteId}")
     public NoteResponseDto noteDetail (@PathVariable("noteId") Long noteId) {
-        return noteService.findNoteDetail(noteId);
+        return noteService.readNoteDetail(noteId);
     }
 
     @PutMapping("/{noteId}")
@@ -36,9 +33,10 @@ public class NoteController {
         return noteService.deleteNote(noteId);
     }
 
-
-
-
+    @GetMapping("/{projectId}/kanbans")
+    public KanbanNoteSearchResponseDto kanbanNoteSearchResponse(@PathVariable("projectId") Long projectId){
+        return noteService.readKanbanNote(projectId);
+    }
 
 
 

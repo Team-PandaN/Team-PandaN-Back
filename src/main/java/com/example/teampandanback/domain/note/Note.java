@@ -1,6 +1,8 @@
 package com.example.teampandanback.domain.note;
 
 import com.example.teampandanback.domain.Timestamped;
+import com.example.teampandanback.domain.project.Project;
+import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.dto.note.NoteRequestDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,6 +34,14 @@ public class Note extends Timestamped {
     @Enumerated(EnumType.STRING)
     @Column(name = "STEP")
     private Step step;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_ID")
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PROJECT_ID")
+    private Project project;
 
 
     public LocalDate changeType (String dateString) {
