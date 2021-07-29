@@ -1,7 +1,6 @@
 package com.example.teampandanback.domain.user_project_mapping;
 
 import com.example.teampandanback.domain.project.Project;
-import com.example.teampandanback.domain.user.Role;
 import com.example.teampandanback.domain.user.User;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,7 +22,7 @@ public class UserProjectMapping {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "ROLE")
-    private Role role;
+    private UserProjectRole role;
 
     @ManyToOne
     @JoinColumn(nullable = false, name = "USER_ID")
@@ -34,9 +33,10 @@ public class UserProjectMapping {
     private Project project;
 
     @Builder
-    public UserProjectMapping(Role role, User user) {
-        this.role = role;
+    public UserProjectMapping(UserProjectRole userProjectRole, User user, Project project ) {
+        this.role = userProjectRole;
         this.user = user;
         this.project = project;
+
     }
 }

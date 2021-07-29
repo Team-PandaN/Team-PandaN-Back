@@ -36,6 +36,10 @@ public class NoteController {
         return noteService.deleteNote(noteId);
     }
 
+    @GetMapping("/{projectId}/kanbans")
+    public KanbanNoteSearchResponseDto kanbanNoteSearchResponse(@PathVariable("projectId") Long projectId){
+        return noteService.readKanbanNote(projectId);
+    }
     @PostMapping("/{projectId}/notes")
     public NoteResponseDto createNote (@PathVariable Long projectId, @RequestBody NoteRequestDto noteRequestDto){
         return noteService.createNote(projectId, noteRequestDto);
