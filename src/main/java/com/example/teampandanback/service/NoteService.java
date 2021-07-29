@@ -69,6 +69,44 @@ public class NoteService {
     }
 
     @Transactional
+    public NoteCreateResponseDto createNote(Long projectId, NoteCreateRequestDto noteCreateRequestDto, SessionUser sessionUser) {
+
+        // #4
+        // What: 노트를 생성하기 위해 NoteController에서 받은 인자로 노트를 저장하는 서비스 메소드를 만들었습니다.
+        // Why: 생략
+        // How: 생략
+
+        // #4-1
+        // 태강님이 작업하신 MappingRepository에서 Optional을 사용하여 null값에 대한 처리를 할 수 있었으면 좋겠다는 생각이듭니다.
+        // userProjectmappingRepository.find~~~~().get().orElseThrow(() -> ApiRequestException("~~~~"))
+        // 와 같은 처리를 할 수 있다고 생각합니다. 이슈에 올려놓고 토의하고자 합니다.
+        UserProjectMapping userProjectMapping =
+                userProjectMappingRepository
+                        .findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(), projectId);
+
+        // #4-2
+        // 아래의 조건문은 모두 userProejectMapping이 존재한다는 가정하에 진행되는 코드입니다.
+        // sessionUser.getId와 projectId를 동시에 만족하는 결과를 찾은 것이므로 굳이 다시 비교하여 맞는지 틀린지 비교하지는 않겠습니다. (아래)
+        // if (!userProjectMapping.getProject().getProjectId().equals(projectId
+        // || !userProjectMapping.getUser().getUserId().equals(sessionUser.getUserId()))
+
+        // [노트 생성] 전달받은 String deadline을 LocalDate 자료형으로 형변환
+        LocalDate deadline = changeType(noteCreateRequestDto.getDeadline());
+
+        // [노트 생성] 전달받은 String step을 Enum Step으로
+        Step step = Step.valueOf(noteCreateRequestDto.getStep());
+
+        // [노트 생성] 찾은 userProjectMappingRepository를 통해 user와 프로젝트 가져오기
+        User user = userProjectMapping.getUser();
+        Project project = userProjectMapping.getProject();
+
+        // [노트 생성] 전달받은 noteCreateRequestDto를 Note.java에 정의한 of 메소드에 전달하여 빌더 패턴에 넣는다.
+        Note note = noteRepository.save(Note.of(noteCreateRequestDto, deadline, step, user, project));
+        return NoteCreateResponseDto.of(note);
+    }
+
+
+    @Transactional
     public NoteDeleteResponseDto deleteNote(Long noteId) {
         noteRepository.deleteById(noteId);
         return NoteDeleteResponseDto.builder()

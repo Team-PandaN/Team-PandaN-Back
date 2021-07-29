@@ -3,17 +3,15 @@ package com.example.teampandanback.domain.note;
 import com.example.teampandanback.domain.Timestamped;
 import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.user.User;
-import com.example.teampandanback.dto.note.NoteRequestDto;
-import com.example.teampandanback.dto.note.NoteResponseDto;
+import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
+import com.example.teampandanback.dto.note.request.NoteRequestDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.apache.tomcat.jni.Local;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 @Getter
 @Entity
@@ -47,31 +45,38 @@ public class Note extends Timestamped {
     private Project project;
 
 
-
     @Builder
-    public Note (Long noteId, String title, String content, LocalDate deadline, Step step){
+    public Note(Long noteId, String title, String content, LocalDate deadline, Step step, User user, Project project){
         this.title = title;
         this.content = content;
         this.deadline = deadline;
         this.step = step;
+        this.user = user;
+        this.project = project;
     }
-    public LocalDate changeType (String dateString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate date = LocalDate.parse(dateString, formatter);
-        return date;
 
-    }
-    public void update(NoteRequestDto noteRequestDto) {
+    // #1
+    // What: Note.java에서 changeType 메소드를 삭제하고, update 메소드는 형변환이 완료된 LocalDate 파라미터를 받게 하였습니다.
+    // Why: NoteService.java 에서 형변환이 자주 일어나는 바, NoteService.java 에서 형변환 메소드를 정적으로 정의하여 공용으로 쓰기 위함입니다.
+    // How: NoteService의 updateNoteDetail 함수는 전달받은 noteRequestDto의 String을 꺼내 localDate으로 변환 후 여기에 전달합니다.
+    public void update(NoteRequestDto noteRequestDto, LocalDate updateLocalDate) {
         this.title = noteRequestDto.getTitle();
         this.content = noteRequestDto.getContent();
-        this.deadline = changeType(noteRequestDto.getDeadline());
+        this.deadline = updateLocalDate;
     }
 
-    public static Note of (NoteRequestDto noteRequestDto, LocalDate deadline) {
+    // #2
+    // What: of 메소드를 만들어서 dto를
+    // Why: 서비스에서
+    // How:
+    public static Note of(NoteCreateRequestDto noteCreateRequestDto, LocalDate deadline, Step step, User user, Project project) {
         return Note.builder()
-                .title(noteRequestDto.getTitle())
-                .content(noteRequestDto.getContent())
+                .title(noteCreateRequestDto.getTitle())
+                .content(noteCreateRequestDto.getContent())
                 .deadline(deadline)
+                .step(step)
+                .user(user)
+                .project(project)
                 .build();
     }
 }

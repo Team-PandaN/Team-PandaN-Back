@@ -11,7 +11,7 @@ public enum Step {
     PROCESSING(3, "진행중"),
     DONE(4, "끝");
 
-    private  final int id;
+    private final int id;
     private final String step;
 
 }
