@@ -1,14 +1,14 @@
 package com.example.teampandanback.controller;
 
-import com.example.teampandanback.config.auth.LoginUser;
-import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
 import com.example.teampandanback.dto.note.request.NoteRequestDto;
-import com.example.teampandanback.dto.note.response.*;
+import com.example.teampandanback.config.auth.LoginUser;
+import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.service.NoteService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
+import com.example.teampandanback.dto.note.response.*;
 import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
+
 
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -23,11 +23,7 @@ public class NoteController {
         return noteService.readKanbanNote(projectId);
     }
 
-    // 내가 쓴 노트 조회
-    // #5
-    // What: 내가 쓴 노트를 조회할 시 서버가 요청을 받을 GetMapping 함수를 만들었습니다.
-    // Why: projectId 받기 위해 Getmapping 을 써야 합니다.
-    // How: 프로젝트ID 를 SessionUser 와 noteService 에 넘겨주면 NoteMineOnlyResponseDto 를 전달받습니다.
+    //내가 쓴 노트 조회
     @GetMapping("/projects/{projectId}/mynotes")
     public NoteMineOnlyResponseDto readNotesMineOnly(@PathVariable("projectId") Long projectId, @LoginUser SessionUser sessionUser) {
         return noteService.readNotesMineOnly(projectId, sessionUser);
@@ -39,10 +35,7 @@ public class NoteController {
         return noteService.readNoteDetail(noteId);
     }
 
-    // #4
-    // What: 노트 생성 시 서버가 요청을 받을 PostMapping 함수를 만들었습니다.
-    // Why: 노트 생성 시 requestbody를 받기 위해 Postmapping을 써야 합니다.
-    // How: 프로젝트ID와 requestBody를 noteService.createNote 메소드에 넘겨주면 return 을 위한 NoteResponseDto를 전달받습니다.
+    //내가 생성
     @PostMapping("/notes/{projectId}")
     public NoteCreateResponseDto createNote (@PathVariable Long projectId,
                                              @RequestBody NoteCreateRequestDto noteCreateRequestDto,

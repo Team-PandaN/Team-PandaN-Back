@@ -4,12 +4,9 @@ import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.domain.note.Step;
 import com.example.teampandanback.domain.project.Project;
-import com.example.teampandanback.domain.project.ProjectRepository;
 import com.example.teampandanback.domain.user.User;
-import com.example.teampandanback.domain.user.UserRepository;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
-import com.example.teampandanback.domain.user_project_mapping.UserProjectRole;
 import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
 import com.example.teampandanback.dto.note.request.NoteRequestDto;
@@ -18,13 +15,11 @@ import com.example.teampandanback.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.mail.Session;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -58,38 +53,17 @@ public class NoteService {
 
         // #1-1
         note.update(noteRequestDto, changeType(noteRequestDto.getDeadline()));
-        // What: noteRequestDto 만 받다가, 형변환 파라미터를 따로 받는 것으로 변경
-        // Why: Note.java의 #1에서 수정 사항이 반영되는 부분입니다.
-        // How: 형변환된 파라미터를 하나 더 받습니다.
 
         // #2
         return NoteResponseDto.of(note);
-        // What; 빌더 패턴을 직접 쓰는 것에서, 빌더 패턴을 수행하는 of 메소드를 이용하는 것으로 변경
-        // Why: Dto 객체를 만드는 빌더가 NoteResponseDto.java 에서 이미 정의되었기 때문에 바꾸었습니다.
-        // How: NoteResponseDto.java 에 정의된 of 메소드를 사용하였습니다.
     }
 
     @Transactional
     public NoteCreateResponseDto createNote(Long projectId, NoteCreateRequestDto noteCreateRequestDto, SessionUser sessionUser) {
 
-        // #4
-        // What: 노트를 생성하기 위해 NoteController에서 받은 인자로 노트를 저장하는 서비스 메소드를 만들었습니다.
-        // Why: 생략
-        // How: 생략
-
-        // #4-1
-        // 태강님이 작업하신 MappingRepository에서 Optional을 사용하여 null값에 대한 처리를 할 수 있었으면 좋겠다는 생각이듭니다.
-        // userProjectmappingRepository.find~~~~().get().orElseThrow(() -> ApiRequestException("~~~~"))
-        // 와 같은 처리를 할 수 있다고 생각합니다. 이슈에 올려놓고 토의하고자 합니다.
         UserProjectMapping userProjectMapping =
                 userProjectMappingRepository
                         .findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(), projectId);
-
-        // #4-2
-        // 아래의 조건문은 모두 userProejectMapping이 존재한다는 가정하에 진행되는 코드입니다.
-        // sessionUser.getId와 projectId를 동시에 만족하는 결과를 찾은 것이므로 굳이 다시 비교하여 맞는지 틀린지 비교하지는 않겠습니다. (아래)
-        // if (!userProjectMapping.getProject().getProjectId().equals(projectId
-        // || !userProjectMapping.getUser().getUserId().equals(sessionUser.getUserId()))
 
         // [노트 생성] 전달받은 String deadline을 LocalDate 자료형으로 형변환
         LocalDate deadline = changeType(noteCreateRequestDto.getDeadline());
@@ -107,45 +81,13 @@ public class NoteService {
     }
 
     public NoteMineOnlyResponseDto readNotesMineOnly(Long projectId, SessionUser sessionUser){
-        // #5-1
-        // Optional도 사용하고 싶고, 프로젝트/노트 사이의 관계도 다시 생각해보고 싶습니다.
         List<Note> noteList = noteRepository.findNoteByProject_projectId(projectId);
         List<NoteResponseDto> myNoteList = noteList
                 .stream()
-                //fetchType.Lazy 라면 getUser() 할 때마다 쿼리가 발생할까요?
-                //실제 발생하는 쿼리를 보니 제가 완전히 오해했다는 생각이 듭니다. lazy가 쿼리를 발생을 똑똑하게 시킵니다.
                 .filter(note -> note.getUser().getUserId().equals(sessionUser.getUserId()))
                 .map(NoteResponseDto::of)
                 .collect(Collectors.toList());
-                //Hibernate:
-        //    select
-        //        user0_.user_id as user_id1_2_0_,
-        //        user0_.email as email2_2_0_,
-        //        user0_.name as name3_2_0_,
-        //        user0_.picture as picture4_2_0_,
-        //        user0_.role as role5_2_0_
-        //    from
-        //        user user0_
-        //    where
-        //        user0_.user_id=?
-        //Hibernate:
-        //    select
-        //        note0_.note_id as note_id1_0_,
-        //        note0_.created_date as created_2_0_,
-        //        note0_.modified_date as modified3_0_,
-        //        note0_.content as content4_0_,
-        //        note0_.deadline as deadline5_0_,
-        //        note0_.project_id as project_8_0_,
-        //        note0_.step as step6_0_,
-        //        note0_.title as title7_0_,
-        //        note0_.user_id as user_id9_0_
-        //    from
-        //        note note0_
-        //    left outer join
-        //        project project1_
-        //            on note0_.project_id=project1_.project_id
-        //    where
-        //        project1_.project_id=?
+
         return NoteMineOnlyResponseDto.of(myNoteList);
     }
 
