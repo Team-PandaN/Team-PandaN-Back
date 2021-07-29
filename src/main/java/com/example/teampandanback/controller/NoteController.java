@@ -1,9 +1,6 @@
 package com.example.teampandanback.controller;
 
-import com.example.teampandanback.dto.note.KanbanNoteSearchResponseDto;
-import com.example.teampandanback.dto.note.NoteDeleteResponseDto;
-import com.example.teampandanback.dto.note.NoteRequestDto;
-import com.example.teampandanback.dto.note.NoteResponseDto;
+import com.example.teampandanback.dto.note.*;
 import com.example.teampandanback.service.NoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -37,8 +34,9 @@ public class NoteController {
         return noteService.readKanbanNote(projectId);
     }
 
-
-
-
+    @GetMapping("/{projectId}/issues")
+    public NoteSerchResponseDto ordinaryNoteSerch(@PathVariable("projectId") Long projectId) {
+        return noteService.readOrdinaryNote(projectId);
+    }
 
 }

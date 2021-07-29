@@ -124,4 +124,22 @@ public class NoteService {
     }
 
 
+    @Transactional
+    public NoteSerchResponseDto readOrdinaryNote(Long projectId) {
+        List<NoteResponseDto> noteResponseDtoList = new ArrayList<>();
+        for (Note note : noteRepository.findNoteByProject_projectId(projectId)){
+            noteResponseDtoList.add(NoteResponseDto.builder()
+                    .noteId(note.getNoteId())
+                    .title(note.getTitle())
+                    .content(note.getContent())
+                    .deadline(note.getDeadline())
+                    .build());
+            }
+        return NoteSerchResponseDto.builder()
+                .noteResponseDtoList(noteResponseDtoList)
+                .build();
+    }
+
+
+
 }
