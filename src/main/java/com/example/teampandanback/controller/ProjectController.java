@@ -1,5 +1,7 @@
 package com.example.teampandanback.controller;
 
+import com.example.teampandanback.config.auth.LoginUser;
+import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.project.*;
 import com.example.teampandanback.service.EncryptService;
 import com.example.teampandanback.service.ProjectService;
@@ -33,8 +35,8 @@ public class ProjectController {
 
     // Project 생성
     @PostMapping("")
-    public ProjectResponseDto createProject(@RequestBody ProjectRequestDto requestDto){
-        return projectService.createProject(requestDto);
+    public ProjectResponseDto createProject(@RequestBody ProjectRequestDto requestDto, @LoginUser SessionUser sessionUser){
+        return projectService.createProject(requestDto, sessionUser);
     }
 
     // Project 수정
