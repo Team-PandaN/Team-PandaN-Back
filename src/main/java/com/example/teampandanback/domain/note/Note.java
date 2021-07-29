@@ -1,5 +1,6 @@
 package com.example.teampandanback.domain.note;
 
+import com.example.teampandanback.domain.Timestamped;
 import com.example.teampandanback.dto.note.NoteRequestDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,10 +12,9 @@ import java.time.format.DateTimeFormatter;
 
 @Getter
 @Entity
-@Table(name = "NOTE_TB")
 @DynamicUpdate
 @NoArgsConstructor
-public class Note {
+public class Note extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "NOTE_ID")

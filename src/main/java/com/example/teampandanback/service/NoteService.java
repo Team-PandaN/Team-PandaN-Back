@@ -5,7 +5,6 @@ import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.dto.note.NoteDeleteResponseDto;
 import com.example.teampandanback.dto.note.NoteRequestDto;
 import com.example.teampandanback.dto.note.NoteResponseDto;
-import com.example.teampandanback.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -44,11 +43,9 @@ public class NoteService {
 
     @Transactional
     public NoteDeleteResponseDto deleteNote(Long noteId) {
-        Note note = noteRepository.findById(noteId)
-                .orElseThrow(()-> new IllegalArgumentException("삭제 할 노트가 없습니다."));
-        noteRepository.delete(note);
+        noteRepository.deleteById(noteId);
         return NoteDeleteResponseDto.builder()
-                .noteId(note.getNoteId())
+                .noteId(noteId)
                 .build();
     }
 }
