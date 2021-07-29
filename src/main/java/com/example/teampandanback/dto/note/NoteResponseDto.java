@@ -1,5 +1,6 @@
 package com.example.teampandanback.dto.note;
 
+import com.example.teampandanback.domain.note.Note;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -18,5 +19,14 @@ public class NoteResponseDto {
         this.title = title;
         this.content = content;
         this.deadline = deadline;
+    }
+
+    public static NoteResponseDto of (Note note) {
+        return NoteResponseDto.builder()
+                .noteId(note.getNoteId())
+                .title(note.getTitle())
+                .content(note.getContent())
+                .deadline(note.getDeadline())
+                .build();
     }
 }

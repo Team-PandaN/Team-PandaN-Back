@@ -34,7 +34,7 @@ public class Note {
     private Step step;
 
 
-    public LocalDateTime chageType (String dateString) {
+    public LocalDateTime changeType (String dateString) {
         String newDateString = dateString + " 00:00:00";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime date = LocalDateTime.parse(newDateString, formatter);
@@ -44,6 +44,6 @@ public class Note {
     public void update(NoteRequestDto noteRequestDto) {
         this.title = noteRequestDto.getTitle();
         this.content = noteRequestDto.getContent();
-        this.deadline = chageType(noteRequestDto.getDeadline());
+        this.deadline = changeType(noteRequestDto.getDeadline());
     }
 }
