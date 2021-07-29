@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 @Getter
@@ -27,17 +27,16 @@ public class Note {
     private String content;
 
     @Column(name = "DEADLINE")
-    private LocalDateTime deadline;
+    private LocalDate deadline;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "STEP")
     private Step step;
 
 
-    public LocalDateTime changeType (String dateString) {
-        String newDateString = dateString + " 00:00:00";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime date = LocalDateTime.parse(newDateString, formatter);
+    public LocalDate changeType (String dateString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate date = LocalDate.parse(dateString, formatter);
         return date;
 
     }
