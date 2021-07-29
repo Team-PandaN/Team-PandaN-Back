@@ -36,6 +36,11 @@ public class NoteController {
         return noteService.deleteNote(noteId);
     }
 
+    @PostMapping("/{projectId}/notes")
+    public NoteResponseDto createNote (@PathVariable Long projectId, @RequestBody NoteRequestDto noteRequestDto){
+        return noteService.createNote(projectId, noteRequestDto);
+    }
+
 
 
 

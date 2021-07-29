@@ -1,8 +1,11 @@
 package com.example.teampandanback.domain.note;
 
 import com.example.teampandanback.dto.note.NoteRequestDto;
+import com.example.teampandanback.dto.note.NoteResponseDto;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.tomcat.jni.Local;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
@@ -34,6 +37,14 @@ public class Note {
     private Step step;
 
 
+
+    @Builder
+    public Note (Long noteId, String title, String content, LocalDate deadline, Step step){
+        this.title = title;
+        this.content = content;
+        this.deadline = deadline;
+        this.step = step;
+    }
     public LocalDate changeType (String dateString) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate date = LocalDate.parse(dateString, formatter);
@@ -44,5 +55,13 @@ public class Note {
         this.title = noteRequestDto.getTitle();
         this.content = noteRequestDto.getContent();
         this.deadline = changeType(noteRequestDto.getDeadline());
+    }
+
+    public static Note of (NoteRequestDto noteRequestDto, LocalDate deadline) {
+        return Note.builder()
+                .title(noteRequestDto.getTitle())
+                .content(noteRequestDto.getContent())
+                .deadline(deadline)
+                .build();
     }
 }

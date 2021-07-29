@@ -10,12 +10,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @RequiredArgsConstructor
 @Service
 public class NoteService {
 
     private final NoteRepository noteRepository;
+
+    public static LocalDate changeType (String dateString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate date = LocalDate.parse(dateString, formatter);
+        return date;
+
+    }
 
     @Transactional
     public NoteResponseDto findNoteDetail(Long noteId) {
@@ -40,6 +49,13 @@ public class NoteService {
                 .content(note.getContent())
                 .deadline(note.getDeadline())
                 .build();
+    }
+
+    @Transactional
+    public NoteResponseDto createNote(Long projectId, NoteRequestDto noteRequestDto){
+        LocalDate deadline = changeType(noteRequestDto.getDeadline());
+        Note note = noteRepository.save(Note.of(noteRequestDto, deadline));
+        return NoteResponseDto.of(note);
     }
 
     @Transactional
