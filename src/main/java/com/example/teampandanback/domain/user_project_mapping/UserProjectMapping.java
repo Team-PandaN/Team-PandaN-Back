@@ -24,11 +24,11 @@ public class UserProjectMapping {
     @Column(nullable = false, name = "ROLE")
     private UserProjectRole role;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "USER_ID")
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "PROJECT_ID")
     private Project project;
 
@@ -37,6 +37,5 @@ public class UserProjectMapping {
         this.role = userProjectRole;
         this.user = user;
         this.project = project;
-
     }
 }
