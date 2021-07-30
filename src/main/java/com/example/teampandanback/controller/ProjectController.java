@@ -54,5 +54,11 @@ public class ProjectController {
         return projectService.deleteProject(projectId, sessionUser);
     }
 
+    // Project 회원 조회
+    @GetMapping("/{projectId}/crews")
+    public ProjectCrewResponseDto readCrewList(@PathVariable("projectId") Long projectId){
+        return projectService.readCrewList(projectId);
+    }
+
 
 }
