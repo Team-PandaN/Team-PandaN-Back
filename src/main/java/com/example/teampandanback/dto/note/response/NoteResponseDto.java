@@ -11,14 +11,14 @@ public class NoteResponseDto {
     private Long noteId;
     private String title;
     private String content;
-    private LocalDate deadline;
+    private String deadline;
 
     @Builder
     public NoteResponseDto(Long noteId, String title, String content, LocalDate deadline) {
         this.noteId = noteId;
         this.title = title;
         this.content = content;
-        this.deadline = deadline;
+        this.deadline = deadline.toString();
     }
 
     public static NoteResponseDto of (Note note) {

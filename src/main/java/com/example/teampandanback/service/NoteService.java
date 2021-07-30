@@ -8,8 +8,7 @@ import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.dto.auth.SessionUser;
-import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
-import com.example.teampandanback.dto.note.request.NoteRequestDto;
+import com.example.teampandanback.dto.note.request.NoteFromRequestDto;
 import com.example.teampandanback.dto.note.response.*;
 import com.example.teampandanback.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,7 @@ public class NoteService {
     private final NoteRepository noteRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
 
-    public static LocalDate changeType(String dateString) {
+    private LocalDate changeType(String dateString) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate date = LocalDate.parse(dateString, formatter);
         return date;
@@ -42,37 +41,37 @@ public class NoteService {
     }
 
     @Transactional
-    public NoteResponseDto updateNoteDetail(Long noteId, NoteRequestDto noteRequestDto) {
+    public NoteFormResponseDto updateNoteDetail(Long noteId, NoteFromRequestDto noteFromRequestDto) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
 
         // #1-1
-        note.update(noteRequestDto, changeType(noteRequestDto.getDeadline()));
+        note.update(noteFromRequestDto, changeType(noteFromRequestDto.getDeadline()),Step.valueOf(noteFromRequestDto.getStep()));
 
         // #2
-        return NoteResponseDto.of(note);
+        return NoteFormResponseDto.of(note);
     }
 
     @Transactional
-    public NoteCreateResponseDto createNote(Long projectId, NoteCreateRequestDto noteCreateRequestDto, SessionUser sessionUser) {
+    public NoteFormResponseDto createNote(Long projectId, NoteFromRequestDto noteFromRequestDto, SessionUser sessionUser) {
 
         UserProjectMapping userProjectMapping =
                 userProjectMappingRepository
                         .findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(), projectId);
 
         // [노트 생성] 전달받은 String deadline을 LocalDate 자료형으로 형변환
-        LocalDate deadline = changeType(noteCreateRequestDto.getDeadline());
+        LocalDate deadline = changeType(noteFromRequestDto.getDeadline());
 
         // [노트 생성] 전달받은 String step을 Enum Step으로
-        Step step = Step.valueOf(noteCreateRequestDto.getStep());
+        Step step = Step.valueOf(noteFromRequestDto.getStep());
 
         // [노트 생성] 찾은 userProjectMappingRepository를 통해 user와 프로젝트 가져오기
         User user = userProjectMapping.getUser();
         Project project = userProjectMapping.getProject();
 
         // [노트 생성] 전달받은 noteCreateRequestDto를 Note.java에 정의한 of 메소드에 전달하여 빌더 패턴에 넣는다.
-        Note note = noteRepository.save(Note.of(noteCreateRequestDto, deadline, step, user, project));
-        return NoteCreateResponseDto.of(note);
+        Note note = noteRepository.save(Note.of(noteFromRequestDto, deadline, step, user, project));
+        return NoteFormResponseDto.of(note);
     }
 
     public NoteMineOnlyResponseDto readNotesMineOnly(Long projectId, SessionUser sessionUser){
