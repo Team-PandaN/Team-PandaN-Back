@@ -3,8 +3,8 @@ package com.example.teampandanback.controller;
 import com.example.teampandanback.config.auth.LoginUser;
 import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.project.*;
-import com.example.teampandanback.service.EncryptService;
 import com.example.teampandanback.service.ProjectService;
+import com.example.teampandanback.utils.AESEncryptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +16,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class ProjectController {
 
-    private final EncryptService encryptService;
     private final ProjectService projectService;
 
     @GetMapping("/{projectId}/invites")
-    public ResponseEntity<StringEncryptResponseDto> findTagByCategoryId(@PathVariable("projectId") Long projectId) {
-        log.info(">>> Encrypting >>>");
-        return ResponseEntity.ok().body(encryptService.encodeString(projectId));
+    public ProjectInviteResponseDto findTagByCategoryId(@PathVariable("projectId") Long projectId){
+        return projectService.inviteProject(projectId);
     }
 
     // Project 목록 조회
@@ -54,5 +52,12 @@ public class ProjectController {
         return projectService.deleteProject(projectId, sessionUser);
     }
 
+    //프로젝트 참여
+    @PostMapping("/invites")
+    public ProjectInvitedResponseDto invited(@RequestBody ProjectInvitedRequestDto projectInvitedRequestDto,
+                                             @LoginUser SessionUser sessionUser){
+        return projectService.invitedProject(projectInvitedRequestDto,sessionUser);
+    }
 
 }
+
