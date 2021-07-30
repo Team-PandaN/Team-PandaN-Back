@@ -1,5 +1,6 @@
 package com.example.teampandanback.domain.user_project_mapping;
 
+import com.example.teampandanback.domain.project.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -18,4 +19,7 @@ public interface UserProjectMappingRepository extends JpaRepository<UserProjectM
 //    UserProjectMapping findByUser_IdAndProject_Id(Long userId, Long projectId);
 //
 //    void deleteByProject_Id(Long projectId);
+
+    @Query("select upm from UserProjectMapping upm join fetch upm.user")
+    List<UserProjectMapping> findAllByProject(Project project);
 }

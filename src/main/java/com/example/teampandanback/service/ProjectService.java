@@ -12,7 +12,6 @@ import com.example.teampandanback.dto.project.*;
 import com.example.teampandanback.exception.ApiRequestException;
 import com.example.teampandanback.utils.AESEncryptor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -79,8 +78,8 @@ public class ProjectService {
 
     // Project 삭제
     @Transactional
-    public ProjectDeleteResponseDto deleteProject(Long projectId, SessionUser sessionUser) {
-        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(), projectId);
+    public ProjectDeleteResponseDto deleteProject(Long projectId, SessionUser sessionUser){
+        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(),projectId);
 
         if (!userProjectMapping.getRole().equals(UserProjectRole.OWNER)) {
             throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
@@ -89,6 +88,29 @@ public class ProjectService {
         projectRepository.deleteById(projectId);
 
         return ProjectDeleteResponseDto.builder()
+                .projectId(projectId)
+                .build();
+    }
+
+    // Project 회원 조회
+    @Transactional
+    public ProjectCrewResponseDto readCrewList(Long projectId){
+        // 프로젝트 조회
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(()-> new ApiRequestException("회원을 조회할 프로젝트가 존재하지 않습니다."));
+
+        // 해당 프로젝트에 연관된 유저 목록 조회
+        List<UserProjectMapping> userProjectMapping = userProjectMappingRepository.findAllByProject(project);
+        // 유저목록에 있는 유저들의 아이디, 이름 조회
+        List<CrewResponseDto> crewResponseDtoList = userProjectMapping.stream().map(
+                                                            crew-> CrewResponseDto.builder()
+                                                            .userId(crew.getUser().getUserId())
+                                                            .userName(crew.getUser().getName())
+                                                            .build())
+                                                        .collect(Collectors.toList());
+
+        return ProjectCrewResponseDto.builder()
+                .crews(crewResponseDtoList)
                 .projectId(projectId)
                 .build();
     }

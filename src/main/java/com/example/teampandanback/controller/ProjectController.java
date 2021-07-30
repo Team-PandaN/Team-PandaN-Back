@@ -52,6 +52,12 @@ public class ProjectController {
         return projectService.deleteProject(projectId, sessionUser);
     }
 
+    // Project 회원 조회
+    @GetMapping("/{projectId}/crews")
+    public ProjectCrewResponseDto readCrewList(@PathVariable("projectId") Long projectId){
+        return projectService.readCrewList(projectId);
+    }
+
     //프로젝트 참여
     @PostMapping("/invites")
     public ProjectInvitedResponseDto invited(@RequestBody ProjectInvitedRequestDto projectInvitedRequestDto,
@@ -60,4 +66,3 @@ public class ProjectController {
     }
 
 }
-
