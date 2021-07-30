@@ -1,11 +1,11 @@
-package com.example.teampandanback.dto.note;
+package com.example.teampandanback.dto.note.request;
 
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-public class NoteRequestDto {
+public class NoteCreateRequestDto {
     private String title;
     private String content;
     private String deadline;
+    private String step;
 }

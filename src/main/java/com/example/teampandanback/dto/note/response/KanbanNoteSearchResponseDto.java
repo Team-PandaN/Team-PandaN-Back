@@ -1,4 +1,4 @@
-package com.example.teampandanback.dto.note;
+package com.example.teampandanback.dto.note.response;
 
 
 import lombok.Builder;
@@ -8,12 +8,11 @@ import java.util.List;
 
 @Getter
 public class KanbanNoteSearchResponseDto {
-    private List<NoteOfProjectResponseDto> project;
+    private List<NoteOfProjectResponseDto> projects;
 
     @Builder
     public KanbanNoteSearchResponseDto(List<NoteOfProjectResponseDto> noteOfProjectResponseDtoList) {
-        this.project = noteOfProjectResponseDtoList;
+        this.projects = noteOfProjectResponseDtoList;
     }
-
 }
 

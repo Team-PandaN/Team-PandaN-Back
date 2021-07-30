@@ -1,12 +1,14 @@
 package com.example.teampandanback.controller;
 
-import com.example.teampandanback.dto.note.KanbanNoteSearchResponseDto;
-import com.example.teampandanback.dto.note.NoteDeleteResponseDto;
-import com.example.teampandanback.dto.note.NoteRequestDto;
-import com.example.teampandanback.dto.note.NoteResponseDto;
+import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
+import com.example.teampandanback.dto.note.request.NoteRequestDto;
+import com.example.teampandanback.config.auth.LoginUser;
+import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.service.NoteService;
-import lombok.RequiredArgsConstructor;
+import com.example.teampandanback.dto.note.response.*;
 import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
+
 
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -21,10 +23,24 @@ public class NoteController {
         return noteService.readKanbanNote(projectId);
     }
 
+    //내가 쓴 노트 조회
+    @GetMapping("/projects/{projectId}/mynotes")
+    public NoteMineOnlyResponseDto readNotesMineOnly(@PathVariable("projectId") Long projectId, @LoginUser SessionUser sessionUser) {
+        return noteService.readNotesMineOnly(projectId, sessionUser);
+    }
+
     //노트 상세 조회
     @GetMapping("/notes/{noteId}")
     public NoteResponseDto noteDetail (@PathVariable("noteId") Long noteId) {
         return noteService.readNoteDetail(noteId);
+    }
+
+    //내가 생성
+    @PostMapping("/notes/{projectId}")
+    public NoteCreateResponseDto createNote (@PathVariable Long projectId,
+                                             @RequestBody NoteCreateRequestDto noteCreateRequestDto,
+                                             @LoginUser SessionUser sessionUser){
+        return noteService.createNote(projectId, noteCreateRequestDto, sessionUser);
     }
 
     //노트 수정
@@ -40,9 +56,10 @@ public class NoteController {
         return noteService.deleteNote(noteId);
     }
 
-    //노트 생성
-    @PostMapping("/notes/{projectId}")
-    public NoteResponseDto createNote (@PathVariable Long projectId, @RequestBody NoteRequestDto noteRequestDto){
-        return noteService.createNote(projectId, noteRequestDto);
+    //노트 일반형 조회
+    @GetMapping("/projects/{projectId}/issues")
+    public NoteSearchResponseDto ordinaryNoteSearch(@PathVariable("projectId") Long projectId) {
+        return noteService.readOrdinaryNote(projectId);
     }
+
 }
