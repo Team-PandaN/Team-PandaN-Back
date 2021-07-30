@@ -38,12 +38,7 @@ public class NoteService {
     public NoteResponseDto readNoteDetail(Long noteId) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ApiRequestException("작성된 노트가 없습니다."));
-        return NoteResponseDto.builder()
-                .noteId(note.getNoteId())
-                .title(note.getTitle())
-                .content(note.getContent())
-                .deadline(note.getDeadline())
-                .build();
+        return NoteResponseDto.of(note);
     }
 
     @Transactional
@@ -110,12 +105,7 @@ public class NoteService {
 
         for (Note note : noteRepository.findNoteByProject_projectId(projectId)) {
             if (note.getStep().equals(Step.STORAGE)) {
-                noteResponseDtoList1.add(NoteResponseDto.builder()
-                        .noteId(note.getNoteId())
-                        .title(note.getTitle())
-                        .content(note.getContent())
-                        .deadline(note.getDeadline())
-                        .build());
+                noteResponseDtoList1.add((NoteResponseDto.of(note)));
             }
         }
         noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
@@ -125,12 +115,7 @@ public class NoteService {
 
         for (Note note : noteRepository.findNoteByProject_projectId(projectId)) {
             if (note.getStep().equals(Step.TODO)) {
-                noteResponseDtoList2.add(NoteResponseDto.builder()
-                        .noteId(note.getNoteId())
-                        .title(note.getTitle())
-                        .content(note.getContent())
-                        .deadline(note.getDeadline())
-                        .build());
+                noteResponseDtoList2.add((NoteResponseDto.of(note)));
             }
         }
         noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
@@ -140,12 +125,7 @@ public class NoteService {
 
         for (Note note : noteRepository.findNoteByProject_projectId(projectId)) {
             if (note.getStep().equals(Step.PROCESSING)) {
-                noteResponseDtoList3.add(NoteResponseDto.builder()
-                        .noteId(note.getNoteId())
-                        .title(note.getTitle())
-                        .content(note.getContent())
-                        .deadline(note.getDeadline())
-                        .build());
+                noteResponseDtoList3.add((NoteResponseDto.of(note)));
             }
         }
         noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
@@ -155,12 +135,7 @@ public class NoteService {
 
         for (Note note : noteRepository.findNoteByProject_projectId(projectId)) {
             if (note.getStep().equals(Step.DONE)) {
-                noteResponseDtoList4.add(NoteResponseDto.builder()
-                        .noteId(note.getNoteId())
-                        .title(note.getTitle())
-                        .content(note.getContent())
-                        .deadline(note.getDeadline())
-                        .build());
+                noteResponseDtoList4.add(NoteResponseDto.of(note));
             }
         }
         noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
@@ -178,16 +153,9 @@ public class NoteService {
         List<NoteResponseDto> noteResponseDtoList = new ArrayList<>();
 
         for (Note note : noteRepository.findNoteByProject_projectId(projectId)) {
-            noteResponseDtoList.add(NoteResponseDto.builder()
-                    .noteId(note.getNoteId())
-                    .title(note.getTitle())
-                    .content(note.getContent())
-                    .deadline(note.getDeadline())
-                    .build());
+            noteResponseDtoList.add((NoteResponseDto.of(note)));
         }
 
-        return NoteSearchResponseDto.builder()
-                .notes(noteResponseDtoList)
-                .build();
+        return NoteSearchResponseDto.of(noteResponseDtoList);
     }
 }

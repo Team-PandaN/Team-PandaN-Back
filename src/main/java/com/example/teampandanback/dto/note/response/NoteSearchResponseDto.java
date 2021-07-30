@@ -13,4 +13,11 @@ public class NoteSearchResponseDto {
     public NoteSearchResponseDto(List<NoteResponseDto> notes) {
         this.notes = notes;
     }
+
+
+    public static NoteSearchResponseDto of (List<NoteResponseDto> noteResponseDtoList) {
+        return NoteSearchResponseDto.builder()
+                .notes(noteResponseDtoList)
+                .build();
+    }
 }
