@@ -12,6 +12,7 @@ import com.example.teampandanback.dto.project.*;
 import com.example.teampandanback.exception.ApiRequestException;
 import com.example.teampandanback.utils.AESEncryptor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;

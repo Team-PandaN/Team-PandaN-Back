@@ -2,7 +2,8 @@ package com.example.teampandanback.controller;
 
 import com.example.teampandanback.config.auth.LoginUser;
 import com.example.teampandanback.dto.auth.SessionUser;
-import com.example.teampandanback.dto.note.request.NoteFromRequestDto;
+import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
+import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
 import com.example.teampandanback.dto.note.response.*;
 import com.example.teampandanback.service.NoteService;
 import lombok.RequiredArgsConstructor;
@@ -36,16 +37,16 @@ public class NoteController {
 
     //내가 생성
     @PostMapping("/notes/{projectId}")
-    public NoteFormResponseDto createNote (@PathVariable Long projectId,
-                                             @RequestBody NoteFromRequestDto noteFromRequestDto,
+    public NoteCreateResponseDto createNote (@PathVariable Long projectId,
+                                             @RequestBody NoteCreateRequestDto noteCreateRequestDto,
                                              @LoginUser SessionUser sessionUser){
-        return noteService.createNote(projectId, noteFromRequestDto, sessionUser);
+        return noteService.createNote(projectId, noteCreateRequestDto, sessionUser);
     }
 
     //노트 수정
     @PutMapping("/notes/{noteId}")
-    public NoteFormResponseDto updateNote (@PathVariable("noteId") Long noteId, @RequestBody NoteFromRequestDto noteFromRequestDto) {
-        return noteService.updateNoteDetail(noteId, noteFromRequestDto);
+    public NoteUpdateResponseDto updateNote (@PathVariable("noteId") Long noteId, @RequestBody NoteUpdateRequestDto noteUpdateRequestDto) {
+        return noteService.updateNoteDetail(noteId, noteUpdateRequestDto);
         //  서비스의 메소드명은 변경될수있습니다.
     }
 

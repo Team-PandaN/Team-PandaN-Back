@@ -8,8 +8,7 @@ import lombok.Getter;
 import java.time.LocalDate;
 
 @Getter
-public class NoteFormResponseDto {
-
+public class NoteUpdateResponseDto {
     private Long noteId;
     private String title;
     private String content;
@@ -17,7 +16,7 @@ public class NoteFormResponseDto {
     private String step;
 
     @Builder
-    public NoteFormResponseDto(Long noteId, String title, String content, LocalDate deadline, Step step) {
+    public NoteUpdateResponseDto(Long noteId, String title, String content, LocalDate deadline, Step step) {
         this.noteId = noteId;
         this.title = title;
         this.content = content;
@@ -25,8 +24,8 @@ public class NoteFormResponseDto {
         this.step = step.toString();
     }
 
-    public static NoteFormResponseDto of (Note note) {
-        return NoteFormResponseDto.builder()
+    public static NoteUpdateResponseDto of (Note note) {
+        return NoteUpdateResponseDto.builder()
                 .noteId(note.getNoteId())
                 .title(note.getTitle())
                 .content(note.getContent())
