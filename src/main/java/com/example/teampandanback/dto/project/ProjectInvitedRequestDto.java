@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class ProjectInvitedRequestDto {
-    private String inviteCode;
+    private final String inviteCode;
 
     @Builder
     public ProjectInvitedRequestDto(String inviteCode) {
