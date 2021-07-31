@@ -2,25 +2,26 @@ package com.example.teampandanback.dto.note.response;
 
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.Step;
-import java.time.LocalDate;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.time.LocalDate;
 
 @Getter
 public class NoteCreateResponseDto {
 
-    private String noteId;
+    private Long noteId;
     private String title;
     private String content;
-    private LocalDate deadline;
+    private String deadline;
     private String step;
 
     @Builder
     public NoteCreateResponseDto(Long noteId, String title, String content, LocalDate deadline, Step step) {
-        this.noteId = noteId.toString();
+        this.noteId = noteId;
         this.title = title;
         this.content = content;
-        this.deadline = deadline;
+        this.deadline = deadline.toString();
         this.step = step.toString();
     }
 

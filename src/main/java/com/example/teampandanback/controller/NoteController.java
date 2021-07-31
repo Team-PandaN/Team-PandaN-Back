@@ -1,13 +1,13 @@
 package com.example.teampandanback.controller;
 
-import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
-import com.example.teampandanback.dto.note.request.NoteRequestDto;
 import com.example.teampandanback.config.auth.LoginUser;
 import com.example.teampandanback.dto.auth.SessionUser;
-import com.example.teampandanback.service.NoteService;
+import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
+import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
 import com.example.teampandanback.dto.note.response.*;
-import org.springframework.web.bind.annotation.*;
+import com.example.teampandanback.service.NoteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
 
 @RequiredArgsConstructor
@@ -45,8 +45,8 @@ public class NoteController {
 
     //노트 수정
     @PutMapping("/notes/{noteId}")
-    public NoteResponseDto updateNote (@PathVariable("noteId") Long noteId, @RequestBody NoteRequestDto noteRequestDto) {
-        return noteService.updateNoteDetail(noteId, noteRequestDto);
+    public NoteUpdateResponseDto updateNote (@PathVariable("noteId") Long noteId, @RequestBody NoteUpdateRequestDto noteUpdateRequestDto) {
+        return noteService.updateNoteDetail(noteId, noteUpdateRequestDto);
         //  서비스의 메소드명은 변경될수있습니다.
     }
 

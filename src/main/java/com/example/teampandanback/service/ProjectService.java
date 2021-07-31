@@ -13,6 +13,7 @@ import com.example.teampandanback.dto.project.*;
 import com.example.teampandanback.exception.ApiRequestException;
 import com.example.teampandanback.utils.AESEncryptor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
@@ -127,9 +129,11 @@ public class ProjectService {
             decodedString = aesEncryptor.decrypt(projectInvitedRequestDto.getInviteCode());
             decodedLong = Long.parseLong(decodedString);
         } catch (NumberFormatException e) {
-            throw new ApiRequestException("복호화 된 프로젝트ID가 숫자가 아닙니다. 프로젝트ID = " +decodedString);
+            log.info("복호화 된 프로젝트ID가 숫자가 아닙니다. 프로젝트ID = " +decodedString);
+            throw new ApiRequestException("유효하지 않은 초대 코드입니다.");
         } catch (Exception e) {
-            throw new ApiRequestException(e.getMessage());
+            log.info(e.getMessage());
+            throw new ApiRequestException("유효하지 않은 초대 코드 입니다.");
         }
 
         User newCrew = userRepository.findById(sessionUser.getUserId()).orElseThrow(
@@ -158,7 +162,8 @@ public class ProjectService {
         try{
             encodedString = aesEncryptor.encrypt(Long.toString(projectId));
         }catch (Exception e){
-            throw new ApiRequestException(e.getMessage());
+            log.info(e.getMessage());
+            throw new ApiRequestException("초대 코드 발급 중 오류가 발생하였습니다.");
         }
 
         return ProjectInviteResponseDto.builder()
