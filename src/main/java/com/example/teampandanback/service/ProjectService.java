@@ -10,11 +10,13 @@ import com.example.teampandanback.domain.user_project_mapping.UserProjectRole;
 import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.project.*;
 import com.example.teampandanback.exception.ApiRequestException;
+import com.example.teampandanback.utils.AESEncryptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -24,10 +26,11 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
+    private final AESEncryptor aesEncryptor;
 
     // Project 목록 조회
     @Transactional
-    public List<ProjectResponseDto> readProjectList(SessionUser sessionUser){
+    public List<ProjectResponseDto> readProjectList(SessionUser sessionUser) {
         List<UserProjectMapping> userProjectMappingList = userProjectMappingRepository.findByUser_UserId(sessionUser.getUserId());
 
         return userProjectMappingList
@@ -38,10 +41,10 @@ public class ProjectService {
 
     // Project 생성
     @Transactional
-    public ProjectResponseDto createProject(ProjectRequestDto requestDto, SessionUser sessionUser){
+    public ProjectResponseDto createProject(ProjectRequestDto requestDto, SessionUser sessionUser) {
         // 사용자 조회
         User user = userRepository.findById(sessionUser.getUserId())
-                .orElseThrow(()-> new ApiRequestException("유저가 아니므로 프로젝트를 생성할 수 없습니다."));
+                .orElseThrow(() -> new ApiRequestException("유저가 아니므로 프로젝트를 생성할 수 없습니다."));
 
         // 프로젝트 생성하고 저장
         Project project = projectRepository.save(Project.of(requestDto));
@@ -59,11 +62,11 @@ public class ProjectService {
 
     // Project 수정
     @Transactional
-    public ProjectResponseDto updateProject(Long projectId, ProjectRequestDto requestDto, SessionUser sessionUser){
+    public ProjectResponseDto updateProject(Long projectId, ProjectRequestDto requestDto, SessionUser sessionUser) {
 
-        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(),projectId);
+        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(), projectId);
 
-        if(!userProjectMapping.getRole().equals(UserProjectRole.OWNER)){
+        if (!userProjectMapping.getRole().equals(UserProjectRole.OWNER)) {
             throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
         }
 
@@ -78,7 +81,7 @@ public class ProjectService {
     public ProjectDeleteResponseDto deleteProject(Long projectId, SessionUser sessionUser){
         UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(),projectId);
 
-        if(!userProjectMapping.getRole().equals(UserProjectRole.OWNER)){
+        if (!userProjectMapping.getRole().equals(UserProjectRole.OWNER)) {
             throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
         }
         userProjectMappingRepository.deleteByProject_ProjectId(projectId);
@@ -112,4 +115,54 @@ public class ProjectService {
                 .build();
     }
 
+    @Transactional
+    public ProjectInvitedResponseDto invitedProject(ProjectInvitedRequestDto projectInvitedRequestDto, SessionUser sessionUser) {
+
+        String decodedString = null;
+        Long decodedLong = null;
+        try {
+            decodedString = aesEncryptor.decrypt(projectInvitedRequestDto.getInviteCode());
+            decodedLong = Long.parseLong(decodedString);
+        } catch (NumberFormatException e) {
+            log.info("복호화 된 프로젝트ID가 숫자가 아닙니다. 프로젝트ID = " +decodedString);
+            throw new ApiRequestException("유효하지 않은 초대 코드입니다.");
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            throw new ApiRequestException("유효하지 않은 초대 코드 입니다.");
+        }
+
+        User newCrew = userRepository.findById(sessionUser.getUserId()).orElseThrow(
+                ()-> new ApiRequestException("등록되지 않은 유저의 접근입니다.")
+        );
+
+        Project invitedProject = projectRepository.findById(decodedLong).orElseThrow(
+                ()-> new ApiRequestException("생성되지 않은 프로젝트입니다.")
+        );
+
+        UserProjectMapping newCrewRecord = UserProjectMapping.builder()
+                .project(invitedProject)
+                .user(newCrew)
+                .userProjectRole(UserProjectRole.CREW)
+                .build();
+
+        userProjectMappingRepository.save(newCrewRecord);
+
+        return ProjectInvitedResponseDto.builder()
+                .projectId(decodedLong)
+                .build();
+    }
+
+    public ProjectInviteResponseDto inviteProject(Long projectId) {
+        String encodedString = null;
+        try{
+            encodedString = aesEncryptor.encrypt(Long.toString(projectId));
+        }catch (Exception e){
+            log.info(e.getMessage());
+            throw new ApiRequestException("초대 코드 발급 중 오류가 발생하였습니다.");
+        }
+
+        return ProjectInviteResponseDto.builder()
+                .inviteCode(encodedString)
+                .build();
+    }
 }
