@@ -56,23 +56,27 @@ public class NoteService {
     @Transactional
     public NoteCreateResponseDto createNote(Long projectId, NoteCreateRequestDto noteCreateRequestDto, SessionUser sessionUser) {
 
-        UserProjectMapping userProjectMapping =
-                userProjectMappingRepository
-                        .findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(), projectId);
+        try {
+            UserProjectMapping userProjectMapping =
+                    userProjectMappingRepository
+                            .findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(), projectId);
 
-        // [노트 생성] 전달받은 String deadline을 LocalDate 자료형으로 형변환
-        LocalDate deadline = changeType(noteCreateRequestDto.getDeadline());
+            // [노트 생성] 전달받은 String deadline을 LocalDate 자료형으로 형변환
+            LocalDate deadline = changeType(noteCreateRequestDto.getDeadline());
 
-        // [노트 생성] 전달받은 String step을 Enum Step으로
-        Step step = Step.valueOf(noteCreateRequestDto.getStep());
+            // [노트 생성] 전달받은 String step을 Enum Step으로
+            Step step = Step.valueOf(noteCreateRequestDto.getStep());
 
-        // [노트 생성] 찾은 userProjectMappingRepository를 통해 user와 프로젝트 가져오기
-        User user = userProjectMapping.getUser();
-        Project project = userProjectMapping.getProject();
+            // [노트 생성] 찾은 userProjectMappingRepository를 통해 user와 프로젝트 가져오기
+            User user = userProjectMapping.getUser();
+            Project project = userProjectMapping.getProject();
 
-        // [노트 생성] 전달받은 noteCreateRequestDto를 Note.java에 정의한 of 메소드에 전달하여 빌더 패턴에 넣는다.
-        Note note = noteRepository.save(Note.of(noteCreateRequestDto, deadline, step, user, project));
-        return NoteCreateResponseDto.of(note);
+            // [노트 생성] 전달받은 noteCreateRequestDto를 Note.java에 정의한 of 메소드에 전달하여 빌더 패턴에 넣는다.
+            Note note = noteRepository.save(Note.of(noteCreateRequestDto, deadline, step, user, project));
+            return NoteCreateResponseDto.of(note);
+        } catch (Exception e) {
+            throw new ApiRequestException("해당하는 프로젝트가 존재 하지 않아 노트를 생성 할 수 없습니다.");
+        }
     }
 
     public NoteMineOnlyResponseDto readNotesMineOnly(Long projectId, SessionUser sessionUser){
@@ -89,7 +93,12 @@ public class NoteService {
 
     @Transactional
     public NoteDeleteResponseDto deleteNote(Long noteId) {
-        noteRepository.deleteById(noteId);
+        try {
+            noteRepository.deleteById(noteId);
+        }catch (Exception e){
+            throw new ApiRequestException("해당하는 노트가 존재 하지 삭제 할 수 없습니다.");
+        }
+
         return NoteDeleteResponseDto.builder()
                 .noteId(noteId)
                 .build();
