@@ -20,6 +20,6 @@ public interface UserProjectMappingRepository extends JpaRepository<UserProjectM
 //
 //    void deleteByProject_Id(Long projectId);
 
-    @Query("select upm from UserProjectMapping upm join fetch upm.user")
+    @Query("select upm from UserProjectMapping upm join fetch upm.user where upm.project = ?1")
     List<UserProjectMapping> findAllByProject(Project project);
 }
