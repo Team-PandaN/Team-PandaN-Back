@@ -157,7 +157,8 @@ public class ProjectService {
         try{
             encodedString = aesEncryptor.encrypt(Long.toString(projectId));
         }catch (Exception e){
-            throw new ApiRequestException(e.getMessage());
+            log.info(e.getMessage());
+            throw new ApiRequestException("초대 코드 발급 중 오류가 발생하였습니다.");
         }
 
         return ProjectInviteResponseDto.builder()
