@@ -5,11 +5,13 @@ import com.example.teampandanback.dto.project.ProjectRequestDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 
 @Getter
 @NoArgsConstructor
+@DynamicUpdate
 @Entity
 public class Project extends Timestamped {
 
@@ -30,7 +32,7 @@ public class Project extends Timestamped {
         this.detail = detail;
     }
 
-    public static Project of(ProjectRequestDto requestDto){
+    public static Project toEntity(ProjectRequestDto requestDto){
         return Project.builder()
                 .title(requestDto.getTitle())
                 .detail(requestDto.getDetail())

@@ -17,7 +17,7 @@ public class ProjectResponseDto {
         this.projectId = projectId;
     }
 
-    public static ProjectResponseDto of (Project project) {
+    public static ProjectResponseDto fromEntity (Project project) {
         return ProjectResponseDto.builder()
                 .title(project.getTitle())
                 .detail(project.getDetail())

@@ -39,7 +39,7 @@ public class ProjectService {
 
         return userProjectMappingList
                 .stream()
-                .map(userProjectMapping -> ProjectResponseDto.of(userProjectMapping.getProject()))
+                .map(userProjectMapping -> ProjectResponseDto.fromEntity(userProjectMapping.getProject()))
                 .collect(Collectors.toList());
     }
 
@@ -51,7 +51,7 @@ public class ProjectService {
                 .orElseThrow(() -> new ApiRequestException("유저가 아니므로 프로젝트를 생성할 수 없습니다."));
 
         // 프로젝트 생성하고 저장
-        Project project = projectRepository.save(Project.of(requestDto));
+        Project project = projectRepository.save(Project.toEntity(requestDto));
 
         // 유저-프로젝트 테이블에도 저장
         UserProjectMapping userProjectMapping = UserProjectMapping.builder()
@@ -61,7 +61,7 @@ public class ProjectService {
                 .build();
         userProjectMappingRepository.save(userProjectMapping);
 
-        return ProjectResponseDto.of(project);
+        return ProjectResponseDto.fromEntity(project);
     }
 
     // Project 수정
@@ -77,7 +77,7 @@ public class ProjectService {
         Project project = userProjectMapping.getProject();
         project.update(requestDto);
 
-        return ProjectResponseDto.of(project);
+        return ProjectResponseDto.fromEntity(project);
     }
 
     // Project 삭제
@@ -85,11 +85,17 @@ public class ProjectService {
     public ProjectDeleteResponseDto deleteProject(Long projectId, SessionUser sessionUser){
         UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(),projectId);
 
+        // Project 의 OWNER 권한 확인
         if (!userProjectMapping.getRole().equals(UserProjectRole.OWNER)) {
             throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
         }
-        userProjectMappingRepository.deleteByProject_ProjectId(projectId);
+        // 해당 Project 와 연관된 Note 삭제
         noteRepository.deleteByProject_ProjectId(projectId);
+
+        // UserProjectMapping 테이블에서 삭제
+        userProjectMappingRepository.deleteByProject_ProjectId(projectId);
+
+        // Project 테이블에서 Project 삭제
         projectRepository.deleteById(projectId);
 
         return ProjectDeleteResponseDto.builder()
