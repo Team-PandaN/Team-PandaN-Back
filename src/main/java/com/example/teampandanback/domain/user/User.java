@@ -4,11 +4,13 @@ import com.example.teampandanback.domain.Timestamped;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 
 @Getter
 @NoArgsConstructor
+@DynamicUpdate
 @Entity
 public class User{
 
