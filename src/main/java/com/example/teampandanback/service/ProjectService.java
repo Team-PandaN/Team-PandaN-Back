@@ -124,7 +124,8 @@ public class ProjectService {
             decodedString = aesEncryptor.decrypt(projectInvitedRequestDto.getInviteCode());
             decodedLong = Long.parseLong(decodedString);
         } catch (NumberFormatException e) {
-            throw new ApiRequestException("복호화 된 프로젝트ID가 숫자가 아닙니다. 프로젝트ID = " +decodedString);
+            log.info("복호화 된 프로젝트ID가 숫자가 아닙니다. 프로젝트ID = " +decodedString);
+            throw new ApiRequestException("유효하지 않은 초대 코드입니다.");
         } catch (Exception e) {
             throw new ApiRequestException(e.getMessage());
         }
