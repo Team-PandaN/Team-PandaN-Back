@@ -6,10 +6,5 @@ import lombok.NoArgsConstructor;
 
 @Getter
 public class ProjectInvitedRequestDto {
-    private final String inviteCode;
-
-    @Builder
-    public ProjectInvitedRequestDto(String inviteCode) {
-        this.inviteCode = inviteCode;
-    }
+    private String inviteCode;
 }
