@@ -1,5 +1,6 @@
 package com.example.teampandanback.service;
 
+import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.project.ProjectRepository;
 import com.example.teampandanback.domain.user.User;
@@ -26,6 +27,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
+    private final NoteRepository noteRepository;
     private final AESEncryptor aesEncryptor;
 
     // Project 목록 조회
@@ -85,6 +87,7 @@ public class ProjectService {
             throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
         }
         userProjectMappingRepository.deleteByProject_ProjectId(projectId);
+        noteRepository.deleteByProject_ProjectId(projectId);
         projectRepository.deleteById(projectId);
 
         return ProjectDeleteResponseDto.builder()
