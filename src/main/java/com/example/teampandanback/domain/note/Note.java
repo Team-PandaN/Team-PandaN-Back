@@ -4,7 +4,7 @@ import com.example.teampandanback.domain.Timestamped;
 import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
-import com.example.teampandanback.dto.note.request.NoteRequestDto;
+import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -46,7 +46,7 @@ public class Note extends Timestamped {
 
 
     @Builder
-    public Note(Long noteId, String title, String content, LocalDate deadline, Step step, User user, Project project){
+    public Note(String title, String content, LocalDate deadline, Step step, User user, Project project){
         this.title = title;
         this.content = content;
         this.deadline = deadline;
@@ -59,10 +59,11 @@ public class Note extends Timestamped {
     // What: Note.java에서 changeType 메소드를 삭제하고, update 메소드는 형변환이 완료된 LocalDate 파라미터를 받게 하였습니다.
     // Why: NoteService.java 에서 형변환이 자주 일어나는 바, NoteService.java 에서 형변환 메소드를 정적으로 정의하여 공용으로 쓰기 위함입니다.
     // How: NoteService의 updateNoteDetail 함수는 전달받은 noteRequestDto의 String을 꺼내 localDate으로 변환 후 여기에 전달합니다.
-    public void update(NoteRequestDto noteRequestDto, LocalDate updateLocalDate) {
-        this.title = noteRequestDto.getTitle();
-        this.content = noteRequestDto.getContent();
+    public void update(NoteUpdateRequestDto noteUpdateRequestDto, LocalDate updateLocalDate, Step step) {
+        this.title = noteUpdateRequestDto.getTitle();
+        this.content = noteUpdateRequestDto.getContent();
         this.deadline = updateLocalDate;
+        this.step = step;
     }
 
     // #2

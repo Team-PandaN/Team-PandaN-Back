@@ -9,7 +9,7 @@ import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
-import com.example.teampandanback.dto.note.request.NoteRequestDto;
+import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
 import com.example.teampandanback.dto.note.response.*;
 import com.example.teampandanback.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class NoteService {
     private final NoteRepository noteRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
 
-    public static LocalDate changeType(String dateString) {
+    private LocalDate changeType(String dateString) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate date = LocalDate.parse(dateString, formatter);
         return date;
@@ -42,15 +42,15 @@ public class NoteService {
     }
 
     @Transactional
-    public NoteResponseDto updateNoteDetail(Long noteId, NoteRequestDto noteRequestDto) {
+    public NoteUpdateResponseDto updateNoteDetail(Long noteId, NoteUpdateRequestDto noteUpdateRequestDto) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
 
         // #1-1
-        note.update(noteRequestDto, changeType(noteRequestDto.getDeadline()));
+        note.update(noteUpdateRequestDto, changeType(noteUpdateRequestDto.getDeadline()),Step.valueOf(noteUpdateRequestDto.getStep()));
 
         // #2
-        return NoteResponseDto.of(note);
+        return NoteUpdateResponseDto.of(note);
     }
 
     @Transactional
