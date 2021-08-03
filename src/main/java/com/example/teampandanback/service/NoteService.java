@@ -55,7 +55,7 @@ public class NoteService {
                 .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
 
         // #1-1
-        note.update(noteUpdateRequestDto, changeType(noteUpdateRequestDto.getDeadline()),Step.valueOf(noteUpdateRequestDto.getStep()));
+        note.update(noteUpdateRequestDto, changeType(noteUpdateRequestDto.getDeadline()), Step.valueOf(noteUpdateRequestDto.getStep()));
 
         // #2
         return NoteUpdateResponseDto.of(note);
@@ -65,14 +65,13 @@ public class NoteService {
     @Transactional
     public NoteCreateResponseDto createNote(Long projectId, NoteCreateRequestDto noteCreateRequestDto, SessionUser sessionUser) {
 
-        // Note 작성 전 Project 조회
-        projectRepository.findById(projectId).orElseThrow(
-                ()-> new ApiRequestException("노트를 작성할 프로젝트가 없습니다.")
-        );
-
         UserProjectMapping userProjectMapping =
                 userProjectMappingRepository
                         .findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(), projectId);
+
+        if(userProjectMapping == null){
+            throw new ApiRequestException("노트를 작성할 수 없습니다.");
+        }
 
         // [노트 생성] 전달받은 String deadline을 LocalDate 자료형으로 형변환
         LocalDate deadline = changeType(noteCreateRequestDto.getDeadline());
@@ -90,11 +89,11 @@ public class NoteService {
     }
 
     // 해당 Project 에서 내가 작성한 Note 조회
-    public NoteMineOnlyResponseDto readNotesMineOnly(Long projectId, SessionUser sessionUser){
+    public NoteMineOnlyResponseDto readNotesMineOnly(Long projectId, SessionUser sessionUser) {
 
         // Project 조회
         projectRepository.findById(projectId).orElseThrow(
-                ()-> new ApiRequestException("내가 작성한 문서를 조회할 프로젝트가 없습니다.")
+                () -> new ApiRequestException("내가 작성한 문서를 조회할 프로젝트가 없습니다.")
         );
 
         // 해당 Project 에서 내가 작성한 Note 죄회
@@ -168,7 +167,7 @@ public class NoteService {
 
         // Project 조회
         Project project = projectRepository.findById(projectId).orElseThrow(
-                ()-> new ApiRequestException("파일을 조회할 프로젝트가 없습니다.")
+                () -> new ApiRequestException("파일을 조회할 프로젝트가 없습니다.")
         );
 
         for (Note note : noteRepository.findByProject(project)) {
