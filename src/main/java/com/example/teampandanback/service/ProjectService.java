@@ -164,7 +164,21 @@ public class ProjectService {
                 .build();
     }
 
-    public ProjectInviteResponseDto inviteProject(Long projectId) {
+    public ProjectInviteResponseDto inviteProject(Long projectId, SessionUser sessionUser) {
+        User inviteOfferUser = userRepository.findById(sessionUser.getUserId()).orElseThrow(
+                ()-> new ApiRequestException("등록되지 않은 유저의 접근입니다.")
+        );
+
+        Project inviteProject = projectRepository.findById(projectId).orElseThrow(
+                ()-> new ApiRequestException("생성되지 않은 프로젝트입니다.")
+        );
+
+        boolean isUserIsMemberOfProject = userProjectMappingRepository.existsByUserAndProject(inviteOfferUser,inviteProject);
+
+        if(!isUserIsMemberOfProject){
+            throw new ApiRequestException("유저가 프로젝트의 구성원이 아닌데, 초대코드를 생성하려 합니다.");
+        }
+
         String encodedString = null;
         try{
             encodedString = aesEncryptor.encrypt(Long.toString(projectId));

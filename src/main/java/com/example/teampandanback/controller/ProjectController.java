@@ -19,8 +19,8 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @GetMapping("/{projectId}/invites")
-    public ProjectInviteResponseDto findTagByCategoryId(@PathVariable("projectId") Long projectId){
-        return projectService.inviteProject(projectId);
+    public ProjectInviteResponseDto invite(@PathVariable("projectId") Long projectId, @LoginUser SessionUser sessionUser){
+        return projectService.inviteProject(projectId, sessionUser);
     }
 
     // Project 목록 조회

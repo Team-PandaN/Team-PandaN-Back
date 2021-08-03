@@ -25,4 +25,6 @@ public interface UserProjectMappingRepository extends JpaRepository<UserProjectM
     List<UserProjectMapping> findAllByProject(Project project);
 
     Optional<UserProjectMapping> findByUserAndProject(User newCrew, Project invitedProject);
+
+    boolean existsByUserAndProject(User inviteOfferUser, Project inviteProject);
 }
