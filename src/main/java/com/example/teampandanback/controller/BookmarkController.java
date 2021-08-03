@@ -19,4 +19,10 @@ public class BookmarkController {
     public void bookmarkNote(@PathVariable Long noteId, @LoginUser SessionUser sessionUser){
         bookmarkService.bookmarkNote(noteId,sessionUser);
     }
+
+    //북마크 해제
+    @PostMapping("/api/notes/{noteId}/unbookmark")
+    public void unBookmarkNote(@PathVariable Long noteId, @LoginUser SessionUser sessionUser){
+        bookmarkService.unBookmarkNote(noteId,sessionUser);
+    }
 }
