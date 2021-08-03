@@ -4,6 +4,7 @@ import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.domain.note.Step;
 import com.example.teampandanback.domain.project.Project;
+import com.example.teampandanback.domain.project.ProjectRepository;
 import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 public class NoteService {
     private final NoteRepository noteRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
+    private final ProjectRepository projectRepository;
 
     private LocalDate changeType(String dateString) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -75,11 +77,17 @@ public class NoteService {
         return NoteCreateResponseDto.of(note);
     }
 
+    // 해당 Project 에서 내가 작성한 Note 조회
     public NoteMineOnlyResponseDto readNotesMineOnly(Long projectId, SessionUser sessionUser){
-        List<Note> noteList = noteRepository.findNoteByProject_projectId(projectId);
-        List<NoteResponseDto> myNoteList = noteList
+
+        // Project 조회
+        Project project = projectRepository.findById(projectId).orElseThrow(
+                ()-> new ApiRequestException("내가 작성한 문서를 조회할 프로젝트가 없습니다.")
+        );
+
+        // 해당 Project 에서 내가 작성한 Note 죄회
+        List<NoteResponseDto> myNoteList = noteRepository.findByProjectAndUser(projectId, sessionUser.getUserId())
                 .stream()
-                .filter(note -> note.getUser().getUserId().equals(sessionUser.getUserId()))
                 .map(NoteResponseDto::of)
                 .collect(Collectors.toList());
 
@@ -95,6 +103,7 @@ public class NoteService {
                 .build();
     }
 
+    // Note 칸반형 조회 (칸반 페이지)
     @Transactional
     public KanbanNoteSearchResponseDto readKanbanNote(Long projectId) {
         List<NoteOfProjectResponseDto> noteOfProjectResponseDtoList = new ArrayList<>();
@@ -103,56 +112,45 @@ public class NoteService {
         List<NoteResponseDto> noteResponseDtoList3 = new ArrayList<>();
         List<NoteResponseDto> noteResponseDtoList4 = new ArrayList<>();
 
-        for (Note note : noteRepository.findNoteByProject_projectId(projectId)) {
-            if (note.getStep().equals(Step.STORAGE)) {
-                noteResponseDtoList1.add((NoteResponseDto.of(note)));
-            }
-        }
-        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
-                .step(Step.STORAGE)
-                .noteResponseDtoList(noteResponseDtoList1)
-                .build());
+        // Project 조회
+        Project project = projectRepository.findById(projectId).orElseThrow(
+                ()-> new ApiRequestException("칸반을 조회할 프로젝트가 없습니다.")
+        );
 
-        for (Note note : noteRepository.findNoteByProject_projectId(projectId)) {
-            if (note.getStep().equals(Step.TODO)) {
-                noteResponseDtoList2.add((NoteResponseDto.of(note)));
+        for (Note note : noteRepository.findByProject(project)) {
+            switch(note.getStep()){
+                case STORAGE:
+                    noteResponseDtoList1.add((NoteResponseDto.of(note))); break;
+                case TODO:
+                    noteResponseDtoList2.add((NoteResponseDto.of(note))); break;
+                case PROCESSING:
+                    noteResponseDtoList3.add((NoteResponseDto.of(note))); break;
+                case DONE:
+                    noteResponseDtoList4.add(NoteResponseDto.of(note)); break;
             }
         }
-        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
-                .step(Step.TODO)
-                .noteResponseDtoList(noteResponseDtoList2)
-                .build());
-
-        for (Note note : noteRepository.findNoteByProject_projectId(projectId)) {
-            if (note.getStep().equals(Step.PROCESSING)) {
-                noteResponseDtoList3.add((NoteResponseDto.of(note)));
-            }
-        }
-        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
-                .step(Step.PROCESSING)
-                .noteResponseDtoList(noteResponseDtoList3)
-                .build());
-
-        for (Note note : noteRepository.findNoteByProject_projectId(projectId)) {
-            if (note.getStep().equals(Step.DONE)) {
-                noteResponseDtoList4.add(NoteResponseDto.of(note));
-            }
-        }
-        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.builder()
-                .step(Step.DONE)
-                .noteResponseDtoList(noteResponseDtoList4)
-                .build());
+        // Note 를 각 상태별로 List 로 묶어서 응답 보내기
+        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.of(Step.STORAGE, noteResponseDtoList1));
+        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.of(Step.TODO, noteResponseDtoList2));
+        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.of(Step.PROCESSING, noteResponseDtoList3));
+        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.of(Step.DONE, noteResponseDtoList4));
 
         return KanbanNoteSearchResponseDto.builder()
                 .noteOfProjectResponseDtoList(noteOfProjectResponseDtoList)
                 .build();
     }
 
+    // Note 일반형 조회 (파일 페이지)
     @Transactional
     public NoteSearchResponseDto readOrdinaryNote(Long projectId) {
         List<NoteResponseDto> noteResponseDtoList = new ArrayList<>();
 
-        for (Note note : noteRepository.findNoteByProject_projectId(projectId)) {
+        // Project 조회
+        Project project = projectRepository.findById(projectId).orElseThrow(
+                ()-> new ApiRequestException("파일을 조회할 프로젝트가 없습니다.")
+        );
+
+        for (Note note : noteRepository.findByProject(project)) {
             noteResponseDtoList.add((NoteResponseDto.of(note)));
         }
 

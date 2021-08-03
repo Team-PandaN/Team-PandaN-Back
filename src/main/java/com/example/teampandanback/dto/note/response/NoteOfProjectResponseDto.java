@@ -17,5 +17,11 @@ public class NoteOfProjectResponseDto {
         this.notes = noteResponseDtoList;
     }
 
+    public static NoteOfProjectResponseDto of (Step step, List<NoteResponseDto> noteResponseDtoList) {
+        return NoteOfProjectResponseDto.builder()
+                .step(step)
+                .noteResponseDtoList(noteResponseDtoList)
+                .build();
+    }
 }
 
