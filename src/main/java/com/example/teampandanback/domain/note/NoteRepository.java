@@ -16,7 +16,7 @@ public interface NoteRepository extends JpaRepository<Note,Long> {
     // Project 에 연관된 Note 삭제
     void deleteByProject_ProjectId(Long projectId);
 
-    // Project
+    // 특정 Project 에서 내가 작성한 Note 조회
     @Query("select n from Note n where n.project.projectId = :projectId and n.user.userId =:userId")
     List<Note> findByProjectAndUser(Long projectId, Long userId);
 }
