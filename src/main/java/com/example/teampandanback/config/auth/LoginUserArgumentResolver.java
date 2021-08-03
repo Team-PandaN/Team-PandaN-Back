@@ -19,7 +19,7 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
 
     private final HttpSession httpSession;
     private final UserRepository userRepository;
-//
+
 //    @Override
 //    public boolean supportsParameter(MethodParameter parameter) {
 //        boolean isLoginUserAnnotation = parameter.getParameterAnnotation(LoginUser.class) != null;

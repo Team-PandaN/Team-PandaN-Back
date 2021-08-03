@@ -150,11 +150,12 @@ public class ProjectService {
                 ()-> new ApiRequestException("생성되지 않은 프로젝트입니다.")
         );
 
-        UserProjectMapping newCrewRecord = UserProjectMapping.builder()
-                .project(invitedProject)
-                .user(newCrew)
+        UserProjectMapping newCrewRecord = userProjectMappingRepository.findByUserAndProject(newCrew, invitedProject)
+                .orElseGet(()->UserProjectMapping.builder()
                 .userProjectRole(UserProjectRole.CREW)
-                .build();
+                .user(newCrew)
+                .project(invitedProject)
+                .build());
 
         userProjectMappingRepository.save(newCrewRecord);
 
