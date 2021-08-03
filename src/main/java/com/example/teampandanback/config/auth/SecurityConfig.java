@@ -2,6 +2,7 @@ package com.example.teampandanback.config.auth;
 
 import com.example.teampandanback.domain.user.Role;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -34,6 +35,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .userInfoEndpoint()
                             .userService(customOAuth2UserService); //OAuth2 로그인 성공 이후 사용자 정보를 가져올 때의 설정들을 담당.
 //                    .and()
-//                    .defaultSuccessUrl(frontUrl,true);
+//                    .successHandler(new LoginSuccessHandler());
     }
 }
