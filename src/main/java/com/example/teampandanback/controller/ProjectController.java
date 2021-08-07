@@ -31,6 +31,14 @@ public class ProjectController {
                 .build();
     }
 
+
+
+    // Project 상세 조회
+    @GetMapping("/{projectId}")
+    public ProjectDetailResponseDto readProjectDetail(@LoginUser SessionUser sessionUser, @PathVariable Long projectId){
+        return projectService.readProjectDetail(sessionUser, projectId);
+    }
+
     // Project 생성
     @PostMapping("")
     public ProjectResponseDto createProject(@RequestBody ProjectRequestDto requestDto, @LoginUser SessionUser sessionUser) {
@@ -64,5 +72,6 @@ public class ProjectController {
                                              @LoginUser SessionUser sessionUser){
         return projectService.invitedProject(projectInvitedRequestDto,sessionUser);
     }
+
 
 }

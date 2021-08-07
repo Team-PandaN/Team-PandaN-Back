@@ -15,8 +15,8 @@ import com.example.teampandanback.utils.AESEncryptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -191,4 +191,18 @@ public class ProjectService {
                 .inviteCode(encodedString)
                 .build();
     }
+
+    // Project 상세 조회
+    @Transactional(readOnly=true)
+    public ProjectDetailResponseDto readProjectDetail(SessionUser sessionUser, Long projectId) {
+
+        ProjectDetailResponseDto responseDto = userProjectMappingRepository
+                .findProjectDetail(sessionUser.getUserId(),projectId)
+                .orElseThrow( ()-> new ApiRequestException("해당 유저는 접근권한이 없는 프로젝트입니다.") );
+
+        responseDto.updateCrewCount(userProjectMappingRepository.findCountProjectMember(projectId));
+
+        return responseDto;
+    }
+
 }
