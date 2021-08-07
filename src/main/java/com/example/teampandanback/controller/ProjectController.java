@@ -31,6 +31,13 @@ public class ProjectController {
                 .build();
     }
 
+    // 사이드 바에 들어갈 Project 목록 조회(최대 5개)
+    @GetMapping("/sidebar")
+    public ProjectListSidebarResponseDto readProjectListSidebar(@LoginUser SessionUser sessionUser) {
+        return ProjectListSidebarResponseDto.builder()
+                .projectSidebarResponseList(projectService.readProjectListSidebar(sessionUser))
+                .build();
+    }
 
 
     // Project 상세 조회

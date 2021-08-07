@@ -205,4 +205,8 @@ public class ProjectService {
         return responseDto;
     }
 
+    // 사이드 바에 들어갈 Project 목록 조회(최대 5개)
+    public List<ProjectSidebarResponseDto> readProjectListSidebar(SessionUser sessionUser) {
+        return userProjectMappingRepository.findProjectListTop5(sessionUser.getUserId());
+    }
 }

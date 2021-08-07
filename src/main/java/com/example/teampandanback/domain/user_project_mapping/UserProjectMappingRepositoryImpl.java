@@ -46,4 +46,18 @@ public class UserProjectMappingRepositoryImpl implements UserProjectMappingRepos
                 .fetchCount();
     }
 
+    // 사이드 바에 들어갈 프로젝트의 목록 (최대 5개)
+    @Override
+    public List<ProjectSidebarResponseDto> findProjectListTop5(long userId) {
+        return queryFactory
+                .select(
+                        Projections.constructor(ProjectSidebarResponseDto.class,
+                                project.projectId, project.title
+                        ))
+                .from(userProjectMapping)
+                .join(userProjectMapping.project, project)
+                .where(userProjectMapping.user.userId.eq(userId))
+                .limit(5)
+                .fetch();
+    }
 }
