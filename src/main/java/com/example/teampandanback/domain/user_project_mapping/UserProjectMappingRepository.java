@@ -12,7 +12,6 @@ import java.util.Optional;
 public interface UserProjectMappingRepository extends JpaRepository<UserProjectMapping, Long>, UserProjectMappingRepositoryQuerydsl {
 
     UserProjectMapping findByUser_UserIdAndProject_ProjectId(Long userId, Long projectId); // but 갑자기 join함. 쿼리보면 갑분쪼
-    Optional<UserProjectMapping> findByUserUserIdAndProjectProjectId(Long userId, Long projectId);
 
 //    List<UserProjectMapping> findByUser_UserId(@Param("userId") Long userId);
 
