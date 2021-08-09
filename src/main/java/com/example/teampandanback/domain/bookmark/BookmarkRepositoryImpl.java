@@ -70,4 +70,13 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
                 .fetch();
 
     }
+
+    // Note 에 연관된 북마크 삭제
+    @Override
+    public void deleteByNote(Long noteId) {
+        queryFactory
+                .delete(bookmark)
+                .where(bookmark.note.noteId.eq(noteId))
+                .execute();
+    }
 }
