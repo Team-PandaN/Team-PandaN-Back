@@ -5,16 +5,16 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class NoteMineOnlyResponseDto{
+public class NoteMineInProjectResponseDto {
     private List<NoteResponseDto> myNoteList;
 
     @Builder
-    public NoteMineOnlyResponseDto(List<NoteResponseDto> myNoteList) {
+    public NoteMineInProjectResponseDto(List<NoteResponseDto> myNoteList) {
         this.myNoteList = myNoteList;
     }
 
-    public static NoteMineOnlyResponseDto of (List<NoteResponseDto> myNoteList) {
-        return NoteMineOnlyResponseDto.builder()
+    public static NoteMineInProjectResponseDto of (List<NoteResponseDto> myNoteList) {
+        return NoteMineInProjectResponseDto.builder()
                 .myNoteList(myNoteList)
                 .build();
     }

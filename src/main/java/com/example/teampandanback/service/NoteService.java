@@ -4,7 +4,6 @@ import com.example.teampandanback.domain.bookmark.Bookmark;
 import com.example.teampandanback.domain.bookmark.BookmarkRepository;
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
-import com.example.teampandanback.domain.note.NoteRepositoryQuerydsl;
 import com.example.teampandanback.domain.note.Step;
 import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.project.ProjectRepository;
@@ -18,12 +17,9 @@ import com.example.teampandanback.dto.note.response.*;
 import com.example.teampandanback.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import javax.transaction.Transactional;
-import java.awt.print.Book;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -97,7 +93,7 @@ public class NoteService {
     }
 
     // 해당 Project 에서 내가 작성한 Note 조회
-    public NoteMineOnlyResponseDto readNotesMineOnly(Long projectId, SessionUser sessionUser) {
+    public NoteMineInProjectResponseDto readNotesMineOnly(Long projectId, SessionUser sessionUser) {
 
         // Project 조회
         projectRepository.findById(projectId).orElseThrow(
@@ -110,7 +106,17 @@ public class NoteService {
                 .map(NoteResponseDto::of)
                 .collect(Collectors.toList());
 
-        return NoteMineOnlyResponseDto.of(myNoteList);
+        return NoteMineInProjectResponseDto.of(myNoteList);
+    }
+
+    // 전체 Project 에서 내가 북마크한 Note 조회
+    public NoteBookmarkedResponseDto readBookmarkedMine(SessionUser sessionUser) {
+
+        // 해당 북마크한 Note 조회
+        List<NoteEachBookmarkedResponseDto> noteEachBookmarkedResponseDto =
+                bookmarkRepository.findByUserId(sessionUser.getUserId());
+
+        return NoteBookmarkedResponseDto.builder().noteList(noteEachBookmarkedResponseDto).build();
     }
 
     // Note 삭제
