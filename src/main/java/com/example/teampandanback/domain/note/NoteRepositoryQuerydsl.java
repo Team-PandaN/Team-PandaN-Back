@@ -1,5 +1,6 @@
 package com.example.teampandanback.domain.note;
 
+import com.example.teampandanback.dto.note.response.NoteEachBookmarkedResponseDto;
 import com.example.teampandanback.dto.note.response.NoteResponseDto;
 
 import java.util.List;
