@@ -1,6 +1,6 @@
 package com.example.teampandanback.domain.note;
 
-import com.example.teampandanback.domain.project.QProject;
+import com.example.teampandanback.dto.note.response.NoteEachMineInTotalResponseDto;
 import com.example.teampandanback.dto.note.response.NoteResponseDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -48,4 +48,20 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                         .on(note.noteId.eq(noteId))
                         .fetchOne());
     }
+
+    // 전체 프로젝트 중 해당 유저가 작성한 노트 조회
+    @Override
+    public List<NoteEachMineInTotalResponseDto> findUserNoteInTotalProject(Long userId) {
+
+        return queryFactory
+                .select(
+                        Projections.constructor(NoteEachMineInTotalResponseDto.class,
+                                note.noteId, note.title, note.createdAt, note.step, project.projectId, project.title
+                                ))
+                .from(note)
+                .join(note.project, project)
+                .where(note.user.userId.eq(userId))
+                .fetch();
+    }
+
 }

@@ -182,4 +182,9 @@ public class NoteService {
 
         return NoteSearchResponseDto.of(noteResponseDtoList);
     }
+
+    // 전체 프로젝트에서 내가 작성한 노트 조회
+    public List<NoteEachMineInTotalResponseDto> readMyNoteInTotalProject(SessionUser sessionUser) {
+        return noteRepository.findUserNoteInTotalProject(sessionUser.getUserId());
+    }
 }
