@@ -9,18 +9,18 @@ import java.util.List;
 @Getter
 public class NoteOfProjectResponseDto {
     private final String step;
-    private final List<NoteResponseDto> notes;
+    private final List<KanbanNoteEachResponseDto> notes;
 
     @Builder
-    public NoteOfProjectResponseDto(Step step, List<NoteResponseDto> noteResponseDtoList) {
+    public NoteOfProjectResponseDto(Step step, List<KanbanNoteEachResponseDto> kanbanNoteEachResponseDtoList) {
         this.step = step.toString();
-        this.notes = noteResponseDtoList;
+        this.notes = kanbanNoteEachResponseDtoList;
     }
 
-    public static NoteOfProjectResponseDto of (Step step, List<NoteResponseDto> noteResponseDtoList) {
+    public static NoteOfProjectResponseDto of (Step step, List<KanbanNoteEachResponseDto> kanbanNoteEachResponseDtoList) {
         return NoteOfProjectResponseDto.builder()
                 .step(step)
-                .noteResponseDtoList(noteResponseDtoList)
+                .kanbanNoteEachResponseDtoList(kanbanNoteEachResponseDtoList)
                 .build();
     }
 }

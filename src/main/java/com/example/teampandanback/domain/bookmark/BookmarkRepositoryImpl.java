@@ -1,12 +1,9 @@
 package com.example.teampandanback.domain.bookmark;
 
-import com.example.teampandanback.domain.note.QNote;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import javax.persistence.EntityManager;
-
-import java.awt.print.Book;
 import java.util.Optional;
 
 import static com.example.teampandanback.domain.bookmark.QBookmark.bookmark;

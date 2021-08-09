@@ -1,6 +1,7 @@
 package com.example.teampandanback.domain.user_project_mapping;
 
 import com.example.teampandanback.dto.project.ProjectDetailResponseDto;
+import com.example.teampandanback.dto.project.ProjectResponseDto;
 import com.example.teampandanback.dto.project.ProjectSidebarResponseDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -57,6 +58,20 @@ public class UserProjectMappingRepositoryImpl implements UserProjectMappingRepos
                 .join(userProjectMapping.project, project)
                 .where(userProjectMapping.user.userId.eq(userId))
                 .limit(5)
+                .fetch();
+    }
+
+
+    @Override
+    public List<ProjectResponseDto> findProjectByUser_UserId(Long userId) {
+        return queryFactory
+                .select(
+                        Projections.constructor(ProjectResponseDto.class,
+                        project.projectId, project.title, project.detail
+                ))
+                .from(userProjectMapping)
+                .join(userProjectMapping.project, project)
+                .where(userProjectMapping.user.userId.eq(userId))
                 .fetch();
     }
 }

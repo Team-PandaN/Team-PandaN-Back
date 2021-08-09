@@ -133,10 +133,10 @@ public class NoteService {
     @Transactional
     public KanbanNoteSearchResponseDto readKanbanNote(Long projectId) {
         List<NoteOfProjectResponseDto> noteOfProjectResponseDtoList = new ArrayList<>();
-        List<NoteResponseDto> noteResponseDtoList1 = new ArrayList<>();
-        List<NoteResponseDto> noteResponseDtoList2 = new ArrayList<>();
-        List<NoteResponseDto> noteResponseDtoList3 = new ArrayList<>();
-        List<NoteResponseDto> noteResponseDtoList4 = new ArrayList<>();
+        List<KanbanNoteEachResponseDto> kanbanNoteEachResponseDtoList1 = new ArrayList<>();
+        List<KanbanNoteEachResponseDto> kanbanNoteEachResponseDtoList2 = new ArrayList<>();
+        List<KanbanNoteEachResponseDto> kanbanNoteEachResponseDtoList3 = new ArrayList<>();
+        List<KanbanNoteEachResponseDto> kanbanNoteEachResponseDtoList4 = new ArrayList<>();
 
         // Project 조회
         Project project = projectRepository.findById(projectId).orElseThrow(
@@ -146,20 +146,20 @@ public class NoteService {
         for (Note note : noteRepository.findByProject(project)) {
             switch(note.getStep()){
                 case STORAGE:
-                    noteResponseDtoList1.add((NoteResponseDto.of(note))); break;
+                    kanbanNoteEachResponseDtoList1.add((KanbanNoteEachResponseDto.of(note))); break;
                 case TODO:
-                    noteResponseDtoList2.add((NoteResponseDto.of(note))); break;
+                    kanbanNoteEachResponseDtoList2.add((KanbanNoteEachResponseDto.of(note))); break;
                 case PROCESSING:
-                    noteResponseDtoList3.add((NoteResponseDto.of(note))); break;
+                    kanbanNoteEachResponseDtoList3.add((KanbanNoteEachResponseDto.of(note))); break;
                 case DONE:
-                    noteResponseDtoList4.add(NoteResponseDto.of(note)); break;
+                    kanbanNoteEachResponseDtoList4.add(KanbanNoteEachResponseDto.of(note)); break;
             }
         }
         // Note 를 각 상태별로 List 로 묶어서 응답 보내기
-        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.of(Step.STORAGE, noteResponseDtoList1));
-        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.of(Step.TODO, noteResponseDtoList2));
-        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.of(Step.PROCESSING, noteResponseDtoList3));
-        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.of(Step.DONE, noteResponseDtoList4));
+        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.of(Step.STORAGE, kanbanNoteEachResponseDtoList1));
+        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.of(Step.TODO, kanbanNoteEachResponseDtoList2));
+        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.of(Step.PROCESSING, kanbanNoteEachResponseDtoList3));
+        noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.of(Step.DONE, kanbanNoteEachResponseDtoList4));
 
         return KanbanNoteSearchResponseDto.builder()
                 .noteOfProjectResponseDtoList(noteOfProjectResponseDtoList)

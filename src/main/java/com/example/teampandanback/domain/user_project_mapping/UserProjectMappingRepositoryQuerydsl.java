@@ -1,6 +1,7 @@
 package com.example.teampandanback.domain.user_project_mapping;
 
 import com.example.teampandanback.dto.project.ProjectDetailResponseDto;
+import com.example.teampandanback.dto.project.ProjectResponseDto;
 import com.example.teampandanback.dto.project.ProjectSidebarResponseDto;
 
 import java.util.List;
@@ -16,4 +17,6 @@ public interface UserProjectMappingRepositoryQuerydsl {
 
     // 사이드 바에 들어갈 프로젝트의 목록 (최대 5개)
     List<ProjectSidebarResponseDto> findProjectListTop5(long userId);
+
+    List<ProjectResponseDto> findProjectByUser_UserId(Long userId);
 }

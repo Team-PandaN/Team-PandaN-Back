@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -37,12 +36,11 @@ public class ProjectService {
     // Project 목록 조회
     @Transactional
     public List<ProjectResponseDto> readProjectList(SessionUser sessionUser) {
-        List<UserProjectMapping> userProjectMappingList = userProjectMappingRepository.findByUser_UserId(sessionUser.getUserId());
+        List<ProjectResponseDto> projectResponseDtoList = userProjectMappingRepository
+                                                            .findProjectByUser_UserId(sessionUser.getUserId());
 
-        return userProjectMappingList
-                .stream()
-                .map(userProjectMapping -> ProjectResponseDto.fromEntity(userProjectMapping.getProject()))
-                .collect(Collectors.toList());
+        return projectResponseDtoList;
+
     }
 
     // Project 생성
@@ -207,6 +205,7 @@ public class ProjectService {
                 .findProjectDetail(sessionUser.getUserId(),projectId)
                 .orElseThrow( ()-> new ApiRequestException("해당 유저는 접근권한이 없는 프로젝트입니다.") );
 
+        System.out.println("=========================");
         responseDto.updateCrewCount(userProjectMappingRepository.findCountProjectMember(projectId));
 
         return responseDto;
