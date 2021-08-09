@@ -91,4 +91,16 @@ public class UserProjectMappingRepositoryImpl implements UserProjectMappingRepos
                 .where(userProjectMapping.project.projectId.eq(projectId))
                 .execute();
     }
+
+
+
+    @Override
+    public Optional<UserProjectMapping> findByUserIdAndProjectIdJoin(Long userId, Long projectId) {
+        return Optional.ofNullable(queryFactory
+                .select(userProjectMapping)
+                .from(userProjectMapping)
+                .join(userProjectMapping.project).fetchJoin()
+                .where(userProjectMapping.user.userId.eq(userId), userProjectMapping.project.projectId.eq(projectId))
+                .fetchFirst());
+    }
 }

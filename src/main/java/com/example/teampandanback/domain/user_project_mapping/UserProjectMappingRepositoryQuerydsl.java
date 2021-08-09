@@ -22,6 +22,10 @@ public interface UserProjectMappingRepositoryQuerydsl {
     //x 유저가 y 프로젝트에 속해 있는지 여부를 판단, fetchOne()
     Optional<UserProjectMapping> findByUserIdAndProjectId(Long userId, Long projectId);
 
+
+    Optional<UserProjectMapping> findByUserIdAndProjectIdJoin(Long userId, Long projectId);
+
     @Modifying(clearAutomatically = true)
     void deleteByProjectId(Long projectId);
+
 }
