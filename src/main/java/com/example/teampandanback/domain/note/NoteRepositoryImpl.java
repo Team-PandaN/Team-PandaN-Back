@@ -1,6 +1,5 @@
 package com.example.teampandanback.domain.note;
 
-import com.example.teampandanback.domain.project.QProject;
 import com.example.teampandanback.dto.note.response.NoteResponseDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -47,5 +46,13 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                         .join(note.project, project)
                         .on(note.noteId.eq(noteId))
                         .fetchOne());
+    }
+
+    @Override
+    public void deleteByProjectId(Long projectId) {
+        queryFactory
+                .delete(note)
+                .where(note.project.projectId.eq(projectId))
+                .execute();
     }
 }
