@@ -30,8 +30,7 @@ public class UserProjectMappingRepositoryImpl implements UserProjectMappingRepos
                                         project.projectId, project.title, project.detail, userProjectMapping.role))
                         .from(userProjectMapping)
                         .join(userProjectMapping.project, project)
-                        .on(userProjectMapping.project.projectId.eq(projectId))
-                        .where(userProjectMapping.user.userId.eq(userId))
+                        .on(userProjectMapping.project.projectId.eq(projectId).and(userProjectMapping.user.userId.eq(userId)))
                         .fetchOne()
         );
     }
