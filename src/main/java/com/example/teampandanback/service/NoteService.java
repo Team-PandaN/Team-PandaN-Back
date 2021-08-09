@@ -127,6 +127,9 @@ public class NoteService {
                 () -> new ApiRequestException("이미 삭제된 노트입니다.")
         );
 
+        // Note 에 연관된 북마크 삭제
+        bookmarkRepository.deleteByNote(noteId);
+
         // Note 삭제
         noteRepository.delete(note);
 
