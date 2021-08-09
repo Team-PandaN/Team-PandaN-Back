@@ -68,4 +68,11 @@ public class NoteController {
         return noteService.readOrdinaryNote(projectId);
     }
 
+    // 전체 프로젝트에서 내가 작성한 노트 조회
+    @GetMapping("/notes/mynotes")
+    public NoteMineInTotalResponseDto readMyNoteInTotalProject(@LoginUser SessionUser sessionUser){
+        return NoteMineInTotalResponseDto.builder()
+                .myNoteList(noteService.readMyNoteInTotalProject(sessionUser))
+                .build();
+    }
 }

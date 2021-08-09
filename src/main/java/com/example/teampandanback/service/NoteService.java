@@ -127,6 +127,9 @@ public class NoteService {
                 () -> new ApiRequestException("이미 삭제된 노트입니다.")
         );
 
+        // Note 에 연관된 북마크 삭제
+        bookmarkRepository.deleteByNote(noteId);
+
         // Note 삭제
         noteRepository.delete(note);
 
@@ -187,5 +190,10 @@ public class NoteService {
         }
 
         return NoteSearchResponseDto.of(noteResponseDtoList);
+    }
+
+    // 전체 프로젝트에서 내가 작성한 노트 조회
+    public List<NoteEachMineInTotalResponseDto> readMyNoteInTotalProject(SessionUser sessionUser) {
+        return noteRepository.findUserNoteInTotalProject(sessionUser.getUserId());
     }
 }
