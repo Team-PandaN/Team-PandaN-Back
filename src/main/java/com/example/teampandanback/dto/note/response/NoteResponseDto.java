@@ -1,12 +1,15 @@
 package com.example.teampandanback.dto.note.response;
 
+import com.example.teampandanback.domain.Timestamped;
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.Step;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.sql.Time;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 public class NoteResponseDto {
@@ -16,17 +19,25 @@ public class NoteResponseDto {
     private String deadline;
     private String step;
     public Boolean isBookmark;
+    private Long projectId;
     private String projectTitle;
+    private String writer;
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
 
     public NoteResponseDto(Long noteId, String title, String content, LocalDate deadline, Step step,
-                           String projectTitle)
+                           Long projectId, String projectTitle, String writer, LocalDateTime createdAt, LocalDateTime modifiedAt)
     {
         this.noteId = noteId;
         this.title = title;
         this.content = content;
         this.deadline = deadline.toString();
         this.step = step.toString();
+        this.projectId = projectId;
         this.projectTitle = projectTitle;
+        this.writer = writer;
+        this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
     }
 
     public void setBookmark(Boolean b){
