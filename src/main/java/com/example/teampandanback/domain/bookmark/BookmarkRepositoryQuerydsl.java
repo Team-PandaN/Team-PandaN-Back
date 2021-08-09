@@ -15,5 +15,6 @@ public interface BookmarkRepositoryQuerydsl {
     Optional<Bookmark> findByUserIdAndNoteId(Long userId, Long noteId);
     List<NoteEachBookmarkedResponseDto> findByUserId(Long noteId);
 
+    @Modifying(clearAutomatically = true)
     void deleteByNote(Long noteId);
 }
