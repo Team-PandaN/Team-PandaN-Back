@@ -31,6 +31,21 @@ public class ProjectController {
                 .build();
     }
 
+    // 사이드 바에 들어갈 Project 목록 조회(최대 5개)
+    @GetMapping("/sidebar")
+    public ProjectListSidebarResponseDto readProjectListSidebar(@LoginUser SessionUser sessionUser) {
+        return ProjectListSidebarResponseDto.builder()
+                .projectSidebarResponseList(projectService.readProjectListSidebar(sessionUser))
+                .build();
+    }
+
+
+    // Project 상세 조회
+    @GetMapping("/{projectId}")
+    public ProjectDetailResponseDto readProjectDetail(@LoginUser SessionUser sessionUser, @PathVariable Long projectId){
+        return projectService.readProjectDetail(sessionUser, projectId);
+    }
+
     // Project 생성
     @PostMapping("")
     public ProjectResponseDto createProject(@RequestBody ProjectRequestDto requestDto, @LoginUser SessionUser sessionUser) {
@@ -64,5 +79,6 @@ public class ProjectController {
                                              @LoginUser SessionUser sessionUser){
         return projectService.invitedProject(projectInvitedRequestDto,sessionUser);
     }
+
 
 }

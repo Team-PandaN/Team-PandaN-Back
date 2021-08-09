@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface NoteRepository extends JpaRepository<Note,Long> {
+public interface NoteRepository extends JpaRepository<Note,Long>, NoteRepositoryQuerydsl {
 //    List<Note> findAllByProject(Long projectId);
 
     List<Note> findNoteByProject_projectId(Long projectId);
@@ -17,6 +17,6 @@ public interface NoteRepository extends JpaRepository<Note,Long> {
     void deleteByProject_ProjectId(Long projectId);
 
     // 특정 Project 에서 내가 작성한 Note 조회
-    @Query("select n from Note n where n.project.projectId = :projectId and n.user.userId =:userId")
-    List<Note> findByProjectAndUser(Long projectId, Long userId);
+    // @Query("select n from Note n where n.project.projectId = :projectId and n.user.userId =:userId")
+    // List<Note> findByProjectAndUser(Long projectId, Long userId);
 }
