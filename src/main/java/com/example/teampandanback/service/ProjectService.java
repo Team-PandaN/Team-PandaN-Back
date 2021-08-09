@@ -69,13 +69,14 @@ public class ProjectService {
     @Transactional
     public ProjectResponseDto updateProject(Long projectId, ProjectRequestDto requestDto, SessionUser sessionUser) {
 
-        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(), projectId);
+        Optional<UserProjectMapping> userProjectMapping = userProjectMappingRepository.findByUserIdAndProjectIdJoin(sessionUser.getUserId(),projectId);
 
-        if (!userProjectMapping.getRole().equals(UserProjectRole.OWNER)) {
+        if(!userProjectMapping.isPresent()){
+            throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
+        }else if(!userProjectMapping.get().getRole().equals(UserProjectRole.OWNER)){
             throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
         }
-
-        Project project = userProjectMapping.getProject();
+        Project project = userProjectMapping.get().getProject();
         project.update(requestDto);
 
         return ProjectResponseDto.fromEntity(project);
@@ -208,7 +209,6 @@ public class ProjectService {
                 .findProjectDetail(sessionUser.getUserId(),projectId)
                 .orElseThrow( ()-> new ApiRequestException("해당 유저는 접근권한이 없는 프로젝트입니다.") );
 
-        System.out.println("=========================");
         responseDto.updateCrewCount(userProjectMappingRepository.findCountProjectMember(projectId));
 
         return responseDto;
