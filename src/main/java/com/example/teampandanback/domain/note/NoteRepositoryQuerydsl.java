@@ -13,4 +13,6 @@ public interface NoteRepositoryQuerydsl {
 
     @Modifying(clearAutomatically = true)
     void deleteByProjectId(Long projectId);
+
+    List<Note> findAllNoteByProjectAndUserOrderByCreatedAtDesc(Long projectId, Long userId);
 }

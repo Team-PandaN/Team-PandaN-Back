@@ -101,9 +101,9 @@ public class NoteService {
         );
 
         // 해당 Project 에서 내가 작성한 Note 죄회
-        List<NoteResponseDto> myNoteList = noteRepository.findByProjectAndUser(projectId, sessionUser.getUserId())
+        List<NoteReadMineEachResponseDto> myNoteList = noteRepository.findAllNoteByProjectAndUserOrderByCreatedAtDesc(projectId, sessionUser.getUserId())
                 .stream()
-                .map(NoteResponseDto::of)
+                .map(NoteReadMineEachResponseDto::fromEntity)
                 .collect(Collectors.toList());
 
         return NoteMineInProjectResponseDto.of(myNoteList);

@@ -62,4 +62,14 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                 .where(note.project.projectId.eq(projectId))
                 .execute();
     }
+
+    @Override
+    public List<Note> findAllNoteByProjectAndUserOrderByCreatedAtDesc(Long projectId, Long userId) {
+        return queryFactory
+                .select(note)
+                .from(note)
+                .where(note.project.projectId.eq(projectId).and(note.user.userId.eq(userId)))
+                .orderBy(note.createdAt.desc())
+                .fetch();
+    }
 }
