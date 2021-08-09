@@ -31,8 +31,8 @@ public class NoteController {
 
     //노트 상세 조회
     @GetMapping("/notes/{noteId}")
-    public NoteResponseDto noteDetail (@PathVariable("noteId") Long noteId) {
-        return noteService.readNoteDetail(noteId);
+    public NoteResponseDto noteDetail (@PathVariable("noteId") Long noteId, @LoginUser SessionUser sessionUser) {
+        return noteService.readNoteDetail(noteId, sessionUser);
     }
 
     //내가 생성
