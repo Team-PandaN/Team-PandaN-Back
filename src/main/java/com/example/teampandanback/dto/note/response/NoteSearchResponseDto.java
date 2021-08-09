@@ -7,15 +7,15 @@ import java.util.List;
 
 @Getter
 public class NoteSearchResponseDto {
-    private final List<NoteResponseDto> notes;
+    private final List<OrdinaryNoteEachResponseDto> notes;
 
     @Builder
-    public NoteSearchResponseDto(List<NoteResponseDto> notes) {
+    public NoteSearchResponseDto(List<OrdinaryNoteEachResponseDto> notes) {
         this.notes = notes;
     }
 
 
-    public static NoteSearchResponseDto of (List<NoteResponseDto> noteResponseDtoList) {
+    public static NoteSearchResponseDto of (List<OrdinaryNoteEachResponseDto> noteResponseDtoList) {
         return NoteSearchResponseDto.builder()
                 .notes(noteResponseDtoList)
                 .build();

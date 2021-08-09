@@ -19,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -35,6 +37,7 @@ public class NoteService {
     private final UserProjectMappingRepository userProjectMappingRepository;
     private final ProjectRepository projectRepository;
     private final BookmarkRepository bookmarkRepository;
+
 
     // String 자료형으로 받은 날짜를 LocalDate 자료형으로 형변환
     private LocalDate changeType(String dateString) {
@@ -69,12 +72,12 @@ public class NoteService {
     @Transactional
     public NoteCreateResponseDto createNote(Long projectId, NoteCreateRequestDto noteCreateRequestDto, SessionUser sessionUser) {
 
-        UserProjectMapping userProjectMapping =
+        Optional<UserProjectMapping> userProjectMapping =
                 userProjectMappingRepository
-                        .findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(), projectId);
+                        .findByUserIdAndProjectId(sessionUser.getUserId(), projectId);
 
-        if(userProjectMapping == null){
-            throw new ApiRequestException("노트를 작성할 수 없습니다.");
+        if(!userProjectMapping.isPresent()){
+            throw new ApiRequestException("해당 유저가 해당 프로젝트에 참여해있지 않습니다.");
         }
 
         // [노트 생성] 전달받은 String deadline을 LocalDate 자료형으로 형변환
@@ -84,8 +87,8 @@ public class NoteService {
         Step step = Step.valueOf(noteCreateRequestDto.getStep());
 
         // [노트 생성] 찾은 userProjectMappingRepository를 통해 user와 프로젝트 가져오기
-        User user = userProjectMapping.getUser();
-        Project project = userProjectMapping.getProject();
+        User user = userProjectMapping.get().getUser();
+        Project project = userProjectMapping.get().getProject();
 
         // [노트 생성] 전달받은 noteCreateRequestDto를 Note.java에 정의한 of 메소드에 전달하여 빌더 패턴에 넣는다.
         Note note = noteRepository.save(Note.of(noteCreateRequestDto, deadline, step, user, project));
@@ -101,9 +104,9 @@ public class NoteService {
         );
 
         // 해당 Project 에서 내가 작성한 Note 죄회
-        List<NoteResponseDto> myNoteList = noteRepository.findByProjectAndUser(projectId, sessionUser.getUserId())
+        List<NoteReadMineEachResponseDto> myNoteList = noteRepository.findAllNoteByProjectAndUserOrderByCreatedAtDesc(projectId, sessionUser.getUserId())
                 .stream()
-                .map(NoteResponseDto::of)
+                .map(NoteReadMineEachResponseDto::fromEntity)
                 .collect(Collectors.toList());
 
         return NoteMineInProjectResponseDto.of(myNoteList);
@@ -178,18 +181,19 @@ public class NoteService {
     // Note 일반형 조회 (파일 페이지)
     @Transactional
     public NoteSearchResponseDto readOrdinaryNote(Long projectId) {
-        List<NoteResponseDto> noteResponseDtoList = new ArrayList<>();
+        List<OrdinaryNoteEachResponseDto> ordinaryNoteEachResponseDtoList = new ArrayList<>();
 
         // Project 조회
         Project project = projectRepository.findById(projectId).orElseThrow(
                 () -> new ApiRequestException("파일을 조회할 프로젝트가 없습니다.")
         );
 
-        for (Note note : noteRepository.findByProject(project)) {
-            noteResponseDtoList.add((NoteResponseDto.of(note)));
+
+        for (Note note : noteRepository.findAllByProjectOrderByCreatedAtDesc(project)) {
+            ordinaryNoteEachResponseDtoList.add((OrdinaryNoteEachResponseDto.fromEntity(note)));
         }
 
-        return NoteSearchResponseDto.of(noteResponseDtoList);
+        return NoteSearchResponseDto.of(ordinaryNoteEachResponseDtoList);
     }
 
     // 전체 프로젝트에서 내가 작성한 노트 조회

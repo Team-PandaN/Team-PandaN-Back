@@ -16,4 +16,6 @@ public interface NoteRepositoryQuerydsl {
     List<NoteEachMineInTotalResponseDto> findUserNoteInTotalProject(Long userId); // findByUserId()
     @Modifying(clearAutomatically = true)
     void deleteByProjectId(Long projectId);
+
+    List<Note> findAllNoteByProjectAndUserOrderByCreatedAtDesc(Long projectId, Long userId);
 }

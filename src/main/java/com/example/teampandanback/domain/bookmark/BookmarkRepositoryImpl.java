@@ -56,10 +56,6 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
                 .where(bookmark.user.userId.eq(userId))
                 .fetch();
 
-        if(ids.isEmpty()){
-            return new ArrayList<>();
-        }
-
         return queryFactory
                 .select(Projections.constructor(NoteEachBookmarkedResponseDto.class,
                         note.noteId, note.title, note.step, project.projectId, project.title, user.name))
