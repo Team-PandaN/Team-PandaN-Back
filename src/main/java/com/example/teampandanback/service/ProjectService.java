@@ -37,12 +37,11 @@ public class ProjectService {
     // Project 목록 조회
     @Transactional
     public List<ProjectResponseDto> readProjectList(SessionUser sessionUser) {
-        List<UserProjectMapping> userProjectMappingList = userProjectMappingRepository.findByUser_UserId(sessionUser.getUserId());
+        List<ProjectResponseDto> projectResponseDtoList = userProjectMappingRepository
+                                                            .findProjectByUser_UserId(sessionUser.getUserId());
 
-        return userProjectMappingList
-                .stream()
-                .map(userProjectMapping -> ProjectResponseDto.fromEntity(userProjectMapping.getProject()))
-                .collect(Collectors.toList());
+        return projectResponseDtoList;
+
     }
 
     // Project 생성
@@ -85,10 +84,12 @@ public class ProjectService {
     // Project 삭제
     @Transactional
     public ProjectDeleteResponseDto deleteProject(Long projectId, SessionUser sessionUser){
-        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUser_UserIdAndProject_ProjectId(sessionUser.getUserId(),projectId);
+        Optional<UserProjectMapping> userProjectMapping = userProjectMappingRepository.findByUserIdAndProjectId(sessionUser.getUserId(),projectId);
 
-        // Project 의 OWNER 권한 확인
-        if (!userProjectMapping.getRole().equals(UserProjectRole.OWNER)) {
+        // Project의 OWNER 권한 확인
+        if(!userProjectMapping.isPresent()){ //   우선 해당 프로젝트의 CREW이기라도 한지.
+            throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
+        }else if(!userProjectMapping.get().getRole().equals(UserProjectRole.OWNER)){ //   우선 해당 프로젝트의 CREW이더라도, OWNER가 아닌지,
             throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
         }
 
@@ -96,10 +97,10 @@ public class ProjectService {
         bookmarkRepository.deleteByProjectId(projectId);
 
         // 해당 Project 와 연관된 Note 삭제
-        noteRepository.deleteByProject_ProjectId(projectId);
+        noteRepository.deleteByProjectId(projectId);
 
         // UserProjectMapping 테이블에서 삭제
-        userProjectMappingRepository.deleteByProject_ProjectId(projectId);
+        userProjectMappingRepository.deleteByProjectId(projectId);
 
         // Project 테이블에서 Project 삭제
         projectRepository.deleteById(projectId);
@@ -207,6 +208,7 @@ public class ProjectService {
                 .findProjectDetail(sessionUser.getUserId(),projectId)
                 .orElseThrow( ()-> new ApiRequestException("해당 유저는 접근권한이 없는 프로젝트입니다.") );
 
+        System.out.println("=========================");
         responseDto.updateCrewCount(userProjectMappingRepository.findCountProjectMember(projectId));
 
         return responseDto;
@@ -215,6 +217,8 @@ public class ProjectService {
     // 사이드 바에 들어갈 Project 목록 조회(최대 5개)
     @Transactional(readOnly=true)
     public List<ProjectSidebarResponseDto> readProjectListSidebar(SessionUser sessionUser) {
-        return userProjectMappingRepository.findProjectListTop5(sessionUser.getUserId());
+        Long readSize = 5L;
+
+        return userProjectMappingRepository.findProjectListTopSize(sessionUser.getUserId(), readSize);
     }
 }

@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import static com.example.teampandanback.domain.note.QNote.note;
 import static com.example.teampandanback.domain.project.QProject.project;
+import static com.example.teampandanback.domain.user.QUser.user;
 
 public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
 
@@ -42,10 +43,16 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                                                 note.content,
                                                 note.deadline,
                                                 note.step,
-                                                project.title))
+                                                project.projectId,
+                                                project.title,
+                                                user.name,
+                                                note.createdAt,
+                                                note.modifiedAt
+                                                ))
                         .from(note)
                         .join(note.project, project)
                         .on(note.noteId.eq(noteId))
+                        .join(note.user, user)
                         .fetchOne());
     }
 
@@ -64,4 +71,11 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                 .fetch();
     }
 
+    @Override
+    public void deleteByProjectId(Long projectId) {
+        queryFactory
+                .delete(note)
+                .where(note.project.projectId.eq(projectId))
+                .execute();
+    }
 }

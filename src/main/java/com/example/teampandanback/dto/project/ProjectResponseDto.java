@@ -11,10 +11,10 @@ public class ProjectResponseDto {
     private String detail;
 
     @Builder
-    public ProjectResponseDto (String title, String detail, Long projectId) {
+    public ProjectResponseDto (Long projectId, String title, String detail) {
+        this.projectId = projectId;
         this.title = title;
         this.detail = detail;
-        this.projectId = projectId;
     }
 
     public static ProjectResponseDto fromEntity (Project project) {

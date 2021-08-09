@@ -25,8 +25,14 @@ public class NoteController {
 
     //내가 쓴 노트 조회
     @GetMapping("/projects/{projectId}/mynotes")
-    public NoteMineOnlyResponseDto readNotesMineOnly(@PathVariable("projectId") Long projectId, @LoginUser SessionUser sessionUser) {
+    public NoteMineInProjectResponseDto readNotesMineOnly(@PathVariable("projectId") Long projectId, @LoginUser SessionUser sessionUser) {
         return noteService.readNotesMineOnly(projectId, sessionUser);
+    }
+
+    //내가 북마크한 노트 조회
+    @GetMapping("/notes/mybookmarks")
+    public NoteBookmarkedResponseDto  readBookmarkedMine(@LoginUser SessionUser sessionUser) {
+        return noteService.readBookmarkedMine(sessionUser);
     }
 
     //노트 상세 조회
