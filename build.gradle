@@ -2,6 +2,8 @@ plugins {
     id 'org.springframework.boot' version '2.5.3'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
+    //querydsl 추가
+    id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
 }
 
 group = 'com.example'
@@ -41,8 +43,27 @@ dependencies {
     // spring-session-jdbc
     //      MySQL과 같은 데이터베이스를 세션 저장소로 사용한다.
 //    implementation 'org.springframework.session:spring-session-jdbc'
+
+    // Querydsl 추가
+    implementation 'com.querydsl:querydsl-jpa'
 }
 
 test {
     useJUnitPlatform()
+}
+
+// Querydsl
+def querydslDir = "$buildDir/generated/querydsl"
+querydsl {
+    jpa = true
+    querydslSourcesDir = querydslDir
+}
+sourceSets {
+    main.java.srcDir querydslDir
+}
+configurations {
+    querydsl.extendsFrom compileClasspath
+}
+compileQuerydsl {
+    options.annotationProcessorPath = configurations.querydsl
 }
