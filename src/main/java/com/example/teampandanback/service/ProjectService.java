@@ -1,5 +1,6 @@
 package com.example.teampandanback.service;
 
+import com.example.teampandanback.domain.bookmark.BookmarkRepository;
 import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.project.ProjectRepository;
@@ -15,8 +16,8 @@ import com.example.teampandanback.utils.AESEncryptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ public class ProjectService {
     private final UserRepository userRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
     private final NoteRepository noteRepository;
+    private final BookmarkRepository bookmarkRepository;
     private final AESEncryptor aesEncryptor;
 
     // Project 목록 조회
@@ -89,6 +91,10 @@ public class ProjectService {
         if (!userProjectMapping.getRole().equals(UserProjectRole.OWNER)) {
             throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
         }
+
+        // Bookmark 테이블에서 Note 와 연관된 북마크 삭제
+        bookmarkRepository.deleteByProjectId(projectId);
+
         // 해당 Project 와 연관된 Note 삭제
         noteRepository.deleteByProject_ProjectId(projectId);
 
@@ -164,6 +170,7 @@ public class ProjectService {
                 .build();
     }
 
+    // Project 초대코드 생성
     public ProjectInviteResponseDto inviteProject(Long projectId, SessionUser sessionUser) {
         User inviteOfferUser = userRepository.findById(sessionUser.getUserId()).orElseThrow(
                 ()-> new ApiRequestException("등록되지 않은 유저의 접근입니다.")
@@ -190,5 +197,24 @@ public class ProjectService {
         return ProjectInviteResponseDto.builder()
                 .inviteCode(encodedString)
                 .build();
+    }
+
+    // Project 상세 조회
+    @Transactional(readOnly=true)
+    public ProjectDetailResponseDto readProjectDetail(SessionUser sessionUser, Long projectId) {
+
+        ProjectDetailResponseDto responseDto = userProjectMappingRepository
+                .findProjectDetail(sessionUser.getUserId(),projectId)
+                .orElseThrow( ()-> new ApiRequestException("해당 유저는 접근권한이 없는 프로젝트입니다.") );
+
+        responseDto.updateCrewCount(userProjectMappingRepository.findCountProjectMember(projectId));
+
+        return responseDto;
+    }
+
+    // 사이드 바에 들어갈 Project 목록 조회(최대 5개)
+    @Transactional(readOnly=true)
+    public List<ProjectSidebarResponseDto> readProjectListSidebar(SessionUser sessionUser) {
+        return userProjectMappingRepository.findProjectListTop5(sessionUser.getUserId());
     }
 }
