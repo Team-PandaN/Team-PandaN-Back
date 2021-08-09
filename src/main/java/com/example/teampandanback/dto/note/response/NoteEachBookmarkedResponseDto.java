@@ -1,12 +1,7 @@
 package com.example.teampandanback.dto.note.response;
 
-import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.Step;
-import lombok.Builder;
 import lombok.Getter;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 public class NoteEachBookmarkedResponseDto {

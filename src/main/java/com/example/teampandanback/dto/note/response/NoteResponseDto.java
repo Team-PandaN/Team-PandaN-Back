@@ -1,13 +1,10 @@
 package com.example.teampandanback.dto.note.response;
 
-import com.example.teampandanback.domain.Timestamped;
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.Step;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 

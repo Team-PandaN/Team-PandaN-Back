@@ -16,9 +16,6 @@ public interface UserProjectMappingRepositoryQuerydsl {
     // 프로젝트의 참여 멤버 수
     long findCountProjectMember(long projectId);
 
-    // 사이드 바에 들어갈 프로젝트의 목록 (최대 5개)
-    List<ProjectSidebarResponseDto> findProjectListTop5(long userId);
-
     List<ProjectResponseDto> findProjectByUser_UserId(Long userId);
     List<ProjectSidebarResponseDto> findProjectListTopSize(long userId, Long readSize);
 

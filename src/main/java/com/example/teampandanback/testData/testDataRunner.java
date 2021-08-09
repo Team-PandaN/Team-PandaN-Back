@@ -16,12 +16,10 @@ import com.example.teampandanback.domain.user_project_mapping.UserProjectRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
 
-@Component
+//@Component
 public class testDataRunner implements ApplicationRunner {
 
     @Autowired

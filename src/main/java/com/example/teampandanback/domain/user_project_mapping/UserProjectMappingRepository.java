@@ -13,8 +13,6 @@ public interface UserProjectMappingRepository extends JpaRepository<UserProjectM
 
     UserProjectMapping findByUser_UserIdAndProject_ProjectId(Long userId, Long projectId); // but 갑자기 join함. 쿼리보면 갑분쪼
 
-//    List<UserProjectMapping> findByUser_UserId(@Param("userId") Long userId);
-
     void deleteByProject_ProjectId(Long projectId);
 
 //    UserProjectMapping findByUser_IdAndProject_Id(Long userId, Long projectId);
