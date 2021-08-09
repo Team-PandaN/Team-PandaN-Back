@@ -1,7 +1,10 @@
 package com.example.teampandanback.service;
 
+import com.example.teampandanback.domain.bookmark.Bookmark;
+import com.example.teampandanback.domain.bookmark.BookmarkRepository;
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
+import com.example.teampandanback.domain.note.NoteRepositoryQuerydsl;
 import com.example.teampandanback.domain.note.Step;
 import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.project.ProjectRepository;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.Option;
 import javax.transaction.Transactional;
+import java.awt.print.Book;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -34,6 +38,7 @@ public class NoteService {
     private final NoteRepository noteRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
     private final ProjectRepository projectRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     // String 자료형으로 받은 날짜를 LocalDate 자료형으로 형변환
     private LocalDate changeType(String dateString) {
@@ -42,22 +47,25 @@ public class NoteService {
         return date;
     }
 
+    // Note 상세 조회
     @Transactional
-    public NoteResponseDto readNoteDetail(Long noteId) {
-        Note note = noteRepository.findById(noteId)
+    public NoteResponseDto readNoteDetail(Long noteId, SessionUser sessionUser) {
+        NoteResponseDto noteResponseDto = noteRepository.findByNoteId(noteId)
                 .orElseThrow(() -> new ApiRequestException("작성된 노트가 없습니다."));
-        return NoteResponseDto.of(note);
+
+        Optional<Bookmark> bookmark = bookmarkRepository.findByUserIdAndNoteId(sessionUser.getUserId(), noteId);
+        noteResponseDto.setBookmark(bookmark.isPresent());
+        return noteResponseDto;
     }
 
+    // Note 업데이트
     @Transactional
     public NoteUpdateResponseDto updateNoteDetail(Long noteId, NoteUpdateRequestDto noteUpdateRequestDto) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
 
-        // #1-1
         note.update(noteUpdateRequestDto, changeType(noteUpdateRequestDto.getDeadline()), Step.valueOf(noteUpdateRequestDto.getStep()));
 
-        // #2
         return NoteUpdateResponseDto.of(note);
     }
 
@@ -105,7 +113,6 @@ public class NoteService {
         return NoteMineOnlyResponseDto.of(myNoteList);
     }
 
-
     // Note 삭제
     @Transactional
     public NoteDeleteResponseDto deleteNote(Long noteId) {
@@ -121,7 +128,6 @@ public class NoteService {
                 .noteId(noteId)
                 .build();
     }
-
 
     // Note 칸반형 조회 (칸반 페이지)
     @Transactional
