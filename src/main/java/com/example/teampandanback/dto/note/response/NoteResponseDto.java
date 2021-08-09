@@ -2,6 +2,7 @@ package com.example.teampandanback.dto.note.response;
 
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.Step;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,6 +15,23 @@ public class NoteResponseDto {
     private String content;
     private String deadline;
     private String step;
+    public Boolean isBookmark;
+    private String projectTitle;
+
+    public NoteResponseDto(Long noteId, String title, String content, LocalDate deadline, Step step,
+                           String projectTitle)
+    {
+        this.noteId = noteId;
+        this.title = title;
+        this.content = content;
+        this.deadline = deadline.toString();
+        this.step = step.toString();
+        this.projectTitle = projectTitle;
+    }
+
+    public void setBookmark(Boolean b){
+        this.isBookmark = b;
+    }
 
     @Builder
     public NoteResponseDto(Long noteId, String title, String content, LocalDate deadline, Step step) {
