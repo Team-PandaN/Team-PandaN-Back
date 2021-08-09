@@ -27,7 +27,7 @@ public class ProjectController {
     @GetMapping("")
     public ProjectListResponseDto readProjectList(@LoginUser SessionUser sessionUser) {
         return ProjectListResponseDto.builder()
-                .projectResponseDtoList(projectService.readProjectList(sessionUser))
+                .userProjectMappingDtoList(projectService.readProjectList(sessionUser))
                 .build();
     }
 

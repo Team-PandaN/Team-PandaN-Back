@@ -10,7 +10,7 @@ public class ProjectListResponseDto {
     List<ProjectResponseDto> projects;
 
     @Builder
-    public ProjectListResponseDto(List<ProjectResponseDto> projectResponseDtoList) {
-        this.projects = projectResponseDtoList;
+    public ProjectListResponseDto(List<ProjectResponseDto> userProjectMappingDtoList) {
+        this.projects = userProjectMappingDtoList;
     }
 }

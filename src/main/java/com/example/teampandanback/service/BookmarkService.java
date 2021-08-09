@@ -6,12 +6,10 @@ import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.domain.user.UserRepository;
-import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 

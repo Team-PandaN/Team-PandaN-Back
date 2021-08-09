@@ -1,6 +1,7 @@
 package com.example.teampandanback.domain.user_project_mapping;
 
 import com.example.teampandanback.dto.project.ProjectDetailResponseDto;
+import com.example.teampandanback.dto.project.ProjectResponseDto;
 import com.example.teampandanback.dto.project.ProjectSidebarResponseDto;
 import org.springframework.data.jpa.repository.Modifying;
 
@@ -15,7 +16,7 @@ public interface UserProjectMappingRepositoryQuerydsl {
     // 프로젝트의 참여 멤버 수
     long findCountProjectMember(long projectId);
 
-    // 사이드 바에 들어갈 프로젝트의 목록 (최대 5개)
+    List<ProjectResponseDto> findProjectByUser_UserId(Long userId);
     List<ProjectSidebarResponseDto> findProjectListTopSize(long userId, Long readSize);
 
     //x 유저가 y 프로젝트에 속해 있는지 여부를 판단, fetchOne()
