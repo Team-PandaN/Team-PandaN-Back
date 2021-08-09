@@ -38,8 +38,6 @@ public class NoteService {
     private final ProjectRepository projectRepository;
     private final BookmarkRepository bookmarkRepository;
 
-    @PersistenceContext
-    private EntityManager em;
 
     // String 자료형으로 받은 날짜를 LocalDate 자료형으로 형변환
     private LocalDate changeType(String dateString) {
