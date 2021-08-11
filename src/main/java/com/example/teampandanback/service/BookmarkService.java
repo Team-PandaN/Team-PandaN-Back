@@ -32,12 +32,10 @@ public class BookmarkService {
         User user = userRepository.findById(sessionUser.getUserId()).orElseThrow(
                 () -> new ApiRequestException("등록되지 않은 유저의 접근입니다.")
         );
-
         //북마크 될 노트
         Note note = noteRepository.findById(noteId).orElseThrow(
                 () -> new ApiRequestException("생성되지 않은 노트입니다.")
         );
-
 
         //쿼리
         Project connectedProject = Optional.ofNullable(note.getProject()).orElseThrow(
