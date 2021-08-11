@@ -4,14 +4,19 @@ import com.example.teampandanback.domain.bookmark.Bookmark;
 import com.example.teampandanback.domain.bookmark.BookmarkRepository;
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
+import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.domain.user.UserRepository;
+import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
+import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -19,47 +24,68 @@ public class BookmarkService {
     private final UserRepository userRepository;
     private final NoteRepository noteRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final UserProjectMappingRepository userProjectMappingRepository;
 
     public void bookmarkNote(Long noteId, SessionUser sessionUser) {
 
         //북마크 누른 사람
         User user = userRepository.findById(sessionUser.getUserId()).orElseThrow(
-                ()->new ApiRequestException("등록되지 않은 유저의 접근입니다.")
+                () -> new ApiRequestException("등록되지 않은 유저의 접근입니다.")
         );
-
         //북마크 될 노트
         Note note = noteRepository.findById(noteId).orElseThrow(
-                ()->new ApiRequestException("생성되지 않은 노트입니다.")
+                () -> new ApiRequestException("생성되지 않은 노트입니다.")
         );
 
-        // 유저가 북마크를 했다는 레코드
-       Bookmark bookmark = bookmarkRepository.findByUserAndNote(user,note)
-               .orElseGet(()->Bookmark.builder()
-               .user(user)
-               .note(note)
-               .build());
+        //쿼리
+        Project connectedProject = Optional.ofNullable(note.getProject()).orElseThrow(
+                () -> new ApiRequestException("연결된 프로젝트가 없습니다.")
+        );
 
-       bookmarkRepository.save(bookmark);
+        //쿼리
+        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUserAndProject(user, connectedProject)
+                .orElseThrow(
+                        () -> new ApiRequestException("user와 project mapping을 찾지 못했습니다.")
+                );
+
+        //유저가 북마크를 했다는 레코드
+        Bookmark bookmark = bookmarkRepository.findByUserAndNote(user, note)
+                .orElseGet(() -> Bookmark.builder()
+                        .user(user)
+                        .note(note)
+                        .build());
+
+        bookmarkRepository.save(bookmark);
     }
 
     public void unBookmarkNote(Long noteId, SessionUser sessionUser) {
 
-        //북마크 해제를 누른 사람
+        //북마크 누른 사람
         User user = userRepository.findById(sessionUser.getUserId()).orElseThrow(
-                ()->new ApiRequestException("등록되지 않은 유저의 접근입니다.")
+                () -> new ApiRequestException("등록되지 않은 유저의 접근입니다.")
         );
 
-        //북마크가 해제 될 노트
+        //북마크 될 노트
         Note note = noteRepository.findById(noteId).orElseThrow(
-                ()->new ApiRequestException("생성되지 않은 노트입니다.")
+                () -> new ApiRequestException("생성되지 않은 노트입니다.")
         );
+
+
+        //쿼리
+        Project connectedProject = Optional.ofNullable(note.getProject()).orElseThrow(
+                () -> new ApiRequestException("연결된 프로젝트가 없습니다.")
+        );
+
+        //쿼리
+        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUserAndProject(user, connectedProject)
+                .orElseThrow(
+                        () -> new ApiRequestException("user와 project mapping을 찾지 못했습니다.")
+                );
 
         // 유저가 북마크를 했다는 레코드드
-        Optional<Bookmark> bookmark = bookmarkRepository.findByUserAndNote(user,note);
+        Optional<Bookmark> bookmark = bookmarkRepository.findByUserAndNote(user, note);
 
-        if(bookmark.isPresent()){
-            bookmarkRepository.delete(bookmark.get());
-        }
+        bookmark.ifPresent(bookmarkRepository::delete);
 
     }
 }

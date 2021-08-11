@@ -70,7 +70,6 @@ public class ProjectService {
     public ProjectResponseDto updateProject(Long projectId, ProjectRequestDto requestDto, SessionUser sessionUser) {
 
         Optional<UserProjectMapping> userProjectMapping = userProjectMappingRepository.findByUserIdAndProjectIdJoin(sessionUser.getUserId(),projectId);
-
         if(!userProjectMapping.isPresent()){
             throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
         }else if(!userProjectMapping.get().getRole().equals(UserProjectRole.OWNER)){

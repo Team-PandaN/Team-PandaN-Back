@@ -2,6 +2,7 @@ package com.example.teampandanback.domain.user_project_mapping;
 
 import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.user.User;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
