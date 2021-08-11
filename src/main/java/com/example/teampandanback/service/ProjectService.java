@@ -1,5 +1,6 @@
 package com.example.teampandanback.service;
 
+import com.example.teampandanback.domain.Comment.CommentRepository;
 import com.example.teampandanback.domain.bookmark.BookmarkRepository;
 import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.domain.project.Project;
@@ -32,6 +33,7 @@ public class ProjectService {
     private final UserProjectMappingRepository userProjectMappingRepository;
     private final NoteRepository noteRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final CommentRepository commentRepository;
     private final AESEncryptor aesEncryptor;
 
     // Project 목록 조회
@@ -91,6 +93,9 @@ public class ProjectService {
         } else if (!userProjectMapping.get().getRole().equals(UserProjectRole.OWNER)) { //   우선 해당 프로젝트의 CREW이더라도, OWNER가 아닌지,
             throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
         }
+
+        // 해당 Project 와 연관된 Note에 속한 코멘트 삭제
+        commentRepository.deleteCommentByProjectId(projectId);
 
         // Bookmark 테이블에서 Note 와 연관된 북마크 삭제
         bookmarkRepository.deleteByProjectId(projectId);

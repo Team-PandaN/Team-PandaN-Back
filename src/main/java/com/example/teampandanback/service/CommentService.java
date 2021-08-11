@@ -10,11 +10,12 @@ import com.example.teampandanback.domain.user.UserRepository;
 import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.comment.request.CommentCreateRequestDto;
 import com.example.teampandanback.dto.comment.response.CommentCreateResponseDto;
+import com.example.teampandanback.dto.comment.response.CommentDeleteResponseDto;
 import com.example.teampandanback.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import javax.transaction.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -24,9 +25,9 @@ public class CommentService {
     private final NoteRepository noteRepository;
     private final CommentRepository commentRepository;
 
-    public CommentCreateResponseDto createComment(Long noteId, SessionUser sessionUser, CommentCreateRequestDto commentCreateRequestDto){
+    public CommentCreateResponseDto createComment(Long noteId, SessionUser sessionUser, CommentCreateRequestDto commentCreateRequestDto) {
         User user = userRepository.findById(sessionUser.getUserId()).orElseThrow(
-                ()-> new ApiRequestException("등록되지 않은 유저의 접근입니다.")
+                () -> new ApiRequestException("등록되지 않은 유저의 접근입니다.")
         );
 
         Note note = noteRepository.findById(noteId).orElseThrow(
@@ -47,4 +48,33 @@ public class CommentService {
                 .writer(user.getName())
                 .build();
     }
+
+    // 코멘트 삭제  V1( 쿼리 2방)
+    @Transactional
+    public CommentDeleteResponseDto deleteComment(Long commentId, SessionUser sessionUser) {
+        commentRepository.deleteByCommentIdAndUserId(commentId, sessionUser.getUserId());
+
+        return CommentDeleteResponseDto.builder()
+                .commentId(commentId)
+                .build();
+
+    }
+
+    // 코멘트 삭제 V2 ( 쿼리 3방)
+//    @Transactional
+//    public CommentDeleteResponseDto deleteComment(Long commentId, SessionUser sessionUser) {
+//        Comment comment = commentRepository.findByCommentIdAndUserId(commentId, sessionUser.getUserId());
+//
+//        if (Objects.isNull(comment)) {
+//            throw new ApiRequestException("댓글을 삭제 할 수 없습니다.");
+//        }
+//
+//        commentRepository.delete(comment);
+//
+//        return CommentDeleteResponseDto.builder()
+//                .commentId(commentId)
+//                .build();
+//    }
+
 }
+

@@ -4,12 +4,10 @@ import com.example.teampandanback.config.auth.LoginUser;
 import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.comment.request.CommentCreateRequestDto;
 import com.example.teampandanback.dto.comment.response.CommentCreateResponseDto;
+import com.example.teampandanback.dto.comment.response.CommentDeleteResponseDto;
 import com.example.teampandanback.service.CommentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -27,4 +25,8 @@ public class CommentController {
     //코멘트 수정
 
     //코멘트 삭제
+    @DeleteMapping("/api/comments/{commentId}")
+    public CommentDeleteResponseDto deleteComment(@PathVariable Long commentId, @LoginUser SessionUser sessionUser) {
+        return commentService.deleteComment(commentId, sessionUser);
+    }
 }
