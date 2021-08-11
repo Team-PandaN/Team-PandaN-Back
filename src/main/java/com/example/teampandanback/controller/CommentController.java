@@ -4,12 +4,10 @@ import com.example.teampandanback.config.auth.LoginUser;
 import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.comment.request.CommentCreateRequestDto;
 import com.example.teampandanback.dto.comment.response.CommentCreateResponseDto;
+import com.example.teampandanback.dto.comment.response.CommentReadListResponseDto;
 import com.example.teampandanback.service.CommentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -23,7 +21,10 @@ public class CommentController {
         return commentService.createComment(noteId,sessionUser,commentCreateRequestDto);
     }
     //코멘트 읽기
-
+    @GetMapping("/api/comments/{noteId}")
+    public CommentReadListResponseDto readComments(@PathVariable Long noteId, @LoginUser SessionUser sessionUser){
+        return commentService.readComments(noteId,sessionUser);
+    }
     //코멘트 수정
 
     //코멘트 삭제

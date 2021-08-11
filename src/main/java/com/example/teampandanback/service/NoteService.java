@@ -76,9 +76,6 @@ public class NoteService {
         Optional<UserProjectMapping> userProjectMapping =
                 userProjectMappingRepository
                         .findByUserIdAndProjectId(sessionUser.getUserId(), projectId);
-        System.out.println(userProjectMapping.get().getProject().getClass());
-        System.out.println(userProjectMapping.get().getUser().getClass());
-
 
         if(!userProjectMapping.isPresent()){
             throw new ApiRequestException("해당 유저가 해당 프로젝트에 참여해있지 않습니다.");
