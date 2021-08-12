@@ -1,4 +1,4 @@
-package com.example.teampandanback.dto.project;
+package com.example.teampandanback.dto.project.request;
 
 import com.example.teampandanback.domain.project.Project;
 import lombok.Builder;

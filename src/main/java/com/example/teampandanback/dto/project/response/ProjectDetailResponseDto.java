@@ -1,4 +1,4 @@
-package com.example.teampandanback.dto.project;
+package com.example.teampandanback.dto.project.response;
 
 import com.example.teampandanback.domain.user_project_mapping.UserProjectRole;
 import com.fasterxml.jackson.annotation.JsonProperty;

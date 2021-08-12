@@ -1,5 +1,6 @@
-package com.example.teampandanback.dto.project;
+package com.example.teampandanback.dto.project.response;
 
+import com.example.teampandanback.dto.project.request.ProjectResponseDto;
 import lombok.Builder;
 import lombok.Getter;
 

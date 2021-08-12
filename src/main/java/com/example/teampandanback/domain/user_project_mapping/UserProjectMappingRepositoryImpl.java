@@ -1,8 +1,8 @@
 package com.example.teampandanback.domain.user_project_mapping;
 
-import com.example.teampandanback.dto.project.ProjectDetailResponseDto;
-import com.example.teampandanback.dto.project.ProjectResponseDto;
-import com.example.teampandanback.dto.project.ProjectSidebarResponseDto;
+import com.example.teampandanback.dto.project.response.ProjectDetailResponseDto;
+import com.example.teampandanback.dto.project.request.ProjectResponseDto;
+import com.example.teampandanback.dto.project.response.ProjectSidebarResponseDto;
 import com.example.teampandanback.exception.ApiRequestException;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;

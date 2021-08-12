@@ -1,4 +1,4 @@
-package com.example.teampandanback.dto.project;
+package com.example.teampandanback.dto.project.response;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
