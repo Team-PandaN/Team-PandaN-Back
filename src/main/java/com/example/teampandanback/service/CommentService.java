@@ -9,10 +9,13 @@ import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.domain.user.UserRepository;
 import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.comment.request.CommentCreateRequestDto;
+import com.example.teampandanback.dto.comment.request.CommentUpdateRequestDto;
 import com.example.teampandanback.dto.comment.response.CommentCreateResponseDto;
+import com.example.teampandanback.dto.comment.response.CommentUpdateResponseDto;
 import com.example.teampandanback.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -46,5 +49,19 @@ public class CommentService {
                 .commentId(newComment.getCommentId())
                 .writer(user.getName())
                 .build();
+    }
+
+    // 댓글 수정
+    @Transactional
+    public CommentUpdateResponseDto updateComment(Long commentId, SessionUser sessionUser, CommentUpdateRequestDto commentUpdateRequestDto) {
+
+        Optional<Comment> maybeComment = commentRepository.findById(commentId);
+
+        Comment updateComment = maybeComment
+                                    .filter(c->c.getUser().getUserId().equals(sessionUser.getUserId()))
+                                    .map(c->c.update(commentUpdateRequestDto))
+                                    .orElseThrow(() -> new ApiRequestException("댓글은 본인만 수정할 수 있습니다"));
+
+        return  CommentUpdateResponseDto.fromEntity(updateComment);
     }
 }

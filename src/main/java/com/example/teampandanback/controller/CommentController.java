@@ -3,13 +3,12 @@ package com.example.teampandanback.controller;
 import com.example.teampandanback.config.auth.LoginUser;
 import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.comment.request.CommentCreateRequestDto;
+import com.example.teampandanback.dto.comment.request.CommentUpdateRequestDto;
 import com.example.teampandanback.dto.comment.response.CommentCreateResponseDto;
+import com.example.teampandanback.dto.comment.response.CommentUpdateResponseDto;
 import com.example.teampandanback.service.CommentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -25,6 +24,9 @@ public class CommentController {
     //코멘트 읽기
 
     //코멘트 수정
-
+    @PutMapping("/api/comments/{commentId}")
+    public CommentUpdateResponseDto updateComment(@PathVariable Long commentId, @LoginUser SessionUser sessionUser, @RequestBody CommentUpdateRequestDto commentUpdateRequestDto){
+        return commentService.updateComment(commentId, sessionUser, commentUpdateRequestDto);
+    }
     //코멘트 삭제
 }
