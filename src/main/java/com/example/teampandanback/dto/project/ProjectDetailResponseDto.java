@@ -3,7 +3,9 @@ package com.example.teampandanback.dto.project;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectRole;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
+import lombok.Getter;
 
+@Getter
 public class ProjectDetailResponseDto {
 
     // 프로젝트의 id (PK 값)
@@ -14,7 +16,7 @@ public class ProjectDetailResponseDto {
     private String detail;
 
     // 해당 유저의 프로젝트 수정, 삭제 가능 여부
-    public boolean isUpdatableAndDeletable;
+    public Boolean isUpdatableAndDeletable;
 
     // 프로젝트의 참여멤버 수
     private long crewCount;
@@ -32,24 +34,4 @@ public class ProjectDetailResponseDto {
         this.crewCount = crewCount;
     }
 
-    public long getProjectId() {
-        return this.projectId;
-    }
-
-    public String getTitle() {
-        return this.title;
-    }
-
-    public String getDetail() {
-        return this.detail;
-    }
-
-    @JsonProperty("isUpdatableAndDeletable")
-    public boolean isUpdatableAndDeletable() {
-        return this.isUpdatableAndDeletable;
-    }
-
-    public long getCrewCount() {
-        return this.crewCount;
-    }
 }
