@@ -2,6 +2,7 @@ package com.example.teampandanback.domain.bookmark;
 
 import com.example.teampandanback.dto.note.response.NoteEachBookmarkedResponseDto;
 import com.example.teampandanback.dto.note.response.NoteEachSearchInBookmarkResponseDto;
+import com.example.teampandanback.utils.PandanUtils;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
@@ -19,6 +20,7 @@ import static com.example.teampandanback.domain.user.QUser.user;
 
 public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
     private final JPAQueryFactory queryFactory;
+    private PandanUtils pandanUtils;
 
     public BookmarkRepositoryImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
@@ -77,10 +79,7 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
     // keyword로 북마크에서 검색, 제목만 검색합니다.
     @Override
     public List<NoteEachSearchInBookmarkResponseDto> findNotesByUserIdAndKeywordInBookmarks(Long userId, List<String> keywordList) {
-        BooleanBuilder builder = new BooleanBuilder();
-        for(String keyword : keywordList){
-            builder.and(note.title.toLowerCase().contains(keyword));
-        }
+        BooleanBuilder builder = pandanUtils.searchByTitleBooleanBuilder(keywordList);
 
         List<Long> noteIdList = queryFactory
                 .select(bookmark.note.noteId)

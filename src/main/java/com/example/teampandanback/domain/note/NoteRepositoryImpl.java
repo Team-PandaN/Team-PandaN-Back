@@ -4,6 +4,7 @@ import com.example.teampandanback.dto.note.response.NoteEachMineInTotalResponseD
 import com.example.teampandanback.dto.note.response.noteEachSearchInTotalResponseDto;
 import com.example.teampandanback.dto.note.response.NoteResponseDto;
 import com.example.teampandanback.dto.note.response.NoteEachSearchInMineResponseDto;
+import com.example.teampandanback.utils.PandanUtils;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -20,6 +21,7 @@ import static com.example.teampandanback.domain.user_project_mapping.QUserProjec
 public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
 
     private final JPAQueryFactory queryFactory;
+    private PandanUtils pandanUtils;
 
     public NoteRepositoryImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
@@ -96,10 +98,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
     // keyword로 내가 참여하고 있는 프로젝트 안에서 노트 검색, 제목으로만 검색합니다.
     @Override
     public List<noteEachSearchInTotalResponseDto> findNotesByUserIdAndKeywordInTotal(Long userId, List<String> keywordList) {
-        BooleanBuilder builder = new BooleanBuilder();
-        for(String keyword : keywordList){
-            builder.and(note.title.toLowerCase().contains(keyword));
-        }
+        BooleanBuilder builder = pandanUtils.searchByTitleBooleanBuilder(keywordList);
 
         List<Long> projectIdList = queryFactory
                 .select(userProjectMapping.project.projectId)
@@ -121,10 +120,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
     // keyword로 내가 쓴 문서 안에서 노트 검색, 제목으로만 검색합니다.
     @Override
     public List<NoteEachSearchInMineResponseDto> findNotesByUserIdAndKeywordInMine(Long userId, List<String> keywordList) {
-        BooleanBuilder builder = new BooleanBuilder();
-        for(String keyword : keywordList){
-            builder.and(note.title.toLowerCase().contains(keyword));
-        }
+        BooleanBuilder builder = pandanUtils.searchByTitleBooleanBuilder(keywordList);
 
         return queryFactory
                 .select(Projections.constructor(NoteEachSearchInMineResponseDto.class,

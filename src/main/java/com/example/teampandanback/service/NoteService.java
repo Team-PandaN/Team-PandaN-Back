@@ -39,6 +39,7 @@ public class NoteService {
     private final ProjectRepository projectRepository;
     private final BookmarkRepository bookmarkRepository;
     private final CommentRepository commentRepository;
+    private PandanUtils pandanUtils;
 
     // Note 상세 조회
     @Transactional
@@ -57,7 +58,7 @@ public class NoteService {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
 
-        note.update(noteUpdateRequestDto, PandanUtils.changeType(noteUpdateRequestDto.getDeadline()), Step.valueOf(noteUpdateRequestDto.getStep()));
+        note.update(noteUpdateRequestDto, pandanUtils.changeType(noteUpdateRequestDto.getDeadline()), Step.valueOf(noteUpdateRequestDto.getStep()));
 
         return NoteUpdateResponseDto.of(note);
     }
@@ -75,7 +76,7 @@ public class NoteService {
         }
 
         // [노트 생성] 전달받은 String deadline을 LocalDate 자료형으로 형변환
-        LocalDate deadline = PandanUtils.changeType(noteCreateRequestDto.getDeadline());
+        LocalDate deadline = pandanUtils.changeType(noteCreateRequestDto.getDeadline());
 
         // [노트 생성] 전달받은 String step을 Enum Step으로
         Step step = Step.valueOf(noteCreateRequestDto.getStep());

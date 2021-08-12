@@ -1,6 +1,7 @@
 package com.example.teampandanback.utils;
 
 import com.example.teampandanback.exception.ApiRequestException;
+import com.querydsl.core.BooleanBuilder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -10,11 +11,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import static com.example.teampandanback.domain.note.QNote.note;
+
 @Component
 public class PandanUtils {
 
     // String 자료형으로 받은 날짜를 LocalDate 자료형으로 형변환
-    public static LocalDate changeType(String dateString) {
+    public LocalDate changeType(String dateString) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate date = LocalDate.parse(dateString, formatter);
         return date;
@@ -38,6 +41,15 @@ public class PandanUtils {
         }
 
         return parsedKeywordList;
+    }
+
+    //QueryDSL 검색 시 where 절에 조건을 추가하는 BooleanBuilder 메소드입니다
+    public static BooleanBuilder searchByTitleBooleanBuilder(List<String> keywordList) {
+        BooleanBuilder builder = new BooleanBuilder();
+        for(String keyword : keywordList){
+            builder.and(note.title.toLowerCase().contains(keyword));
+        }
+        return builder;
     }
 
 }
