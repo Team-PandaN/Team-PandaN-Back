@@ -13,6 +13,7 @@ import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping
 import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.comment.request.CommentCreateRequestDto;
 import com.example.teampandanback.dto.comment.response.CommentCreateResponseDto;
+import com.example.teampandanback.dto.comment.response.CommentDeleteResponseDto;
 import com.example.teampandanback.dto.comment.response.CommentReadEachResponseDto;
 import com.example.teampandanback.dto.comment.response.CommentReadListResponseDto;
 import com.example.teampandanback.exception.ApiRequestException;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.transaction.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -99,4 +101,15 @@ public class CommentService {
                 .commentList(commentReadEachResponseDtoList)
                 .build();
     }
+
+    @Transactional
+    public CommentDeleteResponseDto deleteComment(Long commentId, SessionUser sessionUser) {
+        commentRepository.deleteByCommentIdAndUserId(commentId, sessionUser.getUserId());
+
+        return CommentDeleteResponseDto.builder()
+                .commentId(commentId)
+                .build();
+
+    }
+
 }
