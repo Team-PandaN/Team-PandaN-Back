@@ -1,7 +1,7 @@
 package com.example.teampandanback.domain.bookmark;
 
 import com.example.teampandanback.dto.note.response.NoteEachBookmarkedResponseDto;
-import com.example.teampandanback.dto.note.search.NoteEachSearchInBookmarkResponse;
+import com.example.teampandanback.dto.note.response.NoteEachSearchInBookmarkResponse;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
@@ -16,7 +16,6 @@ import static com.example.teampandanback.domain.bookmark.QBookmark.bookmark;
 import static com.example.teampandanback.domain.note.QNote.note;
 import static com.example.teampandanback.domain.project.QProject.project;
 import static com.example.teampandanback.domain.user.QUser.user;
-import static com.example.teampandanback.domain.user_project_mapping.QUserProjectMapping.userProjectMapping;
 
 public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
     private final JPAQueryFactory queryFactory;
@@ -91,11 +90,12 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
 
         return queryFactory
                 .select(Projections.constructor(NoteEachSearchInBookmarkResponse.class,
-                        note.noteId, note.title, note.step, project.projectId, project.title))
+                        note.noteId, note.title, note.step, project.projectId, project.title, user.name))
                 .from(note)
                 .where(note.noteId.in(noteIdList).and(builder))
                 .orderBy(note.modifiedAt.desc())
                 .join(note.project, project)
+                .join(note.user, user)
                 .fetch();
     }
 }

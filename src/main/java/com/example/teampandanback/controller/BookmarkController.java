@@ -2,7 +2,7 @@ package com.example.teampandanback.controller;
 
 import com.example.teampandanback.config.auth.LoginUser;
 import com.example.teampandanback.dto.auth.SessionUser;
-import com.example.teampandanback.dto.note.search.NoteSearchInBookmarkResponse;
+import com.example.teampandanback.dto.note.response.NoteSearchInBookmarkResponse;
 import com.example.teampandanback.service.BookmarkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

@@ -1,5 +1,6 @@
-package com.example.teampandanback.dto.note.search;
+package com.example.teampandanback.dto.note.response;
 
+import com.example.teampandanback.dto.note.response.NoteEachSearchInBookmarkResponse;
 import lombok.Builder;
 import lombok.Getter;
 

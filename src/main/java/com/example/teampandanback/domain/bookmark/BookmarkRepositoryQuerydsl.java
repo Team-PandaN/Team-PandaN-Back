@@ -4,7 +4,7 @@ import com.example.teampandanback.dto.note.response.NoteEachBookmarkedResponseDt
 
 import java.util.List;
 
-import com.example.teampandanback.dto.note.search.NoteEachSearchInBookmarkResponse;
+import com.example.teampandanback.dto.note.response.NoteEachSearchInBookmarkResponse;
 import org.springframework.data.jpa.repository.Modifying;
 
 import java.util.Optional;
