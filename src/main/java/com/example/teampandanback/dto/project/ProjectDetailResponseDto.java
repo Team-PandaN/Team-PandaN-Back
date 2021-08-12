@@ -15,7 +15,7 @@ public class ProjectDetailResponseDto {
     private String detail;
 
     // 해당 유저의 프로젝트 수정, 삭제 가능 여부
-    @JsonProperty("isUpdateAbleAndDeletable")
+    @JsonProperty("isUpdatableAndDeletable")
     public boolean isUpdatableAndDeletable;
 
     // 프로젝트의 참여멤버 수
