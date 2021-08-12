@@ -10,13 +10,15 @@ import com.example.teampandanback.domain.user.UserRepository;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.dto.auth.SessionUser;
+import com.example.teampandanback.dto.note.search.NoteEachSearchInBookmarkResponse;
+import com.example.teampandanback.dto.note.search.NoteSearchInBookmarkResponse;
 import com.example.teampandanback.exception.ApiRequestException;
+import com.example.teampandanback.utils.PandanUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -87,5 +89,11 @@ public class BookmarkService {
 
         bookmark.ifPresent(bookmarkRepository::delete);
 
+    }
+
+    public NoteSearchInBookmarkResponse searchNoteInBookmarks(SessionUser sessionUser, String rawKeyword){
+        List<String> keywordList = PandanUtils.parseKeywordToList(rawKeyword);
+        List<NoteEachSearchInBookmarkResponse> resultList = bookmarkRepository.findNotesByUserIdAndKeywordInBookmarks(sessionUser.getUserId(), keywordList);
+        return NoteSearchInBookmarkResponse.builder().noteList(resultList).build();
     }
 }

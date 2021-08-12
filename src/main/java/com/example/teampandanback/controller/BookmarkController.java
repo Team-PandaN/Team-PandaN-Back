@@ -2,11 +2,10 @@ package com.example.teampandanback.controller;
 
 import com.example.teampandanback.config.auth.LoginUser;
 import com.example.teampandanback.dto.auth.SessionUser;
+import com.example.teampandanback.dto.note.search.NoteSearchInBookmarkResponse;
 import com.example.teampandanback.service.BookmarkService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -24,5 +23,11 @@ public class BookmarkController {
     @PostMapping("/api/notes/{noteId}/unbookmark")
     public void unBookmarkNote(@PathVariable Long noteId, @LoginUser SessionUser sessionUser){
         bookmarkService.unBookmarkNote(noteId,sessionUser);
+    }
+
+    // 북마크한 노트들 중에서 노트 제목 검색
+    @GetMapping("/api/notes/search/bookmarks")
+    public NoteSearchInBookmarkResponse searchNoteInBookmark(@LoginUser SessionUser sessionUser, @RequestParam("keyword") String rawKeyword){
+        return bookmarkService.searchNoteInBookmarks(sessionUser, rawKeyword);
     }
 }

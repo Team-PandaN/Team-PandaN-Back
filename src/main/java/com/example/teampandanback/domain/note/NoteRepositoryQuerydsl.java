@@ -1,7 +1,7 @@
 package com.example.teampandanback.domain.note;
 
 import com.example.teampandanback.dto.note.response.NoteEachMineInTotalResponseDto;
-import com.example.teampandanback.dto.note.search.NoteEachSearchInTotalResponse;
+import com.example.teampandanback.dto.note.response.NoteEachSearchInTotalResponse;
 import com.example.teampandanback.dto.note.response.NoteResponseDto;
 import org.springframework.data.jpa.repository.Modifying;
 

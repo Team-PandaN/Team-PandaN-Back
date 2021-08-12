@@ -15,18 +15,17 @@ import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
 import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
 import com.example.teampandanback.dto.note.response.*;
-import com.example.teampandanback.dto.note.search.NoteEachSearchInTotalResponse;
-import com.example.teampandanback.dto.note.search.NoteSearchInTotalResponse;
+import com.example.teampandanback.dto.note.response.NoteEachSearchInTotalResponse;
+import com.example.teampandanback.dto.note.response.NoteSearchInTotalResponse;
 import com.example.teampandanback.exception.ApiRequestException;
+import com.example.teampandanback.utils.PandanUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,13 +39,6 @@ public class NoteService {
     private final ProjectRepository projectRepository;
     private final BookmarkRepository bookmarkRepository;
     private final CommentRepository commentRepository;
-
-    // String 자료형으로 받은 날짜를 LocalDate 자료형으로 형변환
-    private LocalDate changeType(String dateString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate date = LocalDate.parse(dateString, formatter);
-        return date;
-    }
 
     // Note 상세 조회
     @Transactional
@@ -65,7 +57,7 @@ public class NoteService {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
 
-        note.update(noteUpdateRequestDto, changeType(noteUpdateRequestDto.getDeadline()), Step.valueOf(noteUpdateRequestDto.getStep()));
+        note.update(noteUpdateRequestDto, PandanUtils.changeType(noteUpdateRequestDto.getDeadline()), Step.valueOf(noteUpdateRequestDto.getStep()));
 
         return NoteUpdateResponseDto.of(note);
     }
@@ -83,7 +75,7 @@ public class NoteService {
         }
 
         // [노트 생성] 전달받은 String deadline을 LocalDate 자료형으로 형변환
-        LocalDate deadline = changeType(noteCreateRequestDto.getDeadline());
+        LocalDate deadline = PandanUtils.changeType(noteCreateRequestDto.getDeadline());
 
         // [노트 생성] 전달받은 String step을 Enum Step으로
         Step step = Step.valueOf(noteCreateRequestDto.getStep());
@@ -206,9 +198,8 @@ public class NoteService {
         return noteRepository.findUserNoteInTotalProject(sessionUser.getUserId());
     }
 
-    // 내가 속해있는 프로젝트에서 제목으로 노트 검색
-    public NoteSearchInTotalResponse searchNoteInTotalProject(SessionUser sessionUser, String rawKeyword){
-        List<String> keywordList = Arrays.asList(rawKeyword.split(" "));
+    public NoteSearchInTotalResponse searchNoteInMyProjects(SessionUser sessionUser, String rawKeyword){
+        List<String> keywordList = PandanUtils.parseKeywordToList(rawKeyword);
         List<NoteEachSearchInTotalResponse> resultList = noteRepository.findNotesByUserIdAndKeywordInTotal(sessionUser.getUserId(), keywordList);
         return NoteSearchInTotalResponse.builder().noteList(resultList).build();
     }
