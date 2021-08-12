@@ -5,7 +5,7 @@ import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
 import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
 import com.example.teampandanback.dto.note.response.*;
-import com.example.teampandanback.dto.note.response.NoteSearchInTotalResponse;
+import com.example.teampandanback.dto.note.response.NoteSearchInTotalResponseDto;
 import com.example.teampandanback.service.NoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -79,8 +79,13 @@ public class NoteController {
 
     // 사용자가 멤버인 프로젝트들 중에서 노트 제목 검색
     @GetMapping("/notes/search")
-    public NoteSearchInTotalResponse searchNoteInMyProjects(@LoginUser SessionUser sessionUser, @RequestParam("keyword") String rawKeyword){
+    public NoteSearchInTotalResponseDto searchNoteInMyProjects(@LoginUser SessionUser sessionUser, @RequestParam("keyword") String rawKeyword){
         return noteService.searchNoteInMyProjects(sessionUser, rawKeyword);
     }
 
+    // 내가 쓴 문서들 중에서 노트 제목 검색
+    @GetMapping("/notes/search/mynotes")
+    public NoteSearchInMineResponseDto searchNoteInMyNotes(@LoginUser SessionUser sessionUser, @RequestParam("keyword") String rawKeyword){
+        return noteService.searchNoteInMyNotes(sessionUser, rawKeyword);
+    }
 }

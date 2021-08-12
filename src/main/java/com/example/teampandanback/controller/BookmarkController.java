@@ -2,7 +2,7 @@ package com.example.teampandanback.controller;
 
 import com.example.teampandanback.config.auth.LoginUser;
 import com.example.teampandanback.dto.auth.SessionUser;
-import com.example.teampandanback.dto.note.response.NoteSearchInBookmarkResponse;
+import com.example.teampandanback.dto.note.response.NoteSearchInBookmarkResponseDto;
 import com.example.teampandanback.service.BookmarkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +27,7 @@ public class BookmarkController {
 
     // 북마크한 노트들 중에서 노트 제목 검색
     @GetMapping("/api/notes/search/bookmarks")
-    public NoteSearchInBookmarkResponse searchNoteInBookmark(@LoginUser SessionUser sessionUser, @RequestParam("keyword") String rawKeyword){
+    public NoteSearchInBookmarkResponseDto searchNoteInBookmark(@LoginUser SessionUser sessionUser, @RequestParam("keyword") String rawKeyword){
         return bookmarkService.searchNoteInBookmarks(sessionUser, rawKeyword);
     }
 }

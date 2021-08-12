@@ -1,7 +1,7 @@
 package com.example.teampandanback.domain.bookmark;
 
 import com.example.teampandanback.dto.note.response.NoteEachBookmarkedResponseDto;
-import com.example.teampandanback.dto.note.response.NoteEachSearchInBookmarkResponse;
+import com.example.teampandanback.dto.note.response.NoteEachSearchInBookmarkResponseDto;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
@@ -76,7 +76,7 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
 
     // keyword로 북마크에서 검색, 제목만 검색합니다.
     @Override
-    public List<NoteEachSearchInBookmarkResponse> findNotesByUserIdAndKeywordInBookmarks(Long userId, List<String> keywordList) {
+    public List<NoteEachSearchInBookmarkResponseDto> findNotesByUserIdAndKeywordInBookmarks(Long userId, List<String> keywordList) {
         BooleanBuilder builder = new BooleanBuilder();
         for(String keyword : keywordList){
             builder.and(note.title.contains(keyword));
@@ -89,7 +89,7 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
                 .fetch();
 
         return queryFactory
-                .select(Projections.constructor(NoteEachSearchInBookmarkResponse.class,
+                .select(Projections.constructor(NoteEachSearchInBookmarkResponseDto.class,
                         note.noteId, note.title, note.step, project.projectId, project.title, user.name))
                 .from(note)
                 .where(note.noteId.in(noteIdList).and(builder))

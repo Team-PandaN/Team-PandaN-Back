@@ -15,8 +15,8 @@ import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
 import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
 import com.example.teampandanback.dto.note.response.*;
-import com.example.teampandanback.dto.note.response.NoteEachSearchInTotalResponse;
-import com.example.teampandanback.dto.note.response.NoteSearchInTotalResponse;
+import com.example.teampandanback.dto.note.response.noteEachSearchInTotalResponseDto;
+import com.example.teampandanback.dto.note.response.NoteSearchInTotalResponseDto;
 import com.example.teampandanback.exception.ApiRequestException;
 import com.example.teampandanback.utils.PandanUtils;
 import lombok.RequiredArgsConstructor;
@@ -198,9 +198,17 @@ public class NoteService {
         return noteRepository.findUserNoteInTotalProject(sessionUser.getUserId());
     }
 
-    public NoteSearchInTotalResponse searchNoteInMyProjects(SessionUser sessionUser, String rawKeyword){
+    public NoteSearchInTotalResponseDto searchNoteInMyProjects(SessionUser sessionUser, String rawKeyword){
         List<String> keywordList = PandanUtils.parseKeywordToList(rawKeyword);
-        List<NoteEachSearchInTotalResponse> resultList = noteRepository.findNotesByUserIdAndKeywordInTotal(sessionUser.getUserId(), keywordList);
-        return NoteSearchInTotalResponse.builder().noteList(resultList).build();
+        List<noteEachSearchInTotalResponseDto> resultList = noteRepository.findNotesByUserIdAndKeywordInTotal(sessionUser.getUserId(), keywordList);
+        return NoteSearchInTotalResponseDto.builder().noteList(resultList).build();
     }
+
+    public NoteSearchInMineResponseDto searchNoteInMyNotes(SessionUser sessionUser, String rawKeyword){
+        List<String> keywordList = PandanUtils.parseKeywordToList(rawKeyword);
+        List<NoteEachSearchInMineResponseDto> resultList = noteRepository.findNotesByUserIdAndKeywordInMine(sessionUser.getUserId(), keywordList);
+        return NoteSearchInMineResponseDto.builder().noteList(resultList).build();
+    }
+
+
 }

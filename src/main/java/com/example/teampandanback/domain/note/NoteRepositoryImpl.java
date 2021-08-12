@@ -1,8 +1,9 @@
 package com.example.teampandanback.domain.note;
 
 import com.example.teampandanback.dto.note.response.NoteEachMineInTotalResponseDto;
-import com.example.teampandanback.dto.note.response.NoteEachSearchInTotalResponse;
+import com.example.teampandanback.dto.note.response.noteEachSearchInTotalResponseDto;
 import com.example.teampandanback.dto.note.response.NoteResponseDto;
+import com.example.teampandanback.dto.note.response.NoteEachSearchInMineResponseDto;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -92,9 +93,9 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                 .fetch();
     }
 
-    // keyword로 검색, 제목만 검색합니다.
+    // keyword로 내가 참여하고 있는 프로젝트 안에서 노트 검색, 제목으로만 검색합니다.
     @Override
-    public List<NoteEachSearchInTotalResponse> findNotesByUserIdAndKeywordInTotal(Long userId, List<String> keywordList) {
+    public List<noteEachSearchInTotalResponseDto> findNotesByUserIdAndKeywordInTotal(Long userId, List<String> keywordList) {
         BooleanBuilder builder = new BooleanBuilder();
         for(String keyword : keywordList){
             builder.and(note.title.contains(keyword));
@@ -107,13 +108,31 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                 .fetch();
 
         return queryFactory
-                .select(Projections.constructor(NoteEachSearchInTotalResponse.class,
+                .select(Projections.constructor(noteEachSearchInTotalResponseDto.class,
                         note.noteId, note.title, note.step, project.projectId, project.title, user.name))
                 .from(note)
-                .where(note.project.projectId.in(projectIdList).and(builder))
-                .orderBy(note.modifiedAt.desc())
                 .join(note.project, project)
                 .join(note.user, user)
+                .where(note.project.projectId.in(projectIdList).and(builder))
+                .orderBy(note.modifiedAt.desc())
+                .fetch();
+    }
+
+    // keyword로 내가 쓴 문서 안에서 노트 검색, 제목으로만 검색합니다.
+    @Override
+    public List<NoteEachSearchInMineResponseDto> findNotesByUserIdAndKeywordInMine(Long userId, List<String> keywordList) {
+        BooleanBuilder builder = new BooleanBuilder();
+        for(String keyword : keywordList){
+            builder.and(note.title.contains(keyword));
+        }
+
+        return queryFactory
+                .select(Projections.constructor(NoteEachSearchInMineResponseDto.class,
+                        note.noteId, note.title, note.step, project.projectId, project.title))
+                .from(note)
+                .where(note.user.userId.eq(userId).and(builder))
+                .orderBy(note.modifiedAt.desc())
+                .join(note.project, project)
                 .fetch();
     }
 }
