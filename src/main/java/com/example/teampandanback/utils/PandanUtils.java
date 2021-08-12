@@ -25,7 +25,7 @@ public class PandanUtils {
 
 
     // 검색을 위해 받은 keyword를 적절한 조건으로 parsing 하여 List 형태로 반환
-    public static List<String> parseKeywordToList(String rawKeyword){
+    public List<String> parseKeywordToList(String rawKeyword){
         List<String> rawKeywordList = Arrays.asList(rawKeyword.split(" "));
         List<String> parsedKeywordList = new ArrayList<>();
 
@@ -44,7 +44,7 @@ public class PandanUtils {
     }
 
     //QueryDSL 검색 시 where 절에 조건을 추가하는 BooleanBuilder 메소드입니다
-    public static BooleanBuilder searchByTitleBooleanBuilder(List<String> keywordList) {
+    public BooleanBuilder searchByTitleBooleanBuilder(List<String> keywordList) {
         BooleanBuilder builder = new BooleanBuilder();
         for(String keyword : keywordList){
             builder.and(note.title.toLowerCase().contains(keyword));

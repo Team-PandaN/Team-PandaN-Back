@@ -201,13 +201,13 @@ public class NoteService {
     }
 
     public NoteSearchInTotalResponseDto searchNoteInMyProjects(SessionUser sessionUser, String rawKeyword){
-        List<String> keywordList = PandanUtils.parseKeywordToList(rawKeyword);
+        List<String> keywordList = pandanUtils.parseKeywordToList(rawKeyword);
         List<noteEachSearchInTotalResponseDto> resultList = noteRepository.findNotesByUserIdAndKeywordInTotal(sessionUser.getUserId(), keywordList);
         return NoteSearchInTotalResponseDto.builder().noteList(resultList).build();
     }
 
     public NoteSearchInMineResponseDto searchNoteInMyNotes(SessionUser sessionUser, String rawKeyword){
-        List<String> keywordList = PandanUtils.parseKeywordToList(rawKeyword);
+        List<String> keywordList = pandanUtils.parseKeywordToList(rawKeyword);
         List<NoteEachSearchInMineResponseDto> resultList = noteRepository.findNotesByUserIdAndKeywordInMine(sessionUser.getUserId(), keywordList);
         return NoteSearchInMineResponseDto.builder().noteList(resultList).build();
     }

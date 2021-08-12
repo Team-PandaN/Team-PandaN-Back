@@ -27,6 +27,7 @@ public class BookmarkService {
     private final NoteRepository noteRepository;
     private final BookmarkRepository bookmarkRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
+    private PandanUtils pandanUtils;
 
     public void bookmarkNote(Long noteId, SessionUser sessionUser) {
 
@@ -92,7 +93,7 @@ public class BookmarkService {
     }
 
     public NoteSearchInBookmarkResponseDto searchNoteInBookmarks(SessionUser sessionUser, String rawKeyword){
-        List<String> keywordList = PandanUtils.parseKeywordToList(rawKeyword);
+        List<String> keywordList = pandanUtils.parseKeywordToList(rawKeyword);
         List<NoteEachSearchInBookmarkResponseDto> resultList = bookmarkRepository.findNotesByUserIdAndKeywordInBookmarks(sessionUser.getUserId(), keywordList);
         return NoteSearchInBookmarkResponseDto.builder().noteList(resultList).build();
     }
