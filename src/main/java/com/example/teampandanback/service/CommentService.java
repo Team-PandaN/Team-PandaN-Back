@@ -102,7 +102,6 @@ public class CommentService {
                 .build();
     }
 
-    // 코멘트 삭제  V1( 쿼리 2방)
     @Transactional
     public CommentDeleteResponseDto deleteComment(Long commentId, SessionUser sessionUser) {
         commentRepository.deleteByCommentIdAndUserId(commentId, sessionUser.getUserId());
