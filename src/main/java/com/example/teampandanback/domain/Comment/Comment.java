@@ -2,6 +2,7 @@ package com.example.teampandanback.domain.Comment;
 
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.user.User;
+import com.example.teampandanback.dto.comment.request.CommentUpdateRequestDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,5 +35,11 @@ public class Comment {
         this.content = content;
         this.user = user;
         this.note = note;
+    }
+
+    // 댓글 수정
+    public Comment update(CommentUpdateRequestDto commentUpdateRequestDto){
+        this.content = commentUpdateRequestDto.getContent();
+        return this;
     }
 }

@@ -12,18 +12,20 @@ import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.comment.request.CommentCreateRequestDto;
+import com.example.teampandanback.dto.comment.request.CommentUpdateRequestDto;
 import com.example.teampandanback.dto.comment.response.CommentCreateResponseDto;
+import com.example.teampandanback.dto.comment.response.CommentUpdateResponseDto;
 import com.example.teampandanback.dto.comment.response.CommentDeleteResponseDto;
 import com.example.teampandanback.dto.comment.response.CommentReadEachResponseDto;
 import com.example.teampandanback.dto.comment.response.CommentReadListResponseDto;
 import com.example.teampandanback.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.transaction.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -102,6 +104,21 @@ public class CommentService {
                 .build();
     }
 
+    // 댓글 수정
+    @Transactional
+    public CommentUpdateResponseDto updateComment(Long commentId, SessionUser sessionUser, CommentUpdateRequestDto commentUpdateRequestDto) {
+
+        Optional<Comment> maybeComment = commentRepository.findById(commentId);
+
+        Comment updateComment = maybeComment
+                                    .filter(c->c.getUser().getUserId().equals(sessionUser.getUserId()))
+                                    .map(c->c.update(commentUpdateRequestDto))
+                                    .orElseThrow(() -> new ApiRequestException("댓글은 본인만 수정할 수 있습니다"));
+
+        return  CommentUpdateResponseDto.fromEntity(updateComment);
+    }
+
+    // 댓글 삭제
     @Transactional
     public CommentDeleteResponseDto deleteComment(Long commentId, SessionUser sessionUser) {
         commentRepository.deleteByCommentIdAndUserId(commentId, sessionUser.getUserId());
@@ -111,5 +128,4 @@ public class CommentService {
                 .build();
 
     }
-
 }

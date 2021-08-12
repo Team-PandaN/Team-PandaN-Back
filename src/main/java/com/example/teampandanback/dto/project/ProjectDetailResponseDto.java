@@ -1,6 +1,7 @@
 package com.example.teampandanback.dto.project;
 
 import com.example.teampandanback.domain.user_project_mapping.UserProjectRole;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
 @Getter
@@ -12,8 +13,11 @@ public class ProjectDetailResponseDto {
     private String title;
     // 프로젝트 설명
     private String detail;
+
     // 해당 유저의 프로젝트 수정, 삭제 가능 여부
-    public Boolean isUpdatableAndDeletable;
+    @JsonProperty("isUpdatableAndDeletable")
+    public boolean isUpdatableAndDeletable;
+
     // 프로젝트의 참여멤버 수
     private long crewCount;
 
