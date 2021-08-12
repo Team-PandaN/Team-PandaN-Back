@@ -2,12 +2,13 @@ package com.example.teampandanback.controller;
 
 import com.example.teampandanback.config.auth.LoginUser;
 import com.example.teampandanback.dto.auth.SessionUser;
-import com.example.teampandanback.dto.project.*;
+import com.example.teampandanback.dto.project.request.ProjectInvitedRequestDto;
+import com.example.teampandanback.dto.project.request.ProjectRequestDto;
+import com.example.teampandanback.dto.project.request.ProjectResponseDto;
+import com.example.teampandanback.dto.project.response.*;
 import com.example.teampandanback.service.ProjectService;
-import com.example.teampandanback.utils.AESEncryptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -54,7 +55,7 @@ public class ProjectController {
 
     // Project 수정
     @PutMapping("/{projectId}")
-    public ProjectResponseDto updateProject(@PathVariable("projectId") Long projectId,
+    public ProjectDetailResponseDto updateProject(@PathVariable("projectId") Long projectId,
                                             @RequestBody ProjectRequestDto requestDto,
                                             @LoginUser SessionUser sessionUser) {
         return projectService.updateProject(projectId, requestDto, sessionUser);

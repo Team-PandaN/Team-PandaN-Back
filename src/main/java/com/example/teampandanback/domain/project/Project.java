@@ -1,7 +1,7 @@
 package com.example.teampandanback.domain.project;
 
 import com.example.teampandanback.domain.Timestamped;
-import com.example.teampandanback.dto.project.ProjectRequestDto;
+import com.example.teampandanback.dto.project.request.ProjectRequestDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

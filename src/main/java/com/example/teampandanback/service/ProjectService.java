@@ -11,7 +11,10 @@ import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectRole;
 import com.example.teampandanback.dto.auth.SessionUser;
-import com.example.teampandanback.dto.project.*;
+import com.example.teampandanback.dto.project.request.ProjectInvitedRequestDto;
+import com.example.teampandanback.dto.project.request.ProjectRequestDto;
+import com.example.teampandanback.dto.project.request.ProjectResponseDto;
+import com.example.teampandanback.dto.project.response.*;
 import com.example.teampandanback.exception.ApiRequestException;
 import com.example.teampandanback.utils.AESEncryptor;
 import lombok.RequiredArgsConstructor;
@@ -69,7 +72,7 @@ public class ProjectService {
 
     // Project 수정
     @Transactional
-    public ProjectResponseDto updateProject(Long projectId, ProjectRequestDto requestDto, SessionUser sessionUser) {
+    public ProjectDetailResponseDto updateProject(Long projectId, ProjectRequestDto requestDto, SessionUser sessionUser) {
 
         UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUserIdAndProjectIdJoin(sessionUser.getUserId(), projectId);
 
@@ -79,7 +82,16 @@ public class ProjectService {
         Project project = userProjectMapping.getProject();
         project.update(requestDto);
 
-        return ProjectResponseDto.fromEntity(project);
+        ProjectDetailResponseDto responseDto = ProjectDetailResponseDto.builder()
+                .projectId(project.getProjectId())
+                .detail(project.getDetail())
+                .title(project.getTitle())
+                .role(userProjectMapping.getRole())
+                .build();
+
+        responseDto.updateCrewCount(userProjectMappingRepository.findCountProjectMember(project.getProjectId()));
+
+        return responseDto;
     }
 
     // Project 삭제
