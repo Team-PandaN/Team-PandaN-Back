@@ -54,7 +54,7 @@ public class ProjectController {
 
     // Project 수정
     @PutMapping("/{projectId}")
-    public ProjectResponseDto updateProject(@PathVariable("projectId") Long projectId,
+    public ProjectDetailResponseDto updateProject(@PathVariable("projectId") Long projectId,
                                             @RequestBody ProjectRequestDto requestDto,
                                             @LoginUser SessionUser sessionUser) {
         return projectService.updateProject(projectId, requestDto, sessionUser);

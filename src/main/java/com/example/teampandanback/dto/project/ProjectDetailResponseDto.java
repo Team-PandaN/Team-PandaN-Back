@@ -1,6 +1,7 @@
 package com.example.teampandanback.dto.project;
 
 import com.example.teampandanback.domain.user_project_mapping.UserProjectRole;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
@@ -17,6 +18,7 @@ public class ProjectDetailResponseDto {
     // 프로젝트의 참여멤버 수
     private long crewCount;
 
+    @Builder
     public ProjectDetailResponseDto(long projectId, String title, String detail, UserProjectRole role) {
         this.projectId = projectId;
         this.title = title;

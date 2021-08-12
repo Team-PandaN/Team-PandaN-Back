@@ -67,7 +67,7 @@ public class ProjectService {
 
     // Project 수정
     @Transactional
-    public ProjectResponseDto updateProject(Long projectId, ProjectRequestDto requestDto, SessionUser sessionUser) {
+    public ProjectDetailResponseDto updateProject(Long projectId, ProjectRequestDto requestDto, SessionUser sessionUser) {
 
         Optional<UserProjectMapping> userProjectMapping = userProjectMappingRepository.findByUserIdAndProjectIdJoin(sessionUser.getUserId(),projectId);
         if(!userProjectMapping.isPresent()){
@@ -78,7 +78,16 @@ public class ProjectService {
         Project project = userProjectMapping.get().getProject();
         project.update(requestDto);
 
-        return ProjectResponseDto.fromEntity(project);
+        ProjectDetailResponseDto responseDto = ProjectDetailResponseDto.builder()
+                .projectId(project.getProjectId())
+                .detail(project.getDetail())
+                .title(project.getTitle())
+                .role(userProjectMapping.get().getRole())
+                .build();
+
+        responseDto.updateCrewCount(userProjectMappingRepository.findCountProjectMember(project.getProjectId()));
+
+        return responseDto;
     }
 
     // Project 삭제
