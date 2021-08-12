@@ -4,7 +4,7 @@ import com.example.teampandanback.domain.note.Step;
 import lombok.Getter;
 
 @Getter
-public class NoteEachSearchInBookmarkResponse {
+public class NoteEachSearchInBookmarkResponseDto {
     private Long noteId;
     private String title;
     private Step step;
@@ -12,7 +12,7 @@ public class NoteEachSearchInBookmarkResponse {
     private String projectTitle;
     private String writer;
 
-    public NoteEachSearchInBookmarkResponse(Long noteId, String title, Step step, Long projectId, String projectTitle, String writer) {
+    public NoteEachSearchInBookmarkResponseDto(Long noteId, String title, Step step, Long projectId, String projectTitle, String writer) {
         this.noteId = noteId;
         this.title = title;
         this.step = step;

@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
-public class NoteEachSearchInTotalResponse {
+public class noteEachSearchInTotalResponseDto {
     private Long noteId;
     private String title;
     private Step step;
@@ -17,7 +17,7 @@ public class NoteEachSearchInTotalResponse {
     private String projectTitle;
     private String writer;
 
-    public NoteEachSearchInTotalResponse(Long noteId, String title, Step step, Long projectId, String projectTitle, String writer) {
+    public noteEachSearchInTotalResponseDto(Long noteId, String title, Step step, Long projectId, String projectTitle, String writer) {
         this.noteId = noteId;
         this.title = title;
         this.step = step;
