@@ -1,6 +1,5 @@
 package com.example.teampandanback.domain.bookmark;
 
-import com.example.teampandanback.domain.note.QNote;
 import com.example.teampandanback.dto.note.response.NoteEachBookmarkedResponseDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
@@ -8,8 +7,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import javax.persistence.EntityManager;
 
-import java.awt.print.Book;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,8 +46,8 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
     }
 
     @Override
-    public List<NoteEachBookmarkedResponseDto> findByUserId(Long userId){
-        List<Long> ids = queryFactory
+    public List<NoteEachBookmarkedResponseDto> findNoteByUserIdInBookmark(Long userId) {
+        List<Long> noteIdList = queryFactory
                 .select(bookmark.note.noteId)
                 .from(bookmark)
                 .where(bookmark.user.userId.eq(userId))
@@ -60,7 +57,7 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
                 .select(Projections.constructor(NoteEachBookmarkedResponseDto.class,
                         note.noteId, note.title, note.step, project.projectId, project.title, user.name))
                 .from(note)
-                .where(note.noteId.in(ids))
+                .where(note.noteId.in(noteIdList))
                 .join(note.project, project)
                 .join(note.user, user)
                 .fetch();

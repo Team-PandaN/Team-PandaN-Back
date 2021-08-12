@@ -15,6 +15,8 @@ import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
 import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
 import com.example.teampandanback.dto.note.response.*;
+import com.example.teampandanback.dto.note.search.NoteEachSearchInTotalResponse;
+import com.example.teampandanback.dto.note.search.NoteSearchInTotalResponse;
 import com.example.teampandanback.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -116,7 +119,7 @@ public class NoteService {
 
         // 해당 북마크한 Note 조회
         List<NoteEachBookmarkedResponseDto> noteEachBookmarkedResponseDto =
-                bookmarkRepository.findByUserId(sessionUser.getUserId());
+                bookmarkRepository.findNoteByUserIdInBookmark(sessionUser.getUserId());
 
         return NoteBookmarkedResponseDto.builder().noteList(noteEachBookmarkedResponseDto).build();
     }
@@ -201,5 +204,12 @@ public class NoteService {
     // 전체 프로젝트에서 내가 작성한 노트 조회
     public List<NoteEachMineInTotalResponseDto> readMyNoteInTotalProject(SessionUser sessionUser) {
         return noteRepository.findUserNoteInTotalProject(sessionUser.getUserId());
+    }
+
+    // 내가 속해있는 프로젝트에서 제목으로 노트 검색
+    public NoteSearchInTotalResponse searchNoteInTotalProject(SessionUser sessionUser, String rawKeyword){
+        List<String> keywordList = Arrays.asList(rawKeyword.split(" "));
+        List<NoteEachSearchInTotalResponse> resultList = noteRepository.findNotesByUserIdAndKeywordInTotal(sessionUser.getUserId(), keywordList);
+        return NoteSearchInTotalResponse.builder().noteList(resultList).build();
     }
 }

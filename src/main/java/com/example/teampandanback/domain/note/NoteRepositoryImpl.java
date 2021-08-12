@@ -1,7 +1,9 @@
 package com.example.teampandanback.domain.note;
 
 import com.example.teampandanback.dto.note.response.NoteEachMineInTotalResponseDto;
+import com.example.teampandanback.dto.note.search.NoteEachSearchInTotalResponse;
 import com.example.teampandanback.dto.note.response.NoteResponseDto;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -12,6 +14,7 @@ import java.util.Optional;
 import static com.example.teampandanback.domain.note.QNote.note;
 import static com.example.teampandanback.domain.project.QProject.project;
 import static com.example.teampandanback.domain.user.QUser.user;
+import static com.example.teampandanback.domain.user_project_mapping.QUserProjectMapping.userProjectMapping;
 
 public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
 
@@ -86,6 +89,31 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                 .from(note)
                 .where(note.project.projectId.eq(projectId).and(note.user.userId.eq(userId)))
                 .orderBy(note.createdAt.desc())
+                .fetch();
+    }
+
+    // keyword로 검색, 제목만 검색합니다.
+    @Override
+    public List<NoteEachSearchInTotalResponse> findNotesByUserIdAndKeywordInTotal(Long userId, List<String> keywordList) {
+        BooleanBuilder builder = new BooleanBuilder();
+        for(String keyword : keywordList){
+            builder.and(note.title.contains(keyword));
+        }
+
+        List<Long> projectIdList = queryFactory
+                .select(userProjectMapping.project.projectId)
+                .from(userProjectMapping)
+                .where(userProjectMapping.user.userId.eq(userId))
+                .fetch();
+
+        return queryFactory
+                .select(Projections.constructor(NoteEachSearchInTotalResponse.class,
+                        note.noteId, note.title, note.step, project.projectId, project.title, user.name))
+                .from(note)
+                .where(note.project.projectId.in(projectIdList).and(builder))
+                .orderBy(note.modifiedAt.desc())
+                .join(note.project, project)
+                .join(note.user, user)
                 .fetch();
     }
 }

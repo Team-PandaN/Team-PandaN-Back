@@ -1,7 +1,7 @@
 package com.example.teampandanback.domain.note;
 
 import com.example.teampandanback.dto.note.response.NoteEachMineInTotalResponseDto;
-import com.example.teampandanback.dto.note.response.NoteEachBookmarkedResponseDto;
+import com.example.teampandanback.dto.note.search.NoteEachSearchInTotalResponse;
 import com.example.teampandanback.dto.note.response.NoteResponseDto;
 import org.springframework.data.jpa.repository.Modifying;
 
@@ -18,4 +18,5 @@ public interface NoteRepositoryQuerydsl {
     void deleteByProjectId(Long projectId);
 
     List<Note> findAllNoteByProjectAndUserOrderByCreatedAtDesc(Long projectId, Long userId);
+    List<NoteEachSearchInTotalResponse> findNotesByUserIdAndKeywordInTotal(Long userId, List<String> kewordList);
 }

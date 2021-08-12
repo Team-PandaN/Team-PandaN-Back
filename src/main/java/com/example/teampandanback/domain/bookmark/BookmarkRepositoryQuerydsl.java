@@ -13,7 +13,7 @@ public interface BookmarkRepositoryQuerydsl {
     void deleteByProjectId(long projectId);
 
     Optional<Bookmark> findByUserIdAndNoteId(Long userId, Long noteId);
-    List<NoteEachBookmarkedResponseDto> findByUserId(Long userId);
+    List<NoteEachBookmarkedResponseDto> findNoteByUserIdInBookmark(Long userId);
 
     @Modifying(clearAutomatically = true)
     void deleteByNote(Long noteId);
