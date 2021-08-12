@@ -41,7 +41,7 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        User user = userRepository.findById(2L).get();
+        User user = userRepository.findById(1L).get();
         return new SessionUser(user);
     }
 }

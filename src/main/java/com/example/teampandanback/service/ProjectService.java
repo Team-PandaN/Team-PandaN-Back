@@ -83,7 +83,7 @@ public class ProjectService {
                 .projectId(project.getProjectId())
                 .detail(project.getDetail())
                 .title(project.getTitle())
-                .role(userProjectMapping.get().getRole())
+                .role(userProjectMapping.getRole())
                 .build();
 
         responseDto.updateCrewCount(userProjectMappingRepository.findCountProjectMember(project.getProjectId()));
