@@ -79,7 +79,7 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
     public List<NoteEachSearchInBookmarkResponseDto> findNotesByUserIdAndKeywordInBookmarks(Long userId, List<String> keywordList) {
         BooleanBuilder builder = new BooleanBuilder();
         for(String keyword : keywordList){
-            builder.and(note.title.contains(keyword));
+            builder.and(note.title.toLowerCase().contains(keyword));
         }
 
         List<Long> noteIdList = queryFactory

@@ -98,7 +98,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
     public List<noteEachSearchInTotalResponseDto> findNotesByUserIdAndKeywordInTotal(Long userId, List<String> keywordList) {
         BooleanBuilder builder = new BooleanBuilder();
         for(String keyword : keywordList){
-            builder.and(note.title.contains(keyword));
+            builder.and(note.title.toLowerCase().contains(keyword));
         }
 
         List<Long> projectIdList = queryFactory
@@ -123,7 +123,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
     public List<NoteEachSearchInMineResponseDto> findNotesByUserIdAndKeywordInMine(Long userId, List<String> keywordList) {
         BooleanBuilder builder = new BooleanBuilder();
         for(String keyword : keywordList){
-            builder.and(note.title.contains(keyword));
+            builder.and(note.title.toLowerCase().contains(keyword));
         }
 
         return queryFactory

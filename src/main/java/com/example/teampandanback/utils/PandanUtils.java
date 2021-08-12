@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 @Component
 public class PandanUtils {
@@ -28,7 +29,7 @@ public class PandanUtils {
         for (String each: rawKeywordList){
             // blank가 아니어야 하고, each의 길이가 2 이상이거나, 전체 단어의 수가 2이상이면
             if(each.length() > 1 || rawKeywordList.size() > 1 && !each.equals(" ")){
-                parsedKeywordList.add(each);
+                parsedKeywordList.add(each.toLowerCase(Locale.ROOT));
             }
         }
 
