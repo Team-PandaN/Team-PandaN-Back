@@ -19,29 +19,19 @@ public class CommentRepositoryImpl implements CommentRepositoryQuerydsl {
 
 
     }
-    // 코멘트 삭제 v1
+
     @Override
     public void deleteByCommentIdAndUserId(Long commentId, Long userId) {
-         Long distinctNum = queryFactory
+        Long distinctNum = queryFactory
                 .delete(comment)
                 .where(comment.commentId.eq(commentId), comment.user.userId.eq(userId))
                 .execute();
 
-         // 삭제된 파일이 존재하면 distincNum 이 1이다.
+        // execute를 실행하면 삭제를 수행하고 삭제된 엔티티의 개수를 리턴한다.
+        // CommentId가 PK값이므로 정상적으로 삭제되었을때 distincNum 이 1이다.
         if (!distinctNum.equals(1L)) {
             throw new ApiRequestException("댓글을 삭제할수 없습니다.");
         }
-
-    }
-
-    // 코멘트 삭제 V2
-    @Override
-    public Comment findByCommentIdAndUserId(Long commentId, Long userId) {
-        return queryFactory
-                .select(comment)
-                .from(comment)
-                .where(comment.commentId.eq(commentId), comment.user.userId.eq(userId))
-                .fetchOne();
     }
 
     @Override

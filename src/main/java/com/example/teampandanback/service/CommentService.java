@@ -60,21 +60,5 @@ public class CommentService {
 
     }
 
-    // 코멘트 삭제 V2 ( 쿼리 3방)
-//    @Transactional
-//    public CommentDeleteResponseDto deleteComment(Long commentId, SessionUser sessionUser) {
-//        Comment comment = commentRepository.findByCommentIdAndUserId(commentId, sessionUser.getUserId());
-//
-//        if (Objects.isNull(comment)) {
-//            throw new ApiRequestException("댓글을 삭제 할 수 없습니다.");
-//        }
-//
-//        commentRepository.delete(comment);
-//
-//        return CommentDeleteResponseDto.builder()
-//                .commentId(commentId)
-//                .build();
-//    }
-
 }
 
