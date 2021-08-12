@@ -194,8 +194,9 @@ public class NoteService {
     }
 
     // 전체 프로젝트에서 내가 작성한 노트 조회
-    public List<NoteEachMineInTotalResponseDto> readMyNoteInTotalProject(SessionUser sessionUser) {
-        return noteRepository.findUserNoteInTotalProject(sessionUser.getUserId());
+    public NoteMineInTotalResponseDto readMyNoteInTotalProject(SessionUser sessionUser) {
+        List<NoteEachMineInTotalResponseDto> resultList = noteRepository.findUserNoteInTotalProject(sessionUser.getUserId());
+        return NoteMineInTotalResponseDto.builder().myNoteList(resultList).build();
     }
 
     public NoteSearchInTotalResponseDto searchNoteInMyProjects(SessionUser sessionUser, String rawKeyword){

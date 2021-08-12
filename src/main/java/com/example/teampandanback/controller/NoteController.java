@@ -72,9 +72,7 @@ public class NoteController {
     // 전체 프로젝트에서 내가 작성한 노트 조회
     @GetMapping("/notes/mynotes")
     public NoteMineInTotalResponseDto readMyNoteInTotalProject(@LoginUser SessionUser sessionUser){
-        return NoteMineInTotalResponseDto.builder()
-                .myNoteList(noteService.readMyNoteInTotalProject(sessionUser))
-                .build();
+        return noteService.readMyNoteInTotalProject(sessionUser);
     }
 
     // 사용자가 멤버인 프로젝트들 중에서 노트 제목 검색
