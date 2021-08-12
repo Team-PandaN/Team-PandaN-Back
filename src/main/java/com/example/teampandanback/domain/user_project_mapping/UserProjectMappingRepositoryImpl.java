@@ -3,6 +3,7 @@ package com.example.teampandanback.domain.user_project_mapping;
 import com.example.teampandanback.dto.project.ProjectDetailResponseDto;
 import com.example.teampandanback.dto.project.ProjectResponseDto;
 import com.example.teampandanback.dto.project.ProjectSidebarResponseDto;
+import com.example.teampandanback.exception.ApiRequestException;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -95,12 +96,13 @@ public class UserProjectMappingRepositoryImpl implements UserProjectMappingRepos
 
 
     @Override
-    public Optional<UserProjectMapping> findByUserIdAndProjectIdJoin(Long userId, Long projectId) {
+    public UserProjectMapping findByUserIdAndProjectIdJoin(Long userId, Long projectId) {
         return Optional.ofNullable(queryFactory
                 .select(userProjectMapping)
                 .from(userProjectMapping)
                 .join(userProjectMapping.project).fetchJoin()
                 .where(userProjectMapping.user.userId.eq(userId), userProjectMapping.project.projectId.eq(projectId))
-                .fetchFirst());
+                .fetchFirst())
+                .orElseThrow(() -> new ApiRequestException("프로젝트에 참가한 사용자가 아닙니다."));
     }
 }

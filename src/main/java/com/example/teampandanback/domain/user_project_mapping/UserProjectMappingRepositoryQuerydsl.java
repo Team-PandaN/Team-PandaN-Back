@@ -23,7 +23,7 @@ public interface UserProjectMappingRepositoryQuerydsl {
     Optional<UserProjectMapping> findByUserIdAndProjectId(Long userId, Long projectId);
 
 
-    Optional<UserProjectMapping> findByUserIdAndProjectIdJoin(Long userId, Long projectId);
+    UserProjectMapping findByUserIdAndProjectIdJoin(Long userId, Long projectId);
 
     @Modifying(clearAutomatically = true)
     void deleteByProjectId(Long projectId);

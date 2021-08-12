@@ -1,5 +1,6 @@
 package com.example.teampandanback.service;
 
+import com.example.teampandanback.domain.Comment.CommentRepository;
 import com.example.teampandanback.domain.bookmark.Bookmark;
 import com.example.teampandanback.domain.bookmark.BookmarkRepository;
 import com.example.teampandanback.domain.note.Note;
@@ -19,10 +20,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceUnitUtil;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -39,6 +36,7 @@ public class NoteService {
     private final UserProjectMappingRepository userProjectMappingRepository;
     private final ProjectRepository projectRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final CommentRepository commentRepository;
 
     // String 자료형으로 받은 날짜를 LocalDate 자료형으로 형변환
     private LocalDate changeType(String dateString) {
@@ -76,9 +74,6 @@ public class NoteService {
         Optional<UserProjectMapping> userProjectMapping =
                 userProjectMappingRepository
                         .findByUserIdAndProjectId(sessionUser.getUserId(), projectId);
-        System.out.println(userProjectMapping.get().getProject().getClass());
-        System.out.println(userProjectMapping.get().getUser().getClass());
-
 
         if(!userProjectMapping.isPresent()){
             throw new ApiRequestException("해당 유저가 해당 프로젝트에 참여해있지 않습니다.");
@@ -133,6 +128,9 @@ public class NoteService {
         Note note = noteRepository.findById(noteId).orElseThrow(
                 () -> new ApiRequestException("이미 삭제된 노트입니다.")
         );
+
+        // Note에 연관된  코멘트 삭제
+        commentRepository.deleteCommentByNoteId(noteId);
 
         // Note 에 연관된 북마크 삭제
         bookmarkRepository.deleteByNote(noteId);
