@@ -6,7 +6,7 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import javax.persistence.EntityManager;
-
+import java.util.List;
 import static com.example.teampandanback.domain.Comment.QComment.comment;
 import static com.example.teampandanback.domain.note.QNote.note;
 
@@ -18,6 +18,14 @@ public class CommentRepositoryImpl implements CommentRepositoryQuerydsl {
         this.queryFactory = new JPAQueryFactory(em);
 
 
+    }
+
+    @Override
+    public List<Comment> findByNoteId(Long noteId) {
+        return queryFactory
+                .selectFrom(comment)
+                .where(comment.note.noteId.eq(noteId))
+                .fetch();
     }
 
     @Override
