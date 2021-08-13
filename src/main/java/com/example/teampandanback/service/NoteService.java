@@ -15,14 +15,16 @@ import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
 import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
 import com.example.teampandanback.dto.note.response.*;
+import com.example.teampandanback.dto.note.response.noteEachSearchInTotalResponseDto;
+import com.example.teampandanback.dto.note.response.NoteSearchInTotalResponseDto;
 import com.example.teampandanback.exception.ApiRequestException;
+import com.example.teampandanback.utils.PandanUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,13 +39,7 @@ public class NoteService {
     private final ProjectRepository projectRepository;
     private final BookmarkRepository bookmarkRepository;
     private final CommentRepository commentRepository;
-
-    // String 자료형으로 받은 날짜를 LocalDate 자료형으로 형변환
-    private LocalDate changeType(String dateString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate date = LocalDate.parse(dateString, formatter);
-        return date;
-    }
+    private PandanUtils pandanUtils;
 
     // Note 상세 조회
     @Transactional
@@ -62,7 +58,7 @@ public class NoteService {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
 
-        note.update(noteUpdateRequestDto, changeType(noteUpdateRequestDto.getDeadline()), Step.valueOf(noteUpdateRequestDto.getStep()));
+        note.update(noteUpdateRequestDto, pandanUtils.changeType(noteUpdateRequestDto.getDeadline()), Step.valueOf(noteUpdateRequestDto.getStep()));
 
         return NoteUpdateResponseDto.of(note);
     }
@@ -80,7 +76,7 @@ public class NoteService {
         }
 
         // [노트 생성] 전달받은 String deadline을 LocalDate 자료형으로 형변환
-        LocalDate deadline = changeType(noteCreateRequestDto.getDeadline());
+        LocalDate deadline = pandanUtils.changeType(noteCreateRequestDto.getDeadline());
 
         // [노트 생성] 전달받은 String step을 Enum Step으로
         Step step = Step.valueOf(noteCreateRequestDto.getStep());
@@ -116,7 +112,7 @@ public class NoteService {
 
         // 해당 북마크한 Note 조회
         List<NoteEachBookmarkedResponseDto> noteEachBookmarkedResponseDto =
-                bookmarkRepository.findByUserId(sessionUser.getUserId());
+                bookmarkRepository.findNoteByUserIdInBookmark(sessionUser.getUserId());
 
         return NoteBookmarkedResponseDto.builder().noteList(noteEachBookmarkedResponseDto).build();
     }
@@ -199,7 +195,22 @@ public class NoteService {
     }
 
     // 전체 프로젝트에서 내가 작성한 노트 조회
-    public List<NoteEachMineInTotalResponseDto> readMyNoteInTotalProject(SessionUser sessionUser) {
-        return noteRepository.findUserNoteInTotalProject(sessionUser.getUserId());
+    public NoteMineInTotalResponseDto readMyNoteInTotalProject(SessionUser sessionUser) {
+        List<NoteEachMineInTotalResponseDto> resultList = noteRepository.findUserNoteInTotalProject(sessionUser.getUserId());
+        return NoteMineInTotalResponseDto.builder().myNoteList(resultList).build();
     }
+
+    public NoteSearchInTotalResponseDto searchNoteInMyProjects(SessionUser sessionUser, String rawKeyword){
+        List<String> keywordList = pandanUtils.parseKeywordToList(rawKeyword);
+        List<noteEachSearchInTotalResponseDto> resultList = noteRepository.findNotesByUserIdAndKeywordInTotal(sessionUser.getUserId(), keywordList);
+        return NoteSearchInTotalResponseDto.builder().noteList(resultList).build();
+    }
+
+    public NoteSearchInMineResponseDto searchNoteInMyNotes(SessionUser sessionUser, String rawKeyword){
+        List<String> keywordList = pandanUtils.parseKeywordToList(rawKeyword);
+        List<NoteEachSearchInMineResponseDto> resultList = noteRepository.findNotesByUserIdAndKeywordInMine(sessionUser.getUserId(), keywordList);
+        return NoteSearchInMineResponseDto.builder().noteList(resultList).build();
+    }
+
+
 }
