@@ -21,10 +21,11 @@ import static com.example.teampandanback.domain.user_project_mapping.QUserProjec
 public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
 
     private final JPAQueryFactory queryFactory;
-    private PandanUtils pandanUtils;
+    private final PandanUtils pandanUtils;
 
     public NoteRepositoryImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
+        this.pandanUtils = new PandanUtils();
     }
 
     @Override

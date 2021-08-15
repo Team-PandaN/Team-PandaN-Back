@@ -39,7 +39,7 @@ public class NoteService {
     private final ProjectRepository projectRepository;
     private final BookmarkRepository bookmarkRepository;
     private final CommentRepository commentRepository;
-    private PandanUtils pandanUtils;
+    private final PandanUtils pandanUtils;
 
     // Note 상세 조회
     @Transactional
