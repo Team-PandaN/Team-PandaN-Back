@@ -1,0 +1,20 @@
+spring:
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: false
+
+  profiles:
+    include: secret
+
+
+  datasource:
+    driverClassName: org.h2.Driver
+    hikari:
+      jdbc-url: jdbc:h2:./testDB;AUTO_SERVER=TRUE
+      username: sa

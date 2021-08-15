@@ -10,7 +10,6 @@ import com.example.teampandanback.domain.user.UserRepository;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectRole;
-import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.project.request.ProjectInvitedRequestDto;
 import com.example.teampandanback.dto.project.request.ProjectRequestDto;
 import com.example.teampandanback.dto.project.request.ProjectResponseDto;
@@ -41,9 +40,9 @@ public class ProjectService {
 
     // Project 목록 조회
     @Transactional
-    public List<ProjectResponseDto> readProjectList(SessionUser sessionUser) {
+    public List<ProjectResponseDto> readProjectList(User currentUser) {
         List<ProjectResponseDto> projectResponseDtoList = userProjectMappingRepository
-                .findProjectByUser_UserId(sessionUser.getUserId());
+                .findProjectByUser_UserId(currentUser.getUserId());
 
         return projectResponseDtoList;
 
@@ -51,9 +50,9 @@ public class ProjectService {
 
     // Project 생성
     @Transactional
-    public ProjectResponseDto createProject(ProjectRequestDto requestDto, SessionUser sessionUser) {
+    public ProjectResponseDto createProject(ProjectRequestDto requestDto, User currentUser) {
         // 사용자 조회
-        User user = userRepository.findById(sessionUser.getUserId())
+        User user = userRepository.findById(currentUser.getUserId())
                 .orElseThrow(() -> new ApiRequestException("유저가 아니므로 프로젝트를 생성할 수 없습니다."));
 
         // 프로젝트 생성하고 저장
@@ -72,9 +71,9 @@ public class ProjectService {
 
     // Project 수정
     @Transactional
-    public ProjectDetailResponseDto updateProject(Long projectId, ProjectRequestDto requestDto, SessionUser sessionUser) {
+    public ProjectDetailResponseDto updateProject(Long projectId, ProjectRequestDto requestDto, User currentUser) {
 
-        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUserIdAndProjectIdJoin(sessionUser.getUserId(), projectId);
+        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUserIdAndProjectIdJoin(currentUser.getUserId(), projectId);
 
         if (!userProjectMapping.getRole().equals(UserProjectRole.OWNER)) {
             throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
@@ -96,8 +95,8 @@ public class ProjectService {
 
     // Project 삭제
     @Transactional
-    public ProjectDeleteResponseDto deleteProject(Long projectId, SessionUser sessionUser) {
-        Optional<UserProjectMapping> userProjectMapping = userProjectMappingRepository.findByUserIdAndProjectId(sessionUser.getUserId(), projectId);
+    public ProjectDeleteResponseDto deleteProject(Long projectId, User currentUser) {
+        Optional<UserProjectMapping> userProjectMapping = userProjectMappingRepository.findByUserIdAndProjectId(currentUser.getUserId(), projectId);
 
         // Project의 OWNER 권한 확인
         if (!userProjectMapping.isPresent()) { //   우선 해당 프로젝트의 CREW이기라도 한지.
@@ -150,7 +149,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectInvitedResponseDto invitedProject(ProjectInvitedRequestDto projectInvitedRequestDto, SessionUser sessionUser) {
+    public ProjectInvitedResponseDto invitedProject(ProjectInvitedRequestDto projectInvitedRequestDto, User currentUser) {
 
         String decodedString = null;
         Long decodedLong = null;
@@ -165,7 +164,7 @@ public class ProjectService {
             throw new ApiRequestException("유효하지 않은 초대 코드 입니다.");
         }
 
-        User newCrew = userRepository.findById(sessionUser.getUserId()).orElseThrow(
+        User newCrew = userRepository.findById(currentUser.getUserId()).orElseThrow(
                 () -> new ApiRequestException("등록되지 않은 유저의 접근입니다.")
         );
 
@@ -188,8 +187,8 @@ public class ProjectService {
     }
 
     // Project 초대코드 생성
-    public ProjectInviteResponseDto inviteProject(Long projectId, SessionUser sessionUser) {
-        User inviteOfferUser = userRepository.findById(sessionUser.getUserId()).orElseThrow(
+    public ProjectInviteResponseDto inviteProject(Long projectId, User currentUser) {
+        User inviteOfferUser = userRepository.findById(currentUser.getUserId()).orElseThrow(
                 () -> new ApiRequestException("등록되지 않은 유저의 접근입니다.")
         );
 
@@ -218,10 +217,10 @@ public class ProjectService {
 
     // Project 상세 조회
     @Transactional(readOnly = true)
-    public ProjectDetailResponseDto readProjectDetail(SessionUser sessionUser, Long projectId) {
+    public ProjectDetailResponseDto readProjectDetail(User currentUser, Long projectId) {
 
         ProjectDetailResponseDto responseDto = userProjectMappingRepository
-                .findProjectDetail(sessionUser.getUserId(), projectId)
+                .findProjectDetail(currentUser.getUserId(), projectId)
                 .orElseThrow(() -> new ApiRequestException("해당 유저는 접근권한이 없는 프로젝트입니다."));
 
         responseDto.updateCrewCount(userProjectMappingRepository.findCountProjectMember(projectId));
@@ -231,9 +230,9 @@ public class ProjectService {
 
     // 사이드 바에 들어갈 Project 목록 조회(최대 5개)
     @Transactional(readOnly = true)
-    public List<ProjectSidebarResponseDto> readProjectListSidebar(SessionUser sessionUser) {
+    public List<ProjectSidebarResponseDto> readProjectListSidebar(User currentUser) {
         Long readSize = 5L;
 
-        return userProjectMappingRepository.findProjectListTopSize(sessionUser.getUserId(), readSize);
+        return userProjectMappingRepository.findProjectListTopSize(currentUser.getUserId(), readSize);
     }
 }

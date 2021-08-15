@@ -1,5 +1,6 @@
 package com.example.teampandanback.service;
 
+import com.example.teampandanback.OAuth2.UserDetailsImpl;
 import com.example.teampandanback.domain.bookmark.Bookmark;
 import com.example.teampandanback.domain.bookmark.BookmarkRepository;
 import com.example.teampandanback.domain.note.Note;
@@ -9,7 +10,6 @@ import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.domain.user.UserRepository;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
-import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.note.response.NoteEachSearchInBookmarkResponseDto;
 import com.example.teampandanback.dto.note.response.NoteSearchInBookmarkResponseDto;
 import com.example.teampandanback.exception.ApiRequestException;
@@ -29,10 +29,10 @@ public class BookmarkService {
     private final UserProjectMappingRepository userProjectMappingRepository;
     private final PandanUtils pandanUtils;
 
-    public void bookmarkNote(Long noteId, SessionUser sessionUser) {
+    public void bookmarkNote(Long noteId, User currentUser) {
 
         //북마크 누른 사람
-        User user = userRepository.findById(sessionUser.getUserId()).orElseThrow(
+        User user = userRepository.findById(currentUser.getUserId()).orElseThrow(
                 () -> new ApiRequestException("등록되지 않은 유저의 접근입니다.")
         );
         //북마크 될 노트
@@ -61,10 +61,10 @@ public class BookmarkService {
         bookmarkRepository.save(bookmark);
     }
 
-    public void unBookmarkNote(Long noteId, SessionUser sessionUser) {
+    public void unBookmarkNote(Long noteId, User currentUser) {
 
         //북마크 누른 사람
-        User user = userRepository.findById(sessionUser.getUserId()).orElseThrow(
+        User user = userRepository.findById(currentUser.getUserId()).orElseThrow(
                 () -> new ApiRequestException("등록되지 않은 유저의 접근입니다.")
         );
 
@@ -92,9 +92,9 @@ public class BookmarkService {
 
     }
 
-    public NoteSearchInBookmarkResponseDto searchNoteInBookmarks(SessionUser sessionUser, String rawKeyword){
+    public NoteSearchInBookmarkResponseDto searchNoteInBookmarks(User currentUser, String rawKeyword){
         List<String> keywordList = pandanUtils.parseKeywordToList(rawKeyword);
-        List<NoteEachSearchInBookmarkResponseDto> resultList = bookmarkRepository.findNotesByUserIdAndKeywordInBookmarks(sessionUser.getUserId(), keywordList);
+        List<NoteEachSearchInBookmarkResponseDto> resultList = bookmarkRepository.findNotesByUserIdAndKeywordInBookmarks(currentUser.getUserId(), keywordList);
         return NoteSearchInBookmarkResponseDto.builder().noteList(resultList).build();
     }
 }
