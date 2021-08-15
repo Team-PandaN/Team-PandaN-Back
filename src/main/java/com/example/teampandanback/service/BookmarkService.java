@@ -27,7 +27,7 @@ public class BookmarkService {
     private final NoteRepository noteRepository;
     private final BookmarkRepository bookmarkRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
-    private PandanUtils pandanUtils;
+    private final PandanUtils pandanUtils;
 
     public void bookmarkNote(Long noteId, SessionUser sessionUser) {
 

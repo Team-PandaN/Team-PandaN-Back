@@ -24,6 +24,7 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
 
     public BookmarkRepositoryImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
+        this.pandanUtils = new PandanUtils();
     }
 
     @Override
