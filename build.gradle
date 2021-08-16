@@ -26,6 +26,8 @@ dependencies {
     //jpa
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
+
+    //Switching
     //database
     //h2
     implementation('com.h2database:h2')
@@ -42,6 +44,12 @@ dependencies {
     // JWT Token
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
     implementation 'org.json:json:20210307'
+
+    //MVC
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    //Swagger
+    implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
 }
 
 test {

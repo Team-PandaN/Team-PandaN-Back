@@ -22,17 +22,25 @@ public class User{
     @Column(nullable = false, name = "NAME")
     private String name;
 
-    @Column(nullable = false, name = "EMAIL")
+    @Column(nullable = true, name = "EMAIL")
     private String email;
 
-    @Column(name = "PICTURE")
+    @Column(nullable = true, name = "PICTURE")
     private String picture;
 
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = true)
+    private Long kakaoId;
+
     @Builder
-    public User(String name, String email, String picture) {
+    public User(String name, String email, String picture, String password, Long kakaoId) {
         this.name = name;
         this.email = email;
         this.picture = picture;
+        this.password = password;
+        this.kakaoId = kakaoId;
     }
 
     public User update(String name, String picture){

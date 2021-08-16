@@ -3,7 +3,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -13,8 +13,9 @@ spring:
     include: secret
 
 
-  datasource:
-    driverClassName: org.h2.Driver
-    hikari:
-      jdbc-url: jdbc:h2:./testDB;AUTO_SERVER=TRUE
-      username: sa
+##Switching
+#  datasource:
+#    driverClassName: org.h2.Driver
+#    hikari:
+#      jdbc-url: jdbc:h2:./testDB;AUTO_SERVER=TRUE
+#      username: sa

@@ -14,10 +14,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private UserRepository userRepository;
 
     //이름은 loadByUsername이지만
-    // OAuth2 방식으로 구현할때 유니크 값은 이메일이므로 이메일로 구현
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Can't find " + email));
+    // OAuth2 방식으로 구현할때 유니크 값은 userId이다.
+    public UserDetails loadUserByUsername(String userPk) throws UsernameNotFoundException {
+        User user = userRepository.findById(Long.parseLong(userPk))
+                .orElseThrow(() -> new UsernameNotFoundException("Can't find " + userPk));
 
         return new UserDetailsImpl(user);
     }
