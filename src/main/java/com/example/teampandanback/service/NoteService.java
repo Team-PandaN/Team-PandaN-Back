@@ -23,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.mail.Session;
+import javax.swing.text.html.Option;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -58,7 +60,8 @@ public class NoteService {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
 
-        note.update(noteUpdateRequestDto, pandanUtils.changeType(noteUpdateRequestDto.getDeadline()), Step.valueOf(noteUpdateRequestDto.getStep()));
+        note.update(noteUpdateRequestDto, pandanUtils.changeType(noteUpdateRequestDto.getDeadline()),
+                Step.valueOf(noteUpdateRequestDto.getStep()), noteUpdateRequestDto.getFormerNext(), noteUpdateRequestDto.getFormerNext());
 
         return NoteUpdateResponseDto.of(note);
     }
@@ -66,28 +69,46 @@ public class NoteService {
     // Note 작성
     @Transactional
     public NoteCreateResponseDto createNote(Long projectId, NoteCreateRequestDto noteCreateRequestDto, SessionUser sessionUser) {
-
         Optional<UserProjectMapping> userProjectMapping =
                 userProjectMappingRepository
                         .findByUserIdAndProjectId(sessionUser.getUserId(), projectId);
-
         if(!userProjectMapping.isPresent()){
             throw new ApiRequestException("해당 유저가 해당 프로젝트에 참여해있지 않습니다.");
         }
 
         // [노트 생성] 전달받은 String deadline을 LocalDate 자료형으로 형변환
         LocalDate deadline = pandanUtils.changeType(noteCreateRequestDto.getDeadline());
-
         // [노트 생성] 전달받은 String step을 Enum Step으로
         Step step = Step.valueOf(noteCreateRequestDto.getStep());
-
         // [노트 생성] 찾은 userProjectMappingRepository를 통해 user와 프로젝트 가져오기
         User user = userProjectMapping.get().getUser();
         Project project = userProjectMapping.get().getProject();
 
-        // [노트 생성] 전달받은 noteCreateRequestDto를 Note.java에 정의한 of 메소드에 전달하여 빌더 패턴에 넣는다.
-        Note note = noteRepository.save(Note.of(noteCreateRequestDto, deadline, step, user, project));
-        return NoteCreateResponseDto.of(note);
+        // 현재 프로젝트의 해당 스텝에 있는 노트 리스트를 가져온 후 가장 마지막 노트를 찾는다.
+        Note lastNote = noteRepository.findAllByProjectAndStep(projectId, step)
+                .stream()
+                .filter(each -> each.getNext().equals(0L))
+                .findFirst().orElse(null);
+
+        // lastNote 있고 noteCreateRequestDto previous 값과 일치한다면
+        if(lastNote != null && lastNote.getNoteId().equals(noteCreateRequestDto.getPrevious())){
+            // [노트 생성] 전달받은 noteCreateRequestDto를 Note.java에 정의한 of 메소드에 전달하여 빌더 패턴에 넣는다.
+            Note note = noteRepository.save(Note.of(noteCreateRequestDto, deadline, step, user, project, lastNote.getNoteId(), 0L));
+            // lastNote의 Next 값을 현재 생성된 노트의 ID로 변경해준다.
+            lastNote.updateWhileCreate(note.getNoteId());
+            return NoteCreateResponseDto.of(note);
+        }
+        // lastNote 없고 noteCreateRequestDto previous 값도 0이 맞다면
+        else if(lastNote == null && noteCreateRequestDto.getPrevious() == 0){
+            // [노트 생성] 전달받은 noteCreateRequestDto를 Note.java에 정의한 of 메소드에 전달하여 빌더 패턴에 넣는다.
+            Note note = noteRepository.save(Note.of(noteCreateRequestDto, deadline, step, user, project, 0L, 0L));
+            // preNote 가 없으므로 따로 처리해주지 않는다.
+            return NoteCreateResponseDto.of(note);
+        }
+        // lastNote 없는데 noteCreateRequestDto prvious 값은 0이 아니라면
+        else{
+            throw new ApiRequestException("잘못된 요청입니다.");
+        }
     }
 
     // 해당 Project 에서 내가 작성한 Note 조회
@@ -108,11 +129,11 @@ public class NoteService {
     }
 
     // 전체 Project 에서 내가 북마크한 Note 조회
-    public NoteBookmarkedResponseDto readBookmarkedMine(SessionUser sessionUser) {
+    public NoteBookmarkedResponseDto readBookmarkedMine(SessionUser currentUser) {
 
         // 해당 북마크한 Note 조회
         List<NoteEachBookmarkedResponseDto> noteEachBookmarkedResponseDto =
-                bookmarkRepository.findNoteByUserIdInBookmark(sessionUser.getUserId());
+                bookmarkRepository.findNoteByUserIdInBookmark(currentUser.getUserId());
 
         return NoteBookmarkedResponseDto.builder().noteList(noteEachBookmarkedResponseDto).build();
     }
