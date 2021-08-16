@@ -12,16 +12,8 @@ import java.util.Optional;
 
 public interface UserProjectMappingRepository extends JpaRepository<UserProjectMapping, Long>, UserProjectMappingRepositoryQuerydsl {
 
-    UserProjectMapping findByUser_UserIdAndProject_ProjectId(Long userId, Long projectId); // but 갑자기 join함. 쿼리보면 갑분쪼
-
-    void deleteByProject_ProjectId(Long projectId);
-
-//    UserProjectMapping findByUser_IdAndProject_Id(Long userId, Long projectId);
-//
-//    void deleteByProject_Id(Long projectId);
-
-    @Query("select upm from UserProjectMapping upm join fetch upm.user where upm.project = ?1")
-    List<UserProjectMapping> findAllByProject(Project project);
+    @Query("select upm from UserProjectMapping upm join fetch upm.user where upm.project = :project")
+    List<UserProjectMapping> findAllByProject(@Param("project") Project project);
 
     Optional<UserProjectMapping> findByUserAndProject(User newCrew, Project invitedProject);
 
