@@ -11,7 +11,6 @@ import com.example.teampandanback.domain.project.ProjectRepository;
 import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
-import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
 import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
 import com.example.teampandanback.dto.note.response.*;
@@ -43,11 +42,11 @@ public class NoteService {
 
     // Note 상세 조회
     @Transactional
-    public NoteResponseDto readNoteDetail(Long noteId, SessionUser sessionUser) {
+    public NoteResponseDto readNoteDetail(Long noteId, User currentUser) {
         NoteResponseDto noteResponseDto = noteRepository.findByNoteId(noteId)
                 .orElseThrow(() -> new ApiRequestException("작성된 노트가 없습니다."));
 
-        Optional<Bookmark> bookmark = bookmarkRepository.findByUserIdAndNoteId(sessionUser.getUserId(), noteId);
+        Optional<Bookmark> bookmark = bookmarkRepository.findByUserIdAndNoteId(currentUser.getUserId(), noteId);
         noteResponseDto.setBookmark(bookmark.isPresent());
         return noteResponseDto;
     }
@@ -65,11 +64,11 @@ public class NoteService {
 
     // Note 작성
     @Transactional
-    public NoteCreateResponseDto createNote(Long projectId, NoteCreateRequestDto noteCreateRequestDto, SessionUser sessionUser) {
+    public NoteCreateResponseDto createNote(Long projectId, NoteCreateRequestDto noteCreateRequestDto, User currentUser) {
 
         Optional<UserProjectMapping> userProjectMapping =
                 userProjectMappingRepository
-                        .findByUserIdAndProjectId(sessionUser.getUserId(), projectId);
+                        .findByUserIdAndProjectId(currentUser.getUserId(), projectId);
 
         if(!userProjectMapping.isPresent()){
             throw new ApiRequestException("해당 유저가 해당 프로젝트에 참여해있지 않습니다.");
@@ -91,7 +90,7 @@ public class NoteService {
     }
 
     // 해당 Project 에서 내가 작성한 Note 조회
-    public NoteMineInProjectResponseDto readNotesMineOnly(Long projectId, SessionUser sessionUser) {
+    public NoteMineInProjectResponseDto readNotesMineOnly(Long projectId, User currentUser) {
 
         // Project 조회
         projectRepository.findById(projectId).orElseThrow(
@@ -99,7 +98,7 @@ public class NoteService {
         );
 
         // 해당 Project 에서 내가 작성한 Note 죄회
-        List<NoteReadMineEachResponseDto> myNoteList = noteRepository.findAllNoteByProjectAndUserOrderByCreatedAtDesc(projectId, sessionUser.getUserId())
+        List<NoteReadMineEachResponseDto> myNoteList = noteRepository.findAllNoteByProjectAndUserOrderByCreatedAtDesc(projectId, currentUser.getUserId())
                 .stream()
                 .map(NoteReadMineEachResponseDto::fromEntity)
                 .collect(Collectors.toList());
@@ -108,11 +107,11 @@ public class NoteService {
     }
 
     // 전체 Project 에서 내가 북마크한 Note 조회
-    public NoteBookmarkedResponseDto readBookmarkedMine(SessionUser sessionUser) {
+    public NoteBookmarkedResponseDto readBookmarkedMine(User currentUser) {
 
         // 해당 북마크한 Note 조회
         List<NoteEachBookmarkedResponseDto> noteEachBookmarkedResponseDto =
-                bookmarkRepository.findNoteByUserIdInBookmark(sessionUser.getUserId());
+                bookmarkRepository.findNoteByUserIdInBookmark(currentUser.getUserId());
 
         return NoteBookmarkedResponseDto.builder().noteList(noteEachBookmarkedResponseDto).build();
     }
@@ -195,20 +194,20 @@ public class NoteService {
     }
 
     // 전체 프로젝트에서 내가 작성한 노트 조회
-    public NoteMineInTotalResponseDto readMyNoteInTotalProject(SessionUser sessionUser) {
-        List<NoteEachMineInTotalResponseDto> resultList = noteRepository.findUserNoteInTotalProject(sessionUser.getUserId());
+    public NoteMineInTotalResponseDto readMyNoteInTotalProject(User currentUser) {
+        List<NoteEachMineInTotalResponseDto> resultList = noteRepository.findUserNoteInTotalProject(currentUser.getUserId());
         return NoteMineInTotalResponseDto.builder().myNoteList(resultList).build();
     }
 
-    public NoteSearchInTotalResponseDto searchNoteInMyProjects(SessionUser sessionUser, String rawKeyword){
+    public NoteSearchInTotalResponseDto searchNoteInMyProjects(User currentUser, String rawKeyword){
         List<String> keywordList = pandanUtils.parseKeywordToList(rawKeyword);
-        List<noteEachSearchInTotalResponseDto> resultList = noteRepository.findNotesByUserIdAndKeywordInTotal(sessionUser.getUserId(), keywordList);
+        List<noteEachSearchInTotalResponseDto> resultList = noteRepository.findNotesByUserIdAndKeywordInTotal(currentUser.getUserId(), keywordList);
         return NoteSearchInTotalResponseDto.builder().noteList(resultList).build();
     }
 
-    public NoteSearchInMineResponseDto searchNoteInMyNotes(SessionUser sessionUser, String rawKeyword){
+    public NoteSearchInMineResponseDto searchNoteInMyNotes(User currentUser, String rawKeyword){
         List<String> keywordList = pandanUtils.parseKeywordToList(rawKeyword);
-        List<NoteEachSearchInMineResponseDto> resultList = noteRepository.findNotesByUserIdAndKeywordInMine(sessionUser.getUserId(), keywordList);
+        List<NoteEachSearchInMineResponseDto> resultList = noteRepository.findNotesByUserIdAndKeywordInMine(currentUser.getUserId(), keywordList);
         return NoteSearchInMineResponseDto.builder().noteList(resultList).build();
     }
 

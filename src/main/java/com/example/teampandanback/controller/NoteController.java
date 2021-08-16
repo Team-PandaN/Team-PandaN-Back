@@ -1,13 +1,13 @@
 package com.example.teampandanback.controller;
 
-import com.example.teampandanback.config.auth.LoginUser;
-import com.example.teampandanback.dto.auth.SessionUser;
+import com.example.teampandanback.OAuth2.UserDetailsImpl;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
 import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
 import com.example.teampandanback.dto.note.response.*;
 import com.example.teampandanback.dto.note.response.NoteSearchInTotalResponseDto;
 import com.example.teampandanback.service.NoteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -26,28 +26,28 @@ public class NoteController {
 
     //내가 쓴 노트 조회
     @GetMapping("/projects/{projectId}/mynotes")
-    public NoteMineInProjectResponseDto readNotesMineOnly(@PathVariable("projectId") Long projectId, @LoginUser SessionUser sessionUser) {
-        return noteService.readNotesMineOnly(projectId, sessionUser);
+    public NoteMineInProjectResponseDto readNotesMineOnly(@PathVariable("projectId") Long projectId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return noteService.readNotesMineOnly(projectId, userDetails.getUser());
     }
 
     //내가 북마크한 노트 조회
     @GetMapping("/notes/mybookmarks")
-    public NoteBookmarkedResponseDto  readBookmarkedMine(@LoginUser SessionUser sessionUser) {
-        return noteService.readBookmarkedMine(sessionUser);
+    public NoteBookmarkedResponseDto  readBookmarkedMine(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return noteService.readBookmarkedMine(userDetails.getUser());
     }
 
     //노트 상세 조회
     @GetMapping("/notes/{noteId}")
-    public NoteResponseDto noteDetail (@PathVariable("noteId") Long noteId, @LoginUser SessionUser sessionUser) {
-        return noteService.readNoteDetail(noteId, sessionUser);
+    public NoteResponseDto noteDetail (@PathVariable("noteId") Long noteId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return noteService.readNoteDetail(noteId, userDetails.getUser());
     }
 
     //내가 생성
     @PostMapping("/notes/{projectId}")
     public NoteCreateResponseDto createNote (@PathVariable Long projectId,
                                              @RequestBody NoteCreateRequestDto noteCreateRequestDto,
-                                             @LoginUser SessionUser sessionUser){
-        return noteService.createNote(projectId, noteCreateRequestDto, sessionUser);
+                                             @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return noteService.createNote(projectId, noteCreateRequestDto, userDetails.getUser());
     }
 
     //노트 수정
@@ -71,19 +71,19 @@ public class NoteController {
 
     // 전체 프로젝트에서 내가 작성한 노트 조회
     @GetMapping("/notes/mynotes")
-    public NoteMineInTotalResponseDto readMyNoteInTotalProject(@LoginUser SessionUser sessionUser){
-        return noteService.readMyNoteInTotalProject(sessionUser);
+    public NoteMineInTotalResponseDto readMyNoteInTotalProject(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        return noteService.readMyNoteInTotalProject(userDetails.getUser());
     }
 
     // 사용자가 멤버인 프로젝트들 중에서 노트 제목 검색
     @GetMapping("/notes/search")
-    public NoteSearchInTotalResponseDto searchNoteInMyProjects(@LoginUser SessionUser sessionUser, @RequestParam("keyword") String rawKeyword){
-        return noteService.searchNoteInMyProjects(sessionUser, rawKeyword);
+    public NoteSearchInTotalResponseDto searchNoteInMyProjects(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("keyword") String rawKeyword){
+        return noteService.searchNoteInMyProjects(userDetails.getUser(), rawKeyword);
     }
 
     // 내가 쓴 문서들 중에서 노트 제목 검색
     @GetMapping("/notes/search/mynotes")
-    public NoteSearchInMineResponseDto searchNoteInMyNotes(@LoginUser SessionUser sessionUser, @RequestParam("keyword") String rawKeyword){
-        return noteService.searchNoteInMyNotes(sessionUser, rawKeyword);
+    public NoteSearchInMineResponseDto searchNoteInMyNotes(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("keyword") String rawKeyword){
+        return noteService.searchNoteInMyNotes(userDetails.getUser(), rawKeyword);
     }
 }

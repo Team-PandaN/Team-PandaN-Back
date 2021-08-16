@@ -29,23 +29,19 @@ dependencies {
     //database
     //h2
     implementation('com.h2database:h2')
-
-    // mustache server-template-engine
-    implementation('org.springframework.boot:spring-boot-starter-mustache')
+    //mysql
+//    implementation 'mysql:mysql-connector-java'
 
     // spring-security
-    //      소셜 로그인 등 클라이언트 입장에서 소셜 기능 구현 시 필요한 의존성입니다.
-    //      spring-security-oauth2-client와 spring-security-oauth2-jose를 기본으로 관리 해 줍니다.
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     testImplementation("org.springframework.security:spring-security-test")
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
-    // spring-session-jdbc
-    //      MySQL과 같은 데이터베이스를 세션 저장소로 사용한다.
-//    implementation 'org.springframework.session:spring-session-jdbc'
-
     // Querydsl 추가
     implementation 'com.querydsl:querydsl-jpa'
+
+    // JWT Token
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+    implementation 'org.json:json:20210307'
 }
 
 test {

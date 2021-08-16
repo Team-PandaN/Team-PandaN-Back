@@ -10,7 +10,6 @@ import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.domain.user.UserRepository;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
-import com.example.teampandanback.dto.auth.SessionUser;
 import com.example.teampandanback.dto.comment.request.CommentCreateRequestDto;
 import com.example.teampandanback.dto.comment.request.CommentUpdateRequestDto;
 import com.example.teampandanback.dto.comment.response.CommentCreateResponseDto;
@@ -36,8 +35,8 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
 
-    public CommentCreateResponseDto createComment(Long noteId, SessionUser sessionUser, CommentCreateRequestDto commentCreateRequestDto) {
-        User user = userRepository.findById(sessionUser.getUserId()).orElseThrow(
+    public CommentCreateResponseDto createComment(Long noteId, User currentUser, CommentCreateRequestDto commentCreateRequestDto) {
+        User user = userRepository.findById(currentUser.getUserId()).orElseThrow(
                 () -> new ApiRequestException("등록되지 않은 유저의 접근입니다.")
         );
 
@@ -71,8 +70,8 @@ public class CommentService {
                 .build();
     }
 
-    public CommentReadListResponseDto readComments(Long noteId, SessionUser sessionUser) {
-        User user = userRepository.findById(sessionUser.getUserId()).orElseThrow(
+    public CommentReadListResponseDto readComments(Long noteId, User currentUser) {
+        User user = userRepository.findById(currentUser.getUserId()).orElseThrow(
                 () -> new ApiRequestException("등록되지 않은 유저의 접근입니다.")
         );
 
@@ -106,12 +105,12 @@ public class CommentService {
 
     // 댓글 수정
     @Transactional
-    public CommentUpdateResponseDto updateComment(Long commentId, SessionUser sessionUser, CommentUpdateRequestDto commentUpdateRequestDto) {
+    public CommentUpdateResponseDto updateComment(Long commentId, User currentUser, CommentUpdateRequestDto commentUpdateRequestDto) {
 
         Optional<Comment> maybeComment = commentRepository.findById(commentId);
 
         Comment updateComment = maybeComment
-                                    .filter(c->c.getUser().getUserId().equals(sessionUser.getUserId()))
+                                    .filter(c->c.getUser().getUserId().equals(currentUser.getUserId()))
                                     .map(c->c.update(commentUpdateRequestDto))
                                     .orElseThrow(() -> new ApiRequestException("댓글은 본인만 수정할 수 있습니다"));
 
@@ -120,8 +119,8 @@ public class CommentService {
 
     // 댓글 삭제
     @Transactional
-    public CommentDeleteResponseDto deleteComment(Long commentId, SessionUser sessionUser) {
-        commentRepository.deleteByCommentIdAndUserId(commentId, sessionUser.getUserId());
+    public CommentDeleteResponseDto deleteComment(Long commentId, User currentUser) {
+        commentRepository.deleteByCommentIdAndUserId(commentId, currentUser.getUserId());
 
         return CommentDeleteResponseDto.builder()
                 .commentId(commentId)
