@@ -1,13 +1,16 @@
 package com.example.teampandanback.domain.note;
 
+import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.dto.note.response.NoteEachMineInTotalResponseDto;
 import com.example.teampandanback.dto.note.response.noteEachSearchInTotalResponseDto;
 import com.example.teampandanback.dto.note.response.NoteResponseDto;
 import com.example.teampandanback.dto.note.response.NoteEachSearchInMineResponseDto;
 import com.example.teampandanback.utils.PandanUtils;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.data.domain.Pageable;
 
 import javax.persistence.EntityManager;
 import java.util.List;
@@ -65,17 +68,20 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
 
     // 전체 프로젝트 중 해당 유저가 작성한 노트 조회
     @Override
-    public List<NoteEachMineInTotalResponseDto> findUserNoteInTotalProject(Long userId) {
-
-        return queryFactory
-                .select(
-                        Projections.constructor(NoteEachMineInTotalResponseDto.class,
-                                note.noteId, note.title, note.createdAt, note.step, project.projectId, project.title
+    public List<NoteEachMineInTotalResponseDto> findUserNoteInTotalProject(Long userId, Pageable pageable) {
+        QueryResults<NoteEachMineInTotalResponseDto> results =
+                queryFactory
+                        .select(
+                                Projections.constructor(NoteEachMineInTotalResponseDto.class,
+                                        note.noteId, note.title, note.createdAt, note.step, project.projectId, project.title
                                 ))
-                .from(note)
-                .join(note.project, project)
-                .where(note.user.userId.eq(userId))
-                .fetch();
+                        .from(note)
+                        .join(note.project, project)
+                        .where(note.user.userId.eq(userId))
+                        .offset(pageable.getOffset())
+                        .limit(pageable.getPageSize() + 1)
+                        .fetchResults();
+        return results.getResults();
     }
 
     @Override
@@ -87,13 +93,17 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
     }
 
     @Override
-    public List<Note> findAllNoteByProjectAndUserOrderByCreatedAtDesc(Long projectId, Long userId) {
-        return queryFactory
-                .select(note)
-                .from(note)
-                .where(note.project.projectId.eq(projectId).and(note.user.userId.eq(userId)))
-                .orderBy(note.createdAt.desc())
-                .fetch();
+    public List<Note> findAllNoteByProjectAndUserOrderByCreatedAtDesc(Long projectId, Long userId, Pageable pageable) {
+        QueryResults<Note> results =
+                queryFactory
+                        .select(note)
+                        .from(note)
+                        .where(note.project.projectId.eq(projectId).and(note.user.userId.eq(userId)))
+                        .orderBy(note.createdAt.desc())
+                        .offset(pageable.getOffset())
+                        .limit(pageable.getPageSize() + 1)
+                        .fetchResults();
+        return results.getResults();
     }
 
     // keyword로 내가 참여하고 있는 프로젝트 안에서 노트 검색, 제목으로만 검색합니다.
@@ -131,5 +141,19 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                 .orderBy(note.modifiedAt.desc())
                 .join(note.project, project)
                 .fetch();
+    }
+
+    @Override
+    public List<Note> findAllByProjectOrderByCreatedAtDesc(Project project, Pageable pageable) {
+        QueryResults<Note> results =
+                queryFactory
+                        .select(note)
+                        .from(note)
+                        .where(note.project.eq(project))
+                        .orderBy(note.createdAt.desc())
+                        .offset(pageable.getOffset())
+                        .limit(pageable.getPageSize() + 1)
+                        .fetchResults();
+        return results.getResults();
     }
 }
