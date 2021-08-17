@@ -1,5 +1,6 @@
 package com.example.teampandanback.domain.Comment;
 
+import com.example.teampandanback.domain.Timestamped;
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.dto.comment.request.CommentUpdateRequestDto;
@@ -14,7 +15,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @DynamicUpdate
 @Entity
-public class Comment {
+public class Comment extends Timestamped {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "COMMENT_ID")
     private Long commentId;

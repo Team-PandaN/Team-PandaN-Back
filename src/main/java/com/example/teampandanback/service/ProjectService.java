@@ -50,11 +50,6 @@ public class ProjectService {
 
         List<UserProjectMapping> currentUserProjectMappingList = userProjectMappingRepository.findByUserId(currentUser.getUserId());
 
-        List<Long> noteCountList = new ArrayList<>();
-        List<LocalDateTime> recentNoteUpdateDateList = new ArrayList<>();
-        List<Long> countCurrentUserBookmarkedAtByProjectIdList = new ArrayList<>();
-        List<List<String>> crewProfilesList = new ArrayList<>();
-        List<Long> crewCountList = new ArrayList<>();
         for (UserProjectMapping each : currentUserProjectMappingList) {
             //noteCount와 recentNoteUpdateDate를 순서대로 넣음. 아직 최종 sorting은 안된 과정
 
