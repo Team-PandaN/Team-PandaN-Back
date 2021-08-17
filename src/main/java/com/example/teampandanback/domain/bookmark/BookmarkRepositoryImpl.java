@@ -65,6 +65,7 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
                                 .where(bookmark.user.userId.eq(userId))))
                         .join(note.project, project)
                         .join(note.user, user)
+                        .orderBy(note.createdAt.desc())
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize() + 1)
                         .fetchResults();

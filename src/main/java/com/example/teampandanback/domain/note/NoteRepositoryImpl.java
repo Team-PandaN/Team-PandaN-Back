@@ -78,6 +78,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                         .from(note)
                         .join(note.project, project)
                         .where(note.user.userId.eq(userId))
+                        .orderBy(note.createdAt.desc())
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize() + 1)
                         .fetchResults();
