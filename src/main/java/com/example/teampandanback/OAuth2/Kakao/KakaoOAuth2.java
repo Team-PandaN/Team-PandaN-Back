@@ -30,9 +30,25 @@ public class KakaoOAuth2 {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", "c8dca36f643170e1873900b2b3d46e68");
-        params.add("redirect_uri", "http://localhost:8080/user/kakao/callback");
-//        params.add("redirect_uri", "http://blossomwhale.shop/user/kakao/callback");
         params.add("code", authorizedCode);
+
+
+        //Switching
+
+        //카카오에 요청을 보낼 때,
+        //https://kauth.kakao.com/oauth/authorize?client_id=278001b9fc63c010f90080f4489dc776&redirect_uri=http://localhost:8080/user/kakao/callback&response_type=code
+        //에서의 redirect_uri를 의미합니다. 보낸것과, 여기서 사용하는것이 같아야합니다.
+
+        //프론트 로컬 용
+//        params.add("redirect_uri", "http://localhost:3000/user/kakao/callback");
+
+        //최종 배포용
+        //params.add("redirect_uri", "http://front.blossomwhale.shop/user/kakao/callback");
+
+        //백엔드 로컬 테스트용
+        params.add("redirect_uri", "http://localhost:8080/user/kakao/callback");
+
+
 
         // HttpHeader와 HttpBody를 하나의 오브젝트에 담기
         RestTemplate rt = new RestTemplate();
@@ -49,13 +65,11 @@ public class KakaoOAuth2 {
 
         // JSON -> 액세스 토큰 파싱
         String tokenJson = response.getBody();
-        //System.out.println(tokenJson); 요기도 확인
         JSONObject rjson = new JSONObject(tokenJson);
         String accessToken = rjson.getString("access_token");
 
         return accessToken;
     }
-
 
 
     private KakaoUserInfo getUserInfoByToken(String accessToken) {
@@ -77,11 +91,23 @@ public class KakaoOAuth2 {
         );
 
         JSONObject body = new JSONObject(response.getBody());
-//        Long id = body.getLong("id");
-        String email = body.getJSONObject("kakao_account").getString("email");
-        String name = body.getJSONObject("properties").getString("nickname");
-        String picture = body.getJSONObject("properties").getString("profile_image");
 
-        return new KakaoUserInfo(email, name, picture);
+        //null-safe한 값들.
+        Long id = body.getLong("id");
+        String name = body.getJSONObject("properties").getString("nickname");
+
+        //null-safe가 보장되지 않는 값들.
+        String email = "";
+        //TODO: 우선 picture를 기본이미지로 사용하고 있는 다른조 것을 사용하고 있는데, 다른 url로 바꿀 예정
+        String picture = "http://52.78.204.238/image/profileDefaultImg.jpg";
+        try {
+            email = body.getJSONObject("kakao_account").getString("email");
+        }catch (Exception ignored){}
+        try{
+            picture = body.getJSONObject("properties").getString("profile_image");
+        }catch (Exception ignored){}
+
+
+        return new KakaoUserInfo(id, email, name, picture);
     }
 }

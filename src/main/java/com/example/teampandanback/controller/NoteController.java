@@ -6,11 +6,14 @@ import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
 import com.example.teampandanback.dto.note.response.*;
 import com.example.teampandanback.dto.note.response.NoteSearchInTotalResponseDto;
 import com.example.teampandanback.service.NoteService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
+@Api(tags = {"노트"})
 @RequiredArgsConstructor
 @RequestMapping("/api")
 @RestController
@@ -19,30 +22,35 @@ public class NoteController {
     private final NoteService noteService;
 
     //노트 칸반형 조회
+    @ApiOperation(value = "노트 칸반형 조회")
     @GetMapping("/projects/{projectId}/kanbans")
     public KanbanNoteSearchResponseDto kanbanNoteSearchResponse(@PathVariable("projectId") Long projectId){
         return noteService.readKanbanNote(projectId);
     }
 
     //내가 쓴 노트 조회
+    @ApiOperation(value = "특정 프로젝트에서 내가 쓴 노트 조회")
     @GetMapping("/projects/{projectId}/mynotes")
     public NoteMineInProjectResponseDto readNotesMineOnly(@PathVariable("projectId") Long projectId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return noteService.readNotesMineOnly(projectId, userDetails.getUser());
     }
 
     //내가 북마크한 노트 조회
+    @ApiOperation(value = "전체 프로젝트에서 내가 북마크 한 노트 조회")
     @GetMapping("/notes/mybookmarks")
     public NoteBookmarkedResponseDto  readBookmarkedMine(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return noteService.readBookmarkedMine(userDetails.getUser());
     }
 
     //노트 상세 조회
+    @ApiOperation(value = "노트 상세 조회")
     @GetMapping("/notes/{noteId}")
     public NoteResponseDto noteDetail (@PathVariable("noteId") Long noteId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return noteService.readNoteDetail(noteId, userDetails.getUser());
     }
 
     //내가 생성
+    @ApiOperation(value = "노트 생성")
     @PostMapping("/notes/{projectId}")
     public NoteCreateResponseDto createNote (@PathVariable Long projectId,
                                              @RequestBody NoteCreateRequestDto noteCreateRequestDto,
@@ -51,6 +59,7 @@ public class NoteController {
     }
 
     //노트 수정
+    @ApiOperation(value = "노트 수정")
     @PutMapping("/notes/{noteId}")
     public NoteUpdateResponseDto updateNote (@PathVariable("noteId") Long noteId, @RequestBody NoteUpdateRequestDto noteUpdateRequestDto) {
         return noteService.updateNoteDetail(noteId, noteUpdateRequestDto);
@@ -58,30 +67,35 @@ public class NoteController {
     }
 
     //노트 삭제
+    @ApiOperation(value = "노트 삭제")
     @DeleteMapping("/notes/{noteId}")
     public NoteDeleteResponseDto deleteNote (@PathVariable("noteId") Long noteId) {
         return noteService.deleteNote(noteId);
     }
 
     //노트 일반형 조회
+    @ApiOperation(value = "노트 일반형 조회")
     @GetMapping("/projects/{projectId}/issues")
     public NoteSearchResponseDto ordinaryNoteSearch(@PathVariable("projectId") Long projectId) {
         return noteService.readOrdinaryNote(projectId);
     }
 
     // 전체 프로젝트에서 내가 작성한 노트 조회
+    @ApiOperation(value = "전체 프로젝트에서 내가 작성한 노트 조회")
     @GetMapping("/notes/mynotes")
     public NoteMineInTotalResponseDto readMyNoteInTotalProject(@AuthenticationPrincipal UserDetailsImpl userDetails){
         return noteService.readMyNoteInTotalProject(userDetails.getUser());
     }
 
     // 사용자가 멤버인 프로젝트들 중에서 노트 제목 검색
+    @ApiOperation(value = "내가 참여한 프로젝트들 중에서 노트 검색 (제목으로)")
     @GetMapping("/notes/search")
     public NoteSearchInTotalResponseDto searchNoteInMyProjects(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("keyword") String rawKeyword){
         return noteService.searchNoteInMyProjects(userDetails.getUser(), rawKeyword);
     }
 
     // 내가 쓴 문서들 중에서 노트 제목 검색
+    @ApiOperation(value = "내가 쓴 노트들 중에서 노트 검색 (제목으로)")
     @GetMapping("/notes/search/mynotes")
     public NoteSearchInMineResponseDto searchNoteInMyNotes(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("keyword") String rawKeyword){
         return noteService.searchNoteInMyNotes(userDetails.getUser(), rawKeyword);
