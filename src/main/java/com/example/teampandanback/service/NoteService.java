@@ -57,36 +57,55 @@ public class NoteService {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
 
-        note.update(noteUpdateRequestDto, pandanUtils.changeType(noteUpdateRequestDto.getDeadline()), Step.valueOf(noteUpdateRequestDto.getStep()));
+        note.update(noteUpdateRequestDto, pandanUtils.changeType(noteUpdateRequestDto.getDeadline()),
+                Step.valueOf(noteUpdateRequestDto.getStep()), noteUpdateRequestDto.getFormerNext(), noteUpdateRequestDto.getFormerNext());
 
         return NoteUpdateResponseDto.of(note);
     }
 
     // Note 작성
     @Transactional
-    public NoteCreateResponseDto createNote(Long projectId, NoteCreateRequestDto noteCreateRequestDto, User currentUser) {
-
-        Optional<UserProjectMapping> userProjectMapping =
-                userProjectMappingRepository
-                        .findByUserIdAndProjectId(currentUser.getUserId(), projectId);
-
-        if(!userProjectMapping.isPresent()){
-            throw new ApiRequestException("해당 유저가 해당 프로젝트에 참여해있지 않습니다.");
-        }
+    public NoteCreateResponseDto createNote(Long projectId, NoteCreateRequestDto noteCreateRequestDto, SessionUser sessionUser) {
+        UserProjectMapping userProjectMapping = userProjectMappingRepository
+                        .findByUserIdAndProjectId(sessionUser.getUserId(), projectId)
+                        .orElseThrow(()-> new ApiRequestException("해당 유저가 해당 프로젝트에 참여해있지 않습니다."));
 
         // [노트 생성] 전달받은 String deadline을 LocalDate 자료형으로 형변환
         LocalDate deadline = pandanUtils.changeType(noteCreateRequestDto.getDeadline());
-
         // [노트 생성] 전달받은 String step을 Enum Step으로
         Step step = Step.valueOf(noteCreateRequestDto.getStep());
-
         // [노트 생성] 찾은 userProjectMappingRepository를 통해 user와 프로젝트 가져오기
-        User user = userProjectMapping.get().getUser();
-        Project project = userProjectMapping.get().getProject();
+        User user = userProjectMapping.getUser();
+        Project project = userProjectMapping.getProject();
 
-        // [노트 생성] 전달받은 noteCreateRequestDto를 Note.java에 정의한 of 메소드에 전달하여 빌더 패턴에 넣는다.
-        Note note = noteRepository.save(Note.of(noteCreateRequestDto, deadline, step, user, project));
-        return NoteCreateResponseDto.of(note);
+        // 현재 프로젝트의 해당 스텝에 있는 노트 리스트를 가져온 후 가장 마지막 노트를 찾는다.
+        // 조건을 만족하지 않는다면 lastNote 값에 그 다음의 if문 조건절 비교를 위해 null 넣어준다.
+        Note lastNote = noteRepository
+                .findAllByProjectAndStep(projectId, step)
+                .stream()
+                .filter(each -> each.getNext().equals(0L))
+                .findFirst().orElse(null);
+
+        // lastNote 있고 noteCreateRequestDto previous 값과 일치한다면
+        if(lastNote != null && lastNote.getNoteId().equals(noteCreateRequestDto.getPrevious())){
+            // [노트 생성] 전달받은 noteCreateRequestDto를 Note.java에 정의한 of 메소드에 전달하여 빌더 패턴에 넣는다.
+            Note note = noteRepository
+                    .save(Note.of(noteCreateRequestDto, deadline, step, user, project, lastNote.getNoteId(), 0L));
+            // lastNote의 Next 값을 현재 생성된 노트의 ID로 변경해준다.
+            lastNote.updateWhileCreate(note.getNoteId());
+            return NoteCreateResponseDto.of(note);
+        }
+        // lastNote 없고 noteCreateRequestDto previous 값도 0이 맞다면
+        else if(lastNote == null && noteCreateRequestDto.getPrevious() == 0){
+            // lastNote 가 없으므로 바로 저장한다.
+            return NoteCreateResponseDto.of(noteRepository.save(Note.of(noteCreateRequestDto, deadline, step, user, project, 0L, 0L)));
+        }
+        // lastNote 없는데 noteCreateRequestDto prvious 값은 0이 아니거나 다른 값이라면
+        // lastNote 있는데 previous 값은 0 내지는 값이 다르다면
+        // 사용자의 칸반이 새로고침 되어야.. 싱크 맞지 않는 것 -> 웹소켓 문제로 이어진다.
+        else{
+            throw new ApiRequestException("새로고침 이후 다시 시도해주세요.");
+        }
     }
 
     // 해당 Project 에서 내가 작성한 Note 조회

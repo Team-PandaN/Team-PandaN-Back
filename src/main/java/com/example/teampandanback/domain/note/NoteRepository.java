@@ -3,6 +3,7 @@ package com.example.teampandanback.domain.note;
 import com.example.teampandanback.domain.project.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -13,6 +14,9 @@ public interface NoteRepository extends JpaRepository<Note,Long>, NoteRepository
     // Project 에 연관된 Note 조회
     List<Note> findByProject(Project project);
     List<Note> findAllByProjectOrderByCreatedAtDesc(Project project);
+
+    @Query("select note from Note note where note.project.projectId = :projectId and note.step = :step")
+    List<Note> findAllByProjectAndStep(@Param("projectId") Long projectId, @Param("step") Step step);
 
     // Project 에 연관된 Note 삭제
     void deleteByProject_ProjectId(Long projectId);
