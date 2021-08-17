@@ -61,7 +61,7 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
                 .fetch();
 
 
-        QueryResults<NoteEachBookmarkedResponseDto> results =
+        List<NoteEachBookmarkedResponseDto> results =
                 queryFactory
                         .select(Projections.constructor(NoteEachBookmarkedResponseDto.class,
                                 note.noteId, note.title, note.step, project.projectId, project.title, user.name))
@@ -72,8 +72,9 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
                         .orderBy(note.createdAt.desc())
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize() + 1)
-                        .fetchResults();
-        return results.getResults();
+                        .fetch();
+
+        return results;
     }
 
     // Note 에 연관된 북마크 삭제

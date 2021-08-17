@@ -69,7 +69,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
     // 전체 프로젝트 중 해당 유저가 작성한 노트 조회
     @Override
     public List<NoteEachMineInTotalResponseDto> findUserNoteInTotalProject(Long userId, Pageable pageable) {
-        QueryResults<NoteEachMineInTotalResponseDto> results =
+        List<NoteEachMineInTotalResponseDto> results =
                 queryFactory
                         .select(
                                 Projections.constructor(NoteEachMineInTotalResponseDto.class,
@@ -81,8 +81,8 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                         .orderBy(note.createdAt.desc())
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize() + 1)
-                        .fetchResults();
-        return results.getResults();
+                        .fetch();
+        return results;
     }
 
     @Override
@@ -95,7 +95,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
 
     @Override
     public List<Note> findAllNoteByProjectAndUserOrderByCreatedAtDesc(Long projectId, Long userId, Pageable pageable) {
-        QueryResults<Note> results =
+        List<Note> results =
                 queryFactory
                         .select(note)
                         .from(note)
@@ -103,8 +103,8 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                         .orderBy(note.createdAt.desc())
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize() + 1)
-                        .fetchResults();
-        return results.getResults();
+                        .fetch();
+        return results;
     }
 
     // keyword로 내가 참여하고 있는 프로젝트 안에서 노트 검색, 제목으로만 검색합니다.
@@ -146,7 +146,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
 
     @Override
     public List<Note> findAllByProjectOrderByCreatedAtDesc(Project project, Pageable pageable) {
-        QueryResults<Note> results =
+        List<Note> results =
                 queryFactory
                         .select(note)
                         .from(note)
@@ -154,7 +154,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                         .orderBy(note.createdAt.desc())
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize() + 1)
-                        .fetchResults();
-        return results.getResults();
+                        .fetch();
+        return results;
     }
 }
