@@ -12,7 +12,6 @@ public interface NoteRepository extends JpaRepository<Note,Long>, NoteRepository
     List<Note> findNoteByProject_projectId(Long projectId);
     // Project 에 연관된 Note 조회
     List<Note> findByProject(Project project);
-    List<Note> findAllByProjectOrderByCreatedAtDesc(Project project);
 
     // Project 에 연관된 Note 삭제
     void deleteByProject_ProjectId(Long projectId);
