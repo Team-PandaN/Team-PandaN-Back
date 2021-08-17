@@ -1,5 +1,6 @@
 package com.example.teampandanback.domain.user_project_mapping;
 
+import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.dto.project.response.ProjectDetailResponseDto;
 import com.example.teampandanback.dto.project.request.ProjectResponseDto;
 import com.example.teampandanback.dto.project.response.ProjectSidebarResponseDto;
@@ -22,10 +23,16 @@ public interface UserProjectMappingRepositoryQuerydsl {
     //x 유저가 y 프로젝트에 속해 있는지 여부를 판단, fetchOne()
     Optional<UserProjectMapping> findByUserIdAndProjectId(Long userId, Long projectId);
 
+    //x 유저가 참여해있는 모든 유저-프로젝트를 호출
+    List<UserProjectMapping> findByUserId(Long userId);
+
+    // x 프로젝트에 참여해있는 모든 유저-프로젝트를 호출
+    List<UserProjectMapping> findByProjectId(Long projectId);
 
     UserProjectMapping findByUserIdAndProjectIdJoin(Long userId, Long projectId);
 
     @Modifying(clearAutomatically = true)
     void deleteByProjectId(Long projectId);
+
 
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @Getter
@@ -13,13 +14,15 @@ public class CommentReadEachResponseDto {
     private Long commentId;
     private String content;
     private String writer;
+    private LocalDateTime modifiedAt;
 
 
     @Builder
-    public CommentReadEachResponseDto(Long commentId, String content, String writer) {
+    public CommentReadEachResponseDto(Long commentId, String content, String writer, LocalDateTime modifiedAt) {
         this.commentId = commentId;
         this.content = content;
         this.writer = writer;
+        this.modifiedAt = modifiedAt;
     }
 
     public static CommentReadEachResponseDto fromEntity(Comment comment){
@@ -27,6 +30,7 @@ public class CommentReadEachResponseDto {
                 .commentId(comment.getCommentId())
                 .content(comment.getContent())
                 .writer(comment.getUser().getName())
+                .modifiedAt(comment.getModifiedAt())
                 .build();
 
     }
