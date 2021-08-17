@@ -54,15 +54,19 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
 
     @Override
     public List<NoteEachBookmarkedResponseDto> findNoteByUserIdInBookmark(Long userId, Pageable pageable) {
+        List<Long> noteIdList = queryFactory
+                .select(bookmark.note.noteId)
+                .from(bookmark)
+                .where(bookmark.user.userId.eq(userId))
+                .fetch();
+
+
         QueryResults<NoteEachBookmarkedResponseDto> results =
                 queryFactory
                         .select(Projections.constructor(NoteEachBookmarkedResponseDto.class,
                                 note.noteId, note.title, note.step, project.projectId, project.title, user.name))
                         .from(note)
-                        .where(note.noteId.in(queryFactory
-                                .select(bookmark.note.noteId)
-                                .from(bookmark)
-                                .where(bookmark.user.userId.eq(userId))))
+                        .where(note.noteId.in(noteIdList))
                         .join(note.project, project)
                         .join(note.user, user)
                         .orderBy(note.createdAt.desc())
