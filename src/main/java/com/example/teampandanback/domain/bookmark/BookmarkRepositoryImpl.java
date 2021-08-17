@@ -98,4 +98,20 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
                 .join(note.user, user)
                 .fetch();
     }
+
+    @Override
+    public Long countCurrentUserBookmarkedAtByProjectId(Long userId, Long projectId) {
+        return queryFactory
+                .selectFrom(bookmark)
+                .where(
+                        bookmark.note.noteId.in(
+                                JPAExpressions
+                                        .select(note.noteId)
+                                        .from(note)
+                                        .where(note.project.projectId.eq(projectId))
+                        ),
+                        bookmark.user.userId.eq(userId)
+                )
+                .fetchCount();
+    }
 }

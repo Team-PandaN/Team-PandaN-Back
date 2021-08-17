@@ -1,5 +1,6 @@
 package com.example.teampandanback.domain.user_project_mapping;
 
+import com.example.teampandanback.domain.user.QUser;
 import com.example.teampandanback.dto.project.response.ProjectDetailResponseDto;
 import com.example.teampandanback.dto.project.request.ProjectResponseDto;
 import com.example.teampandanback.dto.project.response.ProjectSidebarResponseDto;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.example.teampandanback.domain.project.QProject.project;
+import static com.example.teampandanback.domain.user.QUser.user;
 import static com.example.teampandanback.domain.user_project_mapping.QUserProjectMapping.userProjectMapping;
 
 public class UserProjectMappingRepositoryImpl implements UserProjectMappingRepositoryQuerydsl {
@@ -20,6 +22,27 @@ public class UserProjectMappingRepositoryImpl implements UserProjectMappingRepos
 
     public UserProjectMappingRepositoryImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
+    }
+
+
+    @Override
+    public List<UserProjectMapping> findByProjectId(Long projectId) {
+        return queryFactory
+                .select(userProjectMapping)
+                .from(userProjectMapping)
+                .join(userProjectMapping.user, user).fetchJoin()
+                .where(userProjectMapping.project.projectId.eq(projectId))
+                .fetch();
+    }
+
+    @Override
+    public List<UserProjectMapping> findByUserId(Long userId) {
+        return queryFactory
+                .select(userProjectMapping)
+                .from(userProjectMapping)
+                .join(userProjectMapping.project,project).fetchJoin()
+                .where(userProjectMapping.user.userId.eq(userId))
+                .fetch();
     }
 
     // 프로젝트의 상세 조회

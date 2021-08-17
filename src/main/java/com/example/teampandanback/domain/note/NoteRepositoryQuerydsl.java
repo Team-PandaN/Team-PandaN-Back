@@ -21,4 +21,7 @@ public interface NoteRepositoryQuerydsl {
     List<Note> findAllNoteByProjectAndUserOrderByCreatedAtDesc(Long projectId, Long userId);
     List<noteEachSearchInTotalResponseDto> findNotesByUserIdAndKeywordInTotal(Long userId, List<String> kewordList);
     List<NoteEachSearchInMineResponseDto> findNotesByUserIdAndKeywordInMine(Long userId, List<String> kewordList);
+
+    List<Note> findAllByProjectId(Long projectId);
+    Long countByProjectId(Long projectId);
 }

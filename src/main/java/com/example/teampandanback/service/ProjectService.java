@@ -2,6 +2,7 @@ package com.example.teampandanback.service;
 
 import com.example.teampandanback.domain.Comment.CommentRepository;
 import com.example.teampandanback.domain.bookmark.BookmarkRepository;
+import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.project.ProjectRepository;
@@ -21,6 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,11 +45,64 @@ public class ProjectService {
 
     // Project 목록 조회
     @Transactional
-    public List<ProjectResponseDto> readProjectList(User currentUser) {
-        List<ProjectResponseDto> projectResponseDtoList = userProjectMappingRepository
-                .findProjectByUser_UserId(currentUser.getUserId());
+    public List<ProjectEachResponseDTO> readProjectList(User currentUser) {
+        List<ProjectEachResponseDTO> result = new ArrayList<>();
 
-        return projectResponseDtoList;
+        List<UserProjectMapping> currentUserProjectMappingList = userProjectMappingRepository.findByUserId(currentUser.getUserId());
+
+        List<Long> noteCountList = new ArrayList<>();
+        List<LocalDateTime> recentNoteUpdateDateList = new ArrayList<>();
+        List<Long> countCurrentUserBookmarkedAtByProjectIdList = new ArrayList<>();
+        List<List<String>> crewProfilesList = new ArrayList<>();
+        List<Long> crewCountList = new ArrayList<>();
+        for (UserProjectMapping each : currentUserProjectMappingList) {
+            //noteCount와 recentNoteUpdateDate를 순서대로 넣음. 아직 최종 sorting은 안된 과정
+
+            List<Note> noteList = noteRepository.findAllByProjectId(each.getProject().getProjectId());
+            Long noteCount = (long) noteList.size();
+
+            List<Note> sortedByLastUpdatedTime = noteList.stream()
+                    .sorted(Comparator.comparing(Note::getModifiedAt))
+                    .collect(Collectors.toList());
+
+            LocalDateTime recentNoteUpdateDate = LocalDateTime.of(3000,12,29,23,59);
+            if(!(sortedByLastUpdatedTime.size() == 0)){
+                recentNoteUpdateDate = sortedByLastUpdatedTime.get(0).getModifiedAt();
+            }
+
+            //현재 유저가 이 프로젝트에 북마크 누른 횟수를 구함
+            Long bookmarkCount = bookmarkRepository.countCurrentUserBookmarkedAtByProjectId(each.getUser().getUserId(),each.getProject().getProjectId());
+
+            //이 프로젝트 id에 참여해있는 유저들을 호출하기 위한 mapping records
+            List<UserProjectMapping> userProjectMappingList = userProjectMappingRepository.findByProjectId(each.getProject().getProjectId());
+            Long crewCount = (long) userProjectMappingList.size();
+            List<String> crewProfiles = new ArrayList<>();
+            for (int i = 0; i < 3; i++) {
+                try {
+                    crewProfiles.add(userProjectMappingList.get(i).getUser().getPicture());
+                } catch (Exception ignored) {
+                    break;
+                }
+            }
+
+            result.add(ProjectEachResponseDTO.builder()
+                    .noteCount(noteCount)
+                    .recentNoteUpdateDate(recentNoteUpdateDate)
+                    .bookmarkCount(bookmarkCount)
+                    .crewCount(crewCount)
+                    .crewProfiles(crewProfiles)
+                    .projectId(each.getProject().getProjectId())
+                    .title(each.getProject().getTitle())
+                    .detail(each.getProject().getDetail())
+                    .build());
+        }
+        List<ProjectEachResponseDTO> sortedList = result.stream().sorted(Comparator.comparing(ProjectEachResponseDTO::getRecentNoteUpdateDate)).collect(Collectors.toList());
+        for(ProjectEachResponseDTO each: sortedList){
+            if(each.getRecentNoteUpdateDate().isEqual(LocalDateTime.of(3000,12,29,23,59))){
+                each.setRecentNoteUpdateDate(null);
+            }
+        }
+        return sortedList;
 
     }
 

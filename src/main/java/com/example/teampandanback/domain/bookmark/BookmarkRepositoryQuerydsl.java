@@ -21,4 +21,6 @@ public interface BookmarkRepositoryQuerydsl {
 
     @Modifying(clearAutomatically = true)
     void deleteByNote(Long noteId);
+
+    Long countCurrentUserBookmarkedAtByProjectId(Long userId, Long projectId);
 }

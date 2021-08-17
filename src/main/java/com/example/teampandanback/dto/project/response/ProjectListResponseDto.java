@@ -8,10 +8,10 @@ import java.util.List;
 
 @Getter
 public class ProjectListResponseDto {
-    List<ProjectResponseDto> projects;
+    List<ProjectEachResponseDTO> projects;
 
     @Builder
-    public ProjectListResponseDto(List<ProjectResponseDto> userProjectMappingDtoList) {
+    public ProjectListResponseDto(List<ProjectEachResponseDTO> userProjectMappingDtoList) {
         this.projects = userProjectMappingDtoList;
     }
 }

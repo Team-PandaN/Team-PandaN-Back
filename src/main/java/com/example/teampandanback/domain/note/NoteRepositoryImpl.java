@@ -132,4 +132,20 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                 .join(note.project, project)
                 .fetch();
     }
+
+    @Override
+    public Long countByProjectId(Long projectId) {
+        return queryFactory
+                .selectFrom(note)
+                .where(note.project.projectId.eq(projectId))
+                .fetchCount();
+    }
+
+    @Override
+    public List<Note> findAllByProjectId(Long projectId) {
+        return queryFactory
+                .selectFrom(note)
+                .where(note.project.projectId.eq(projectId))
+                .fetch();
+    }
 }
