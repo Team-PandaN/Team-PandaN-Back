@@ -96,17 +96,15 @@ public class KakaoOAuth2 {
         Long id = body.getLong("id");
         String name = body.getJSONObject("properties").getString("nickname");
 
-        //null-safe가 보장되지 않는 값들.
+        //null-safe하지 않은 값들.
         String email = "";
-        //TODO: 우선 picture를 기본이미지로 사용하고 있는 다른조 것을 사용하고 있는데, 다른 url로 바꿀 예정
-        String picture = "http://52.78.204.238/image/profileDefaultImg.jpg";
-        try {
+        if(body.getJSONObject("kakao_account").getBoolean("has_email")){
             email = body.getJSONObject("kakao_account").getString("email");
-        }catch (Exception ignored){}
-        try{
-            picture = body.getJSONObject("properties").getString("profile_image");
-        }catch (Exception ignored){}
-
+        }
+        String picture = "https://s3.ap-northeast-2.amazonaws.com/front.blossomwhale.shop/ico-user.svg";
+        if(!body.getJSONObject("kakao_account").getJSONObject("profile").getBoolean("is_default_image")){
+            picture = body.getJSONObject("kakao_account").getJSONObject("profile").getString("profile_image_url");
+        }
 
         return new KakaoUserInfo(id, email, name, picture);
     }

@@ -15,14 +15,16 @@ public class CommentReadEachResponseDto {
     private String content;
     private String writer;
     private LocalDateTime modifiedAt;
+    private String writerProfileImg;
 
 
     @Builder
-    public CommentReadEachResponseDto(Long commentId, String content, String writer, LocalDateTime modifiedAt) {
+    public CommentReadEachResponseDto(Long commentId, String content, String writer, LocalDateTime modifiedAt, String writerProfileImg) {
         this.commentId = commentId;
         this.content = content;
         this.writer = writer;
         this.modifiedAt = modifiedAt;
+        this.writerProfileImg = writerProfileImg;
     }
 
     public static CommentReadEachResponseDto fromEntity(Comment comment){
@@ -31,6 +33,7 @@ public class CommentReadEachResponseDto {
                 .content(comment.getContent())
                 .writer(comment.getUser().getName())
                 .modifiedAt(comment.getModifiedAt())
+                .writerProfileImg(comment.getUser().getPicture())
                 .build();
 
     }

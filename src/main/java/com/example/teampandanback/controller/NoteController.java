@@ -29,7 +29,7 @@ public class NoteController {
     }
 
     //내가 쓴 노트 조회
-    @ApiOperation(value = "특정 프로젝트에서 내가 쓴 노트 조회")
+    @ApiOperation(value = "특정 프로젝트에서 내가 쓴 노트 조회",notes = "i.e) ?page=1&size=3")
     @GetMapping("/projects/{projectId}/mynotes")
     public NoteMineInProjectResponseDto readNotesMineOnly(@PathVariable("projectId") Long projectId, @AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("page") int page, @RequestParam("size") int size) {
         return noteService.readNotesMineOnly(projectId, userDetails.getUser(), page, size);

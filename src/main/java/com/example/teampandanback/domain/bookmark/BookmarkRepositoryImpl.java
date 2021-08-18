@@ -99,7 +99,7 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
 
         return queryFactory
                 .select(Projections.constructor(NoteEachSearchInBookmarkResponseDto.class,
-                        note.noteId, note.title, note.step, project.projectId, project.title, user.name))
+                        note.noteId, note.title, note.step, project.projectId, project.title, user.name, note.createdAt))
                 .from(note)
                 .where(note.noteId.in(noteIdList).and(builder))
                 .orderBy(note.modifiedAt.desc())
