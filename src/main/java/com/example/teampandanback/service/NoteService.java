@@ -19,6 +19,7 @@ import com.example.teampandanback.dto.note.response.noteEachSearchInTotalRespons
 import com.example.teampandanback.dto.note.response.NoteSearchInTotalResponseDto;
 import com.example.teampandanback.exception.ApiRequestException;
 import com.example.teampandanback.utils.PandanUtils;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -246,6 +247,23 @@ public class NoteService {
 
         // Note 에 연관된 북마크 삭제
         bookmarkRepository.deleteByNote(noteId);
+
+        Note previousNote = noteRepository.findById(note.getPrevious()).orElse(null);
+        Note nextNote = noteRepository.findById(note.getNext()).orElse(null);
+
+        try{
+            previousNote.updateWhileMoveNote(previousNote.getPrevious(), nextNote.getNoteId());
+        }
+        catch (Exception e){
+            throw new ApiRequestException(e.toString());
+        }
+
+        try{
+            nextNote.updateWhileMoveNote(previousNote.getNoteId(), nextNote.getNext());
+        }
+        catch (Exception e){
+            throw new ApiRequestException(e.toString());
+        }
 
         // Note 삭제
         noteRepository.delete(note);
