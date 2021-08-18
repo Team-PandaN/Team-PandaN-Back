@@ -62,11 +62,10 @@ public class Note extends Timestamped {
         this.nextId = nextId;
     }
 
-    public void update(NoteUpdateRequestDto noteUpdateRequestDto, LocalDate updateLocalDate, Step step) {
+    public void update(NoteUpdateRequestDto noteUpdateRequestDto, LocalDate updateLocalDate) {
         this.title = noteUpdateRequestDto.getTitle();
         this.content = noteUpdateRequestDto.getContent();
         this.deadline = updateLocalDate;
-        this.step = step;
     }
 
     public void updatePreviousIdAndNextId(Long previousId, Long nextId){
