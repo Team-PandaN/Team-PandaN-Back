@@ -255,14 +255,14 @@ public class NoteService {
             previousNote.updateWhileMoveNote(previousNote.getPrevious(), nextNote.getNoteId());
         }
         catch (Exception e){
-            throw new ApiRequestException(e.toString());
+            log.info(e.toString());
         }
 
         try{
             nextNote.updateWhileMoveNote(previousNote.getNoteId(), nextNote.getNext());
         }
         catch (Exception e){
-            throw new ApiRequestException(e.toString());
+            log.info(e.toString());
         }
 
         // Note 삭제
