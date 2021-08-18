@@ -12,6 +12,7 @@ import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
+import com.example.teampandanback.dto.note.request.NoteMoveRequestDto;
 import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
 import com.example.teampandanback.dto.note.response.*;
 import com.example.teampandanback.dto.note.response.noteEachSearchInTotalResponseDto;
@@ -51,24 +52,118 @@ public class NoteService {
         return noteResponseDto;
     }
 
-    // Note 업데이트
+    // Note 상세 조회에서 내용 업데이트
     @Transactional
     public NoteUpdateResponseDto updateNoteDetail(Long noteId, NoteUpdateRequestDto noteUpdateRequestDto) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
 
         note.update(noteUpdateRequestDto, pandanUtils.changeType(noteUpdateRequestDto.getDeadline()),
-                Step.valueOf(noteUpdateRequestDto.getStep()), noteUpdateRequestDto.getFormerNext(), noteUpdateRequestDto.getFormerNext());
+                Step.valueOf(noteUpdateRequestDto.getStep()));
 
         return NoteUpdateResponseDto.of(note);
     }
 
+    // Note 칸반 이동 시 순서 업데이트
+    @Transactional
+    public NoteUpdateResponseDto updateNoteMove(Long noteId, NoteMoveRequestDto noteMoveRequestDto) {
+        // 1. Step이 안 바뀐다면~
+        // 2. Step이 바뀐다면~
+
+        // 수정하려는 노트가 존재하지 않으면 멈춘다.
+        Note currentNote = noteRepository.findById(noteId).orElseThrow(() -> new ApiRequestException("수정하려는 노트가 존재하지 않음"));
+
+        // 옮기기 전 step에서의 노트 간 연결이 db와 같은지 확인
+        if (!currentNote.getPrevious().equals(noteMoveRequestDto.getOriginPreNoteId()) || !currentNote.getNext().equals(noteMoveRequestDto.getOriginNextNoteId())) {
+            throw new ApiRequestException("새로고침 후 시도해주세요");
+        }
+
+        // Step이 바뀐다면
+        if (!currentNote.getStep().toString().equals(noteMoveRequestDto.getStep())) {
+            // 옮기려고 하는 step에서의 노트 간 연결이 db와 같은지 확인
+            if (noteMoveRequestDto.getGoalPreNoteId() != 0L && noteMoveRequestDto.getGoalNextNoteId() != 0L) {
+                Note goalPreNote = noteRepository.findById(noteMoveRequestDto.getGoalPreNoteId()).orElseThrow(() -> new ApiRequestException("수정하려는 노트가 존재하지 않음"));
+                Note goalNextNote = noteRepository.findById(noteMoveRequestDto.getGoalNextNoteId()).orElseThrow(() -> new ApiRequestException("수정하려는 노트가 존재하지 않음"));
+                if (goalPreNote.getNext().equals(noteMoveRequestDto.getGoalNextNoteId())) {
+                    goalPreNote.updateWhileMoveNote(goalPreNote.getPrevious(), currentNote.getNoteId());
+                    currentNote.updateWhileMoveNote(goalPreNote.getNoteId(), goalNextNote.getNoteId());
+                    currentNote.updateStepWhileMoveNote(goalPreNote.getStep());
+                    goalNextNote.updateWhileMoveNote(currentNote.getNoteId(), goalNextNote.getNext());
+                } else {
+                    throw new ApiRequestException("새로고침 후 시도해주세요.");
+                }
+            } else if (noteMoveRequestDto.getGoalPreNoteId() == 0L && noteMoveRequestDto.getGoalNextNoteId() != 0L) {
+                Note goalNextNote = noteRepository.findById(noteMoveRequestDto.getGoalNextNoteId()).orElseThrow(() -> new ApiRequestException("수정하려는 노트가 존재하지 않음"));
+                if (goalNextNote.getPrevious().equals(0L)) {
+                    currentNote.updateWhileMoveNote(0L, goalNextNote.getNoteId());
+                    currentNote.updateStepWhileMoveNote(goalNextNote.getStep());
+                    goalNextNote.updateWhileMoveNote(currentNote.getNoteId(), goalNextNote.getNext());
+                } else {
+                    throw new ApiRequestException("새로고침 후 시도해주세요.");
+                }
+            } else if (noteMoveRequestDto.getGoalPreNoteId() != 0L && noteMoveRequestDto.getGoalNextNoteId() == 0L) {
+                Note goalPreNote = noteRepository.findById(noteMoveRequestDto.getGoalPreNoteId()).orElseThrow(() -> new ApiRequestException("수정하려는 노트가 존재하지 않음"));
+                if (goalPreNote.getNext().equals(0L)) {
+                    goalPreNote.updateWhileMoveNote(goalPreNote.getPrevious(), currentNote.getNext());
+                    currentNote.updateWhileMoveNote(goalPreNote.getNoteId(), 0L);
+                    currentNote.updateStepWhileMoveNote(goalPreNote.getStep());
+                } else {
+                    throw new ApiRequestException("새로고침 후 시도해주세요.");
+                }
+            }
+            // TODO 목표 스텝에 아무것도 없다면 아무것도 없는지 확인
+            else {
+                List<Note> resultList = noteRepository.findAllByProjectAndStep(currentNote.getProject().getProjectId(), Step.valueOf(noteMoveRequestDto.getStep()));
+                if (resultList.size() == 0) {
+                    currentNote.updateWhileMoveNote(0L, 0L);
+                    currentNote.updateStepWhileMoveNote(Step.valueOf(noteMoveRequestDto.getStep()));
+                }
+            }
+        }
+        //Step 안 바뀐다면... 죽여줘..
+        else {
+            // 옮기려고 하는 step에서의 노트 간 연결이 db와 같은지 확인
+            if (noteMoveRequestDto.getGoalPreNoteId() != 0L && noteMoveRequestDto.getGoalNextNoteId() != 0L) {
+                Note goalPreNote = noteRepository.findById(noteMoveRequestDto.getGoalPreNoteId()).orElseThrow(() -> new ApiRequestException("수정하려는 노트가 존재하지 않음"));
+                Note goalNextNote = noteRepository.findById(noteMoveRequestDto.getGoalNextNoteId()).orElseThrow(() -> new ApiRequestException("수정하려는 노트가 존재하지 않음"));
+                if (goalPreNote.getNext().equals(noteMoveRequestDto.getGoalNextNoteId())) {
+                    goalPreNote.updateWhileMoveNote(goalPreNote.getPrevious(), currentNote.getNoteId());
+                    currentNote.updateWhileMoveNote(goalPreNote.getNoteId(), goalNextNote.getNoteId());
+                    goalNextNote.updateWhileMoveNote(currentNote.getNoteId(), goalNextNote.getNext());
+                } else {
+                    throw new ApiRequestException("새로고침 후 시도해주세요.");
+                }
+            } else if (noteMoveRequestDto.getGoalPreNoteId() == 0L && noteMoveRequestDto.getGoalNextNoteId() != 0L) {
+                Note goalNextNote = noteRepository.findById(noteMoveRequestDto.getGoalNextNoteId()).orElseThrow(() -> new ApiRequestException("수정하려는 노트가 존재하지 않음"));
+                if (goalNextNote.getPrevious().equals(0L)) {
+                    currentNote.updateWhileMoveNote(0L, goalNextNote.getNoteId());
+                    goalNextNote.updateWhileMoveNote(currentNote.getNoteId(), goalNextNote.getNext());
+                } else {
+                    throw new ApiRequestException("새로고침 후 시도해주세요.");
+                }
+            } else if (noteMoveRequestDto.getGoalPreNoteId() != 0L && noteMoveRequestDto.getGoalNextNoteId() == 0L) {
+                Note goalPreNote = noteRepository.findById(noteMoveRequestDto.getGoalPreNoteId()).orElseThrow(() -> new ApiRequestException("수정하려는 노트가 존재하지 않음"));
+                if (goalPreNote.getNext().equals(0L)) {
+                    goalPreNote.updateWhileMoveNote(goalPreNote.getPrevious(), currentNote.getNext());
+                    currentNote.updateWhileMoveNote(goalPreNote.getNoteId(), 0L);
+                } else {
+                    throw new ApiRequestException("새로고침 후 시도해주세요.");
+                }
+            }
+            // TODO 목표 스텝에 아무것도 없다면 아무것도 없는지 확인
+            else {
+                throw new ApiRequestException("새로고침 후 시도해주세요.");
+            }
+        }
+        return NoteUpdateResponseDto.of(currentNote);
+    }
+
     // Note 작성
     @Transactional
-    public NoteCreateResponseDto createNote(Long projectId, NoteCreateRequestDto noteCreateRequestDto, SessionUser sessionUser) {
+    public NoteCreateResponseDto createNote(Long projectId, NoteCreateRequestDto noteCreateRequestDto, User currentUser) {
         UserProjectMapping userProjectMapping = userProjectMappingRepository
-                        .findByUserIdAndProjectId(sessionUser.getUserId(), projectId)
-                        .orElseThrow(()-> new ApiRequestException("해당 유저가 해당 프로젝트에 참여해있지 않습니다."));
+                .findByUserIdAndProjectId(currentUser.getUserId(), projectId)
+                .orElseThrow(() -> new ApiRequestException("해당 프로젝트에 소속된 유저가 아닙니다."));
 
         // [노트 생성] 전달받은 String deadline을 LocalDate 자료형으로 형변환
         LocalDate deadline = pandanUtils.changeType(noteCreateRequestDto.getDeadline());
@@ -87,7 +182,7 @@ public class NoteService {
                 .findFirst().orElse(null);
 
         // lastNote 있고 noteCreateRequestDto previous 값과 일치한다면
-        if(lastNote != null && lastNote.getNoteId().equals(noteCreateRequestDto.getPrevious())){
+        if (lastNote != null && lastNote.getNoteId().equals(noteCreateRequestDto.getPreviousNoteId())) {
             // [노트 생성] 전달받은 noteCreateRequestDto를 Note.java에 정의한 of 메소드에 전달하여 빌더 패턴에 넣는다.
             Note note = noteRepository
                     .save(Note.of(noteCreateRequestDto, deadline, step, user, project, lastNote.getNoteId(), 0L));
@@ -96,14 +191,14 @@ public class NoteService {
             return NoteCreateResponseDto.of(note);
         }
         // lastNote 없고 noteCreateRequestDto previous 값도 0이 맞다면
-        else if(lastNote == null && noteCreateRequestDto.getPrevious() == 0){
+        else if (lastNote == null && noteCreateRequestDto.getPreviousNoteId() == 0) {
             // lastNote 가 없으므로 바로 저장한다.
             return NoteCreateResponseDto.of(noteRepository.save(Note.of(noteCreateRequestDto, deadline, step, user, project, 0L, 0L)));
         }
         // lastNote 없는데 noteCreateRequestDto prvious 값은 0이 아니거나 다른 값이라면
         // lastNote 있는데 previous 값은 0 내지는 값이 다르다면
         // 사용자의 칸반이 새로고침 되어야.. 싱크 맞지 않는 것 -> 웹소켓 문제로 이어진다.
-        else{
+        else {
             throw new ApiRequestException("새로고침 이후 다시 시도해주세요.");
         }
     }
@@ -168,19 +263,23 @@ public class NoteService {
 
         // Project 조회
         Project project = projectRepository.findById(projectId).orElseThrow(
-                ()-> new ApiRequestException("칸반을 조회할 프로젝트가 없습니다.")
+                () -> new ApiRequestException("칸반을 조회할 프로젝트가 없습니다.")
         );
 
         for (Note note : noteRepository.findByProject(project)) {
-            switch(note.getStep()){
+            switch (note.getStep()) {
                 case STORAGE:
-                    kanbanNoteEachResponseDtoList1.add((KanbanNoteEachResponseDto.of(note))); break;
+                    kanbanNoteEachResponseDtoList1.add((KanbanNoteEachResponseDto.of(note)));
+                    break;
                 case TODO:
-                    kanbanNoteEachResponseDtoList2.add((KanbanNoteEachResponseDto.of(note))); break;
+                    kanbanNoteEachResponseDtoList2.add((KanbanNoteEachResponseDto.of(note)));
+                    break;
                 case PROCESSING:
-                    kanbanNoteEachResponseDtoList3.add((KanbanNoteEachResponseDto.of(note))); break;
+                    kanbanNoteEachResponseDtoList3.add((KanbanNoteEachResponseDto.of(note)));
+                    break;
                 case DONE:
-                    kanbanNoteEachResponseDtoList4.add(KanbanNoteEachResponseDto.of(note)); break;
+                    kanbanNoteEachResponseDtoList4.add(KanbanNoteEachResponseDto.of(note));
+                    break;
             }
         }
         // Note 를 각 상태별로 List 로 묶어서 응답 보내기
@@ -218,13 +317,13 @@ public class NoteService {
         return NoteMineInTotalResponseDto.builder().myNoteList(resultList).build();
     }
 
-    public NoteSearchInTotalResponseDto searchNoteInMyProjects(User currentUser, String rawKeyword){
+    public NoteSearchInTotalResponseDto searchNoteInMyProjects(User currentUser, String rawKeyword) {
         List<String> keywordList = pandanUtils.parseKeywordToList(rawKeyword);
         List<noteEachSearchInTotalResponseDto> resultList = noteRepository.findNotesByUserIdAndKeywordInTotal(currentUser.getUserId(), keywordList);
         return NoteSearchInTotalResponseDto.builder().noteList(resultList).build();
     }
 
-    public NoteSearchInMineResponseDto searchNoteInMyNotes(User currentUser, String rawKeyword){
+    public NoteSearchInMineResponseDto searchNoteInMyNotes(User currentUser, String rawKeyword) {
         List<String> keywordList = pandanUtils.parseKeywordToList(rawKeyword);
         List<NoteEachSearchInMineResponseDto> resultList = noteRepository.findNotesByUserIdAndKeywordInMine(currentUser.getUserId(), keywordList);
         return NoteSearchInMineResponseDto.builder().noteList(resultList).build();

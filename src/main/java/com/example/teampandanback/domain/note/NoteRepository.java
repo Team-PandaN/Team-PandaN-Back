@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface NoteRepository extends JpaRepository<Note,Long>, NoteRepositoryQuerydsl {
 //    List<Note> findAllByProject(Long projectId);
@@ -14,6 +15,8 @@ public interface NoteRepository extends JpaRepository<Note,Long>, NoteRepository
     // Project 에 연관된 Note 조회
     List<Note> findByProject(Project project);
     List<Note> findAllByProjectOrderByCreatedAtDesc(Project project);
+
+    Optional<Note> findByPreviousAndNext(Long previous, Long next);
 
     @Query("select note from Note note where note.project.projectId = :projectId and note.step = :step")
     List<Note> findAllByProjectAndStep(@Param("projectId") Long projectId, @Param("step") Step step);
