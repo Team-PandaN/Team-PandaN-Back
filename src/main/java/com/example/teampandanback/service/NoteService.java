@@ -19,16 +19,13 @@ import com.example.teampandanback.dto.note.response.noteEachSearchInTotalRespons
 import com.example.teampandanback.dto.note.response.NoteSearchInTotalResponseDto;
 import com.example.teampandanback.exception.ApiRequestException;
 import com.example.teampandanback.utils.PandanUtils;
-import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -160,6 +157,7 @@ public class NoteService {
     }
 
     // Note 작성
+    // TODO pre와 next 순서가 바뀌고, 프론트 request가 이제 아무것도 보내주지 않아도 그냥 내가 찾아서 계산한다.
     @Transactional
     public NoteCreateResponseDto createNote(Long projectId, NoteCreateRequestDto noteCreateRequestDto, User currentUser) {
         UserProjectMapping userProjectMapping = userProjectMappingRepository
@@ -182,19 +180,22 @@ public class NoteService {
                 .filter(each -> each.getNext().equals(0L))
                 .findFirst().orElse(null);
 
-        // lastNote 있고 noteCreateRequestDto previous 값과 일치한다면
+        // lastNote 있고 noteCreateRequestDto next 값과 일치한다면
         if (lastNote != null && lastNote.getNoteId().equals(noteCreateRequestDto.getPreviousNoteId())) {
             // [노트 생성] 전달받은 noteCreateRequestDto를 Note.java에 정의한 of 메소드에 전달하여 빌더 패턴에 넣는다.
             Note note = noteRepository
-                    .save(Note.of(noteCreateRequestDto, deadline, step, user, project, lastNote.getNoteId(), 0L));
+                    .save(Note
+                            .of(noteCreateRequestDto, deadline, step, user, project, lastNote.getNoteId(), 0L));
             // lastNote의 Next 값을 현재 생성된 노트의 ID로 변경해준다.
             lastNote.updateWhileCreate(note.getNoteId());
             return NoteCreateResponseDto.of(note);
         }
         // lastNote 없고 noteCreateRequestDto previous 값도 0이 맞다면
-        else if (lastNote == null && noteCreateRequestDto.getPreviousNoteId() == 0) {
+        else if (lastNote == null && noteCreateRequestDto.getPreviousNoteId() == 0L) {
             // lastNote 가 없으므로 바로 저장한다.
-            return NoteCreateResponseDto.of(noteRepository.save(Note.of(noteCreateRequestDto, deadline, step, user, project, 0L, 0L)));
+            return NoteCreateResponseDto
+                    .of(noteRepository.save(Note
+                            .of(noteCreateRequestDto, deadline, step, user, project, 0L, 0L)));
         }
         // lastNote 없는데 noteCreateRequestDto prvious 값은 0이 아니거나 다른 값이라면
         // lastNote 있는데 previous 값은 0 내지는 값이 다르다면
@@ -216,9 +217,9 @@ public class NoteService {
         List<NoteReadMineEachResponseDto> myNoteList =
                 noteRepository.findAllNoteByProjectAndUserOrderByCreatedAtDesc(
                         projectId, currentUser.getUserId(), PandanUtils.dealWithPageRequestParam(page, size))
-                .stream()
-                .map(NoteReadMineEachResponseDto::fromEntity)
-                .collect(Collectors.toList());
+                        .stream()
+                        .map(NoteReadMineEachResponseDto::fromEntity)
+                        .collect(Collectors.toList());
 
         return NoteMineInProjectResponseDto.of(myNoteList);
     }
@@ -251,17 +252,15 @@ public class NoteService {
         Note previousNote = noteRepository.findById(note.getPrevious()).orElse(null);
         Note nextNote = noteRepository.findById(note.getNext()).orElse(null);
 
-        try{
+        try {
             previousNote.updateWhileMoveNote(previousNote.getPrevious(), nextNote.getNoteId());
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             log.info(e.toString());
         }
 
-        try{
+        try {
             nextNote.updateWhileMoveNote(previousNote.getNoteId(), nextNote.getNext());
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             log.info(e.toString());
         }
 
@@ -276,33 +275,55 @@ public class NoteService {
     // Note 칸반형 조회 (칸반 페이지)
     @Transactional
     public KanbanNoteSearchResponseDto readKanbanNote(Long projectId) {
-        List<NoteOfProjectResponseDto> noteOfProjectResponseDtoList = new ArrayList<>();
-        List<KanbanNoteEachResponseDto> kanbanNoteEachResponseDtoList1 = new ArrayList<>();
-        List<KanbanNoteEachResponseDto> kanbanNoteEachResponseDtoList2 = new ArrayList<>();
-        List<KanbanNoteEachResponseDto> kanbanNoteEachResponseDtoList3 = new ArrayList<>();
-        List<KanbanNoteEachResponseDto> kanbanNoteEachResponseDtoList4 = new ArrayList<>();
 
         // Project 조회
         Project project = projectRepository.findById(projectId).orElseThrow(
                 () -> new ApiRequestException("칸반을 조회할 프로젝트가 없습니다.")
         );
 
-        for (Note note : noteRepository.findByProject(project)) {
-            switch (note.getStep()) {
-                case STORAGE:
-                    kanbanNoteEachResponseDtoList1.add((KanbanNoteEachResponseDto.of(note)));
-                    break;
-                case TODO:
-                    kanbanNoteEachResponseDtoList2.add((KanbanNoteEachResponseDto.of(note)));
-                    break;
-                case PROCESSING:
-                    kanbanNoteEachResponseDtoList3.add((KanbanNoteEachResponseDto.of(note)));
-                    break;
-                case DONE:
-                    kanbanNoteEachResponseDtoList4.add(KanbanNoteEachResponseDto.of(note));
-                    break;
+        List<NoteOfProjectResponseDto> noteOfProjectResponseDtoList = new ArrayList<>();
+        List<KanbanNoteEachResponseDto> kanbanNoteEachResponseDtoList1 = new ArrayList<>();
+        List<KanbanNoteEachResponseDto> kanbanNoteEachResponseDtoList2 = new ArrayList<>();
+        List<KanbanNoteEachResponseDto> kanbanNoteEachResponseDtoList3 = new ArrayList<>();
+        List<KanbanNoteEachResponseDto> kanbanNoteEachResponseDtoList4 = new ArrayList<>();
+
+        // Project로 전체 노트 리스트 가져오기
+        List<Note> rawNoteList = noteRepository.findByProject(project);
+        // BottomPointer를 담기 위한 리스트
+        List<Note> bottomPointerList = new ArrayList<>();
+
+        // Stream을 못쓰는 것은 아쉽지만 순회를 1번으로 줄이기 위해서 for문을 사용한다.
+        // rawMap에 (PK, Note) 의 형태로 저장되어 객체 그래프의 역할을 할 수 있게
+        Map<Long, Note> rawMap = new HashMap<>();
+        for (Note note : rawNoteList) {
+            rawMap.put(note.getNoteId(), note);
+            if (note.getPrevious() == 0L) {
+                bottomPointerList.add(note);
             }
         }
+
+        for (Note bottomPointer : bottomPointerList) {
+            Note pointer = bottomPointer;
+            while (pointer != null) {
+                Note target = rawMap.get(pointer.getNoteId());
+                switch (pointer.getStep()) {
+                    case STORAGE:
+                        kanbanNoteEachResponseDtoList1.add(KanbanNoteEachResponseDto.of(target));
+                        break;
+                    case TODO:
+                        kanbanNoteEachResponseDtoList2.add(KanbanNoteEachResponseDto.of(target));
+                        break;
+                    case PROCESSING:
+                        kanbanNoteEachResponseDtoList3.add(KanbanNoteEachResponseDto.of(target));
+                        break;
+                    case DONE:
+                        kanbanNoteEachResponseDtoList4.add(KanbanNoteEachResponseDto.of(target));
+                        break;
+                }
+                pointer = rawMap.get(target.getNext());
+            }
+        }
+
         // Note 를 각 상태별로 List 로 묶어서 응답 보내기
         noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.of(Step.STORAGE, kanbanNoteEachResponseDtoList1));
         noteOfProjectResponseDtoList.add(NoteOfProjectResponseDto.of(Step.TODO, kanbanNoteEachResponseDtoList2));
