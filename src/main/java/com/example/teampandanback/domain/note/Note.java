@@ -45,21 +45,21 @@ public class Note extends Timestamped {
     private Project project;
 
     @Column(name = "PREVIOUS")
-    private Long previous;
+    private Long previousId;
 
     @Column(name = "NEXT")
-    private Long next;
+    private Long nextId;
 
     @Builder
-    public Note(String title, String content, LocalDate deadline, Step step, User user, Project project, Long previous, Long next){
+    public Note(String title, String content, LocalDate deadline, Step step, User user, Project project, Long previousId, Long nextId){
         this.title = title;
         this.content = content;
         this.deadline = deadline;
         this.step = step;
         this.user = user;
         this.project = project;
-        this.previous = previous;
-        this.next = next;
+        this.previousId = previousId;
+        this.nextId = nextId;
     }
 
     public void update(NoteUpdateRequestDto noteUpdateRequestDto, LocalDate updateLocalDate, Step step) {
@@ -69,13 +69,9 @@ public class Note extends Timestamped {
         this.step = step;
     }
 
-    public void updateWhileCreate(Long next) {
-        this.next = next;
-    }
-
-    public void updateWhileMoveNote(Long previous, Long next){
-        this.previous = previous;
-        this.next = next;
+    public void updatePreviousIdAndNextId(Long previousId, Long nextId){
+        this.previousId = previousId;
+        this.nextId = nextId;
     }
 
     public void updateStepWhileMoveNote(Step step){
@@ -83,7 +79,7 @@ public class Note extends Timestamped {
     }
 
 
-        public static Note of(NoteCreateRequestDto noteCreateRequestDto, LocalDate deadline, Step step, User user, Project project, Long previous, Long next) {
+        public static Note of(NoteCreateRequestDto noteCreateRequestDto, LocalDate deadline, Step step, User user, Project project, Long previousId, Long nextId) {
         return Note.builder()
                 .title(noteCreateRequestDto.getTitle())
                 .content(noteCreateRequestDto.getContent())
@@ -91,8 +87,8 @@ public class Note extends Timestamped {
                 .step(step)
                 .user(user)
                 .project(project)
-                .previous(previous)
-                .next(next)
+                .previousId(previousId)
+                .nextId(nextId)
                 .build();
     }
 }
