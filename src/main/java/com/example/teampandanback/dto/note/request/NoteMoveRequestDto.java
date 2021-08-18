@@ -8,8 +8,8 @@ public class NoteMoveRequestDto {
     private String content;
     private String deadline;
     private String step;
-    private Long originPreNoteId;
-    private Long originNextNoteId;
-    private Long goalPreNoteId;
-    private Long goalNextNoteId;
+    private Long fromPreNoteId;
+    private Long fromNextNoteId;
+    private Long toPreNoteId;
+    private Long toNextNodeId;
 }

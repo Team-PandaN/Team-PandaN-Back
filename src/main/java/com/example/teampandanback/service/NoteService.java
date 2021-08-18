@@ -3,6 +3,7 @@ package com.example.teampandanback.service;
 import com.example.teampandanback.domain.Comment.CommentRepository;
 import com.example.teampandanback.domain.bookmark.Bookmark;
 import com.example.teampandanback.domain.bookmark.BookmarkRepository;
+import com.example.teampandanback.domain.note.MoveStatus;
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.domain.note.Step;
@@ -65,56 +66,66 @@ public class NoteService {
     @Transactional
     public NoteUpdateResponseDto moveNote(Long noteId, NoteMoveRequestDto noteMoveRequestDto) {
 
-        // 수정하려는 노트가 존재하지 않으면 멈춘다.
+        // 수정하려는 노트가 존재하지 않으면 Exception 반환.
         Note currentNote = noteRepository.findById(noteId).orElseThrow(() -> new ApiRequestException("수정하려는 노트가 존재하지 않음"));
 
-        // 옮기기 전 step에서의 노트 간 연결이 db와 같은지 확인
-        if (!currentNote.getPreviousId().equals(noteMoveRequestDto.getOriginPreNoteId()) || !currentNote.getNextId().equals(noteMoveRequestDto.getOriginNextNoteId())) {
-            throw new ApiRequestException("새로고침 후 시도해주세요");
+        // Project로 전체 노트 리스트 가져오기
+        List<Note> rawNoteList = noteRepository.findByProject(currentNote.getProject());
+
+        // DB와 프론트에서 보낸 싱크가 맞는지 검증하기 위해 rawMap 만들기
+        Map<Long, Note> rawMap = pandanUtils.getRawMap(rawNoteList);
+
+        // from과 To 그리고 currentNote의 연결 관계 검증
+        if (!pandanUtils.checkSync(noteId, noteMoveRequestDto, rawNoteList, rawMap)){
+            throw new ApiRequestException("새로 고침이 필요합니다.");
         }
 
-        // Step이 바뀐다면
-        if (!currentNote.getStep().toString().equals(noteMoveRequestDto.getStep())) {
-            // 옮기려고 하는 step에서의 노트 간 연결이 db와 같은지 확인
-            if (noteMoveRequestDto.getGoalPreNoteId() != 0L && noteMoveRequestDto.getGoalNextNoteId() != 0L) {
-                Note goalPreNote = noteRepository.findById(noteMoveRequestDto.getGoalPreNoteId()).orElseThrow(() -> new ApiRequestException("수정하려는 노트가 존재하지 않음"));
-                Note goalNextNote = noteRepository.findById(noteMoveRequestDto.getGoalNextNoteId()).orElseThrow(() -> new ApiRequestException("수정하려는 노트가 존재하지 않음"));
-                if (goalPreNote.getNextId().equals(noteMoveRequestDto.getGoalNextNoteId())) {
-                    goalPreNote.updatePreviousIdAndNextId(goalPreNote.getPreviousId(), currentNote.getNoteId());
-                    currentNote.updatePreviousIdAndNextId(goalPreNote.getNoteId(), goalNextNote.getNoteId());
-                    currentNote.updateStepWhileMoveNote(goalPreNote.getStep());
-                    goalNextNote.updatePreviousIdAndNextId(currentNote.getNoteId(), goalNextNote.getNextId());
-                } else {
-                    throw new ApiRequestException("새로고침 후 시도해주세요.");
-                }
-            } else if (noteMoveRequestDto.getGoalPreNoteId() == 0L && noteMoveRequestDto.getGoalNextNoteId() != 0L) {
-                Note goalNextNote = noteRepository.findById(noteMoveRequestDto.getGoalNextNoteId()).orElseThrow(() -> new ApiRequestException("수정하려는 노트가 존재하지 않음"));
-                if (goalNextNote.getPreviousId().equals(0L)) {
-                    currentNote.updatePreviousIdAndNextId(0L, goalNextNote.getNoteId());
-                    currentNote.updateStepWhileMoveNote(goalNextNote.getStep());
-                    goalNextNote.updatePreviousIdAndNextId(currentNote.getNoteId(), goalNextNote.getNextId());
-                } else {
-                    throw new ApiRequestException("새로고침 후 시도해주세요.");
-                }
-            } else if (noteMoveRequestDto.getGoalPreNoteId() != 0L && noteMoveRequestDto.getGoalNextNoteId() == 0L) {
-                Note goalPreNote = noteRepository.findById(noteMoveRequestDto.getGoalPreNoteId()).orElseThrow(() -> new ApiRequestException("수정하려는 노트가 존재하지 않음"));
-                if (goalPreNote.getNextId().equals(0L)) {
-                    goalPreNote.updatePreviousIdAndNextId(goalPreNote.getPreviousId(), currentNote.getNextId());
-                    currentNote.updatePreviousIdAndNextId(goalPreNote.getNoteId(), 0L);
-                    currentNote.updateStepWhileMoveNote(goalPreNote.getStep());
-                } else {
-                    throw new ApiRequestException("새로고침 후 시도해주세요.");
-                }
-            }
-            // TODO 목표 스텝에 아무것도 없다면 아무것도 없는지 확인
-            else {
-                List<Note> resultList = noteRepository.findAllByProjectAndStep(currentNote.getProject().getProjectId(), Step.valueOf(noteMoveRequestDto.getStep()));
-                if (resultList.size() == 0) {
-                    currentNote.updatePreviousIdAndNextId(0L, 0L);
-                    currentNote.updateStepWhileMoveNote(Step.valueOf(noteMoveRequestDto.getStep()));
-                }
-            }
+        Long fromPreNoteId = noteMoveRequestDto.getFromPreNoteId();
+        Long fromNextNoteId = noteMoveRequestDto.getFromNextNoteId();
+        Long toPreNoteId = noteMoveRequestDto.getToPreNoteId();
+        Long toNextNoteId = noteMoveRequestDto.getToNextNodeId();
+
+        // 노트가 이동하는 16가지 상황 중 어떤 상황인지를 파악한다.
+        MoveStatus[] moveStatuses = pandanUtils.getMoveStatus(noteMoveRequestDto);
+
+        // From 상황에서 fromPre와 fromNext 연결관계 정리한다.
+        switch (moveStatuses[0]){
+            case UNIQUE:
+                break;
+            case CURRENTTOP:
+                rawMap.get(fromPreNoteId).updateNextId(0L);
+                break;
+            case CURRENTBOTTOM:
+                rawMap.get(fromNextNoteId).updatePreviousId(0L);
+                break;
+            case CURRENTBETWEEN:
+                rawMap.get(fromPreNoteId).updateNextId(fromNextNoteId);
+                rawMap.get(fromNextNoteId).updatePreviousId(fromPreNoteId);
+                break;
         }
+
+        // From 상황에서 fromPre와 fromNext 연결관계 정리한다.
+        switch (moveStatuses[1]){
+            case UNIQUE:
+                currentNote.updatePreviousIdAndNextId(0L, 0L);
+                break;
+            case CURRENTTOP:
+                rawMap.get(toPreNoteId).updateNextId(currentNote.getNoteId());
+                currentNote.updatePreviousIdAndNextId(toPreNoteId, 0L);
+                break;
+            case CURRENTBOTTOM:
+                currentNote.updatePreviousIdAndNextId(0L, toNextNoteId);
+                rawMap.get(toNextNoteId).updatePreviousId(currentNote.getNoteId());
+                break;
+            case CURRENTBETWEEN:
+                rawMap.get(toPreNoteId).updateNextId(currentNote.getNoteId());
+                currentNote.updatePreviousIdAndNextId(toPreNoteId, toNextNoteId);
+                rawMap.get(toNextNoteId).updatePreviousId(currentNote.getNoteId());
+                break;
+        }
+
+        // Step 이동이든 아니든 DynamicUpdate에 의해서 이동한 경우만 반영하게 된다. 민서님 고마워요! bb
+        currentNote.updateStepWhileMoveNote(Step.valueOf(noteMoveRequestDto.getStep()));
         return NoteUpdateResponseDto.of(currentNote);
     }
 

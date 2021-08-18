@@ -73,6 +73,14 @@ public class Note extends Timestamped {
         this.nextId = nextId;
     }
 
+    public void updatePreviousId(Long previousId){
+        this.previousId = previousId;
+    }
+
+    public void updateNextId(Long nextId){
+        this.nextId = nextId;
+    }
+
     public void updateStepWhileMoveNote(Step step){
         this.step = step;
     }
