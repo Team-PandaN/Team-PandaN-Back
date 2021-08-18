@@ -2,6 +2,7 @@ package com.example.teampandanback.utils;
 
 import com.example.teampandanback.exception.ApiRequestException;
 import com.querydsl.core.BooleanBuilder;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -50,6 +51,12 @@ public class PandanUtils {
             builder.and(note.title.toLowerCase().contains(keyword));
         }
         return builder;
+    }
+
+    public static PageRequest dealWithPageRequestParam(int page, int size) {
+        PageRequest pageRequest = PageRequest
+                .of((page <= 0 ? 1 : page)-1, (size <= 0 ? 1 : size));
+        return pageRequest;
     }
 
 }

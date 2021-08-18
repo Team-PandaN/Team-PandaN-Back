@@ -204,7 +204,7 @@ public class NoteService {
     }
 
     // 해당 Project 에서 내가 작성한 Note 조회
-    public NoteMineInProjectResponseDto readNotesMineOnly(Long projectId, User currentUser) {
+    public NoteMineInProjectResponseDto readNotesMineOnly(Long projectId, User currentUser, int page, int size) {
 
         // Project 조회
         projectRepository.findById(projectId).orElseThrow(
@@ -212,7 +212,9 @@ public class NoteService {
         );
 
         // 해당 Project 에서 내가 작성한 Note 죄회
-        List<NoteReadMineEachResponseDto> myNoteList = noteRepository.findAllNoteByProjectAndUserOrderByCreatedAtDesc(projectId, currentUser.getUserId())
+        List<NoteReadMineEachResponseDto> myNoteList =
+                noteRepository.findAllNoteByProjectAndUserOrderByCreatedAtDesc(
+                        projectId, currentUser.getUserId(), PandanUtils.dealWithPageRequestParam(page, size))
                 .stream()
                 .map(NoteReadMineEachResponseDto::fromEntity)
                 .collect(Collectors.toList());
@@ -221,11 +223,12 @@ public class NoteService {
     }
 
     // 전체 Project 에서 내가 북마크한 Note 조회
-    public NoteBookmarkedResponseDto readBookmarkedMine(User currentUser) {
+    public NoteBookmarkedResponseDto readBookmarkedMine(User currentUser, int page, int size) {
 
         // 해당 북마크한 Note 조회
         List<NoteEachBookmarkedResponseDto> noteEachBookmarkedResponseDto =
-                bookmarkRepository.findNoteByUserIdInBookmark(currentUser.getUserId());
+                bookmarkRepository.findNoteByUserIdInBookmark(
+                        currentUser.getUserId(), PandanUtils.dealWithPageRequestParam(page, size));
 
         return NoteBookmarkedResponseDto.builder().noteList(noteEachBookmarkedResponseDto).build();
     }
@@ -295,7 +298,7 @@ public class NoteService {
 
     // Note 일반형 조회 (파일 페이지)
     @Transactional
-    public NoteSearchResponseDto readOrdinaryNote(Long projectId) {
+    public NoteSearchResponseDto readOrdinaryNote(Long projectId, int page, int size) {
         List<OrdinaryNoteEachResponseDto> ordinaryNoteEachResponseDtoList = new ArrayList<>();
 
         // Project 조회
@@ -304,7 +307,8 @@ public class NoteService {
         );
 
 
-        for (Note note : noteRepository.findAllByProjectOrderByCreatedAtDesc(project)) {
+        for (Note note : noteRepository.findAllByProjectOrderByCreatedAtDesc(
+                project, PandanUtils.dealWithPageRequestParam(page, size))) {
             ordinaryNoteEachResponseDtoList.add((OrdinaryNoteEachResponseDto.fromEntity(note)));
         }
 
@@ -312,8 +316,10 @@ public class NoteService {
     }
 
     // 전체 프로젝트에서 내가 작성한 노트 조회
-    public NoteMineInTotalResponseDto readMyNoteInTotalProject(User currentUser) {
-        List<NoteEachMineInTotalResponseDto> resultList = noteRepository.findUserNoteInTotalProject(currentUser.getUserId());
+    public NoteMineInTotalResponseDto readMyNoteInTotalProject(User currentUser, int page, int size) {
+        List<NoteEachMineInTotalResponseDto> resultList =
+                noteRepository.findUserNoteInTotalProject(
+                        currentUser.getUserId(), PandanUtils.dealWithPageRequestParam(page, size));
         return NoteMineInTotalResponseDto.builder().myNoteList(resultList).build();
     }
 

@@ -5,6 +5,7 @@ import com.example.teampandanback.dto.note.response.NoteEachBookmarkedResponseDt
 import java.util.List;
 
 import com.example.teampandanback.dto.note.response.NoteEachSearchInBookmarkResponseDto;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 
 import java.util.Optional;
@@ -15,10 +16,12 @@ public interface BookmarkRepositoryQuerydsl {
     void deleteByProjectId(long projectId);
 
     Optional<Bookmark> findByUserIdAndNoteId(Long userId, Long noteId);
-    List<NoteEachBookmarkedResponseDto> findNoteByUserIdInBookmark(Long userId);
+    List<NoteEachBookmarkedResponseDto> findNoteByUserIdInBookmark(Long userId, Pageable pageable);
 
     List<NoteEachSearchInBookmarkResponseDto> findNotesByUserIdAndKeywordInBookmarks(Long userId, List<String> keywordList);
 
     @Modifying(clearAutomatically = true)
     void deleteByNote(Long noteId);
+
+    Long countCurrentUserBookmarkedAtByProjectId(Long userId, Long projectId);
 }

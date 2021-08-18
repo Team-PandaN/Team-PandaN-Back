@@ -31,15 +31,15 @@ public class NoteController {
     //내가 쓴 노트 조회
     @ApiOperation(value = "특정 프로젝트에서 내가 쓴 노트 조회")
     @GetMapping("/projects/{projectId}/mynotes")
-    public NoteMineInProjectResponseDto readNotesMineOnly(@PathVariable("projectId") Long projectId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return noteService.readNotesMineOnly(projectId, userDetails.getUser());
+    public NoteMineInProjectResponseDto readNotesMineOnly(@PathVariable("projectId") Long projectId, @AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("page") int page, @RequestParam("size") int size) {
+        return noteService.readNotesMineOnly(projectId, userDetails.getUser(), page, size);
     }
 
     //내가 북마크한 노트 조회
     @ApiOperation(value = "전체 프로젝트에서 내가 북마크 한 노트 조회")
     @GetMapping("/notes/mybookmarks")
-    public NoteBookmarkedResponseDto  readBookmarkedMine(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return noteService.readBookmarkedMine(userDetails.getUser());
+    public NoteBookmarkedResponseDto  readBookmarkedMine(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("page") int page, @RequestParam("size") int size) {
+        return noteService.readBookmarkedMine(userDetails.getUser(), page, size);
     }
 
     //노트 상세 조회
@@ -76,15 +76,15 @@ public class NoteController {
     //노트 일반형 조회
     @ApiOperation(value = "노트 일반형 조회")
     @GetMapping("/projects/{projectId}/issues")
-    public NoteSearchResponseDto ordinaryNoteSearch(@PathVariable("projectId") Long projectId) {
-        return noteService.readOrdinaryNote(projectId);
+    public NoteSearchResponseDto ordinaryNoteSearch(@PathVariable("projectId") Long projectId, @RequestParam("page") int page, @RequestParam("size") int size) {
+        return noteService.readOrdinaryNote(projectId, page, size);
     }
 
     // 전체 프로젝트에서 내가 작성한 노트 조회
     @ApiOperation(value = "전체 프로젝트에서 내가 작성한 노트 조회")
     @GetMapping("/notes/mynotes")
-    public NoteMineInTotalResponseDto readMyNoteInTotalProject(@AuthenticationPrincipal UserDetailsImpl userDetails){
-        return noteService.readMyNoteInTotalProject(userDetails.getUser());
+    public NoteMineInTotalResponseDto readMyNoteInTotalProject(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("page") int page, @RequestParam("size") int size){
+        return noteService.readMyNoteInTotalProject(userDetails.getUser(), page, size);
     }
 
     // 사용자가 멤버인 프로젝트들 중에서 노트 제목 검색
