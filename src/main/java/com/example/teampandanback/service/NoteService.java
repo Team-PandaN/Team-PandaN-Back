@@ -88,7 +88,7 @@ public class NoteService {
         // 노트가 이동하는 16가지 상황 중 어떤 상황인지를 파악한다.
         MoveStatus[] moveStatuses = pandanUtils.getMoveStatus(noteMoveRequestDto);
 
-        // From 상황에서 fromPre와 fromNext 연결관계 정리한다.
+        // From 에서 fromPre와 fromNext 연결관계 정리한다.
         switch (moveStatuses[0]){
             case UNIQUE:
                 break;
@@ -104,7 +104,7 @@ public class NoteService {
                 break;
         }
 
-        // From 상황에서 fromPre와 fromNext 연결관계 정리한다.
+        // To 에서 toPre와 toNext 연결관계 정리한다.
         switch (moveStatuses[1]){
             case UNIQUE:
                 currentNote.updatePreviousIdAndNextId(0L, 0L);
@@ -213,16 +213,21 @@ public class NoteService {
         Note previousNote = noteRepository.findById(note.getPreviousId()).orElse(null);
         Note nextNote = noteRepository.findById(note.getNextId()).orElse(null);
 
-        try {
-            previousNote.updatePreviousIdAndNextId(previousNote.getPreviousId(), nextNote.getNoteId());
-        } catch (Exception e) {
-            log.info(e.toString());
-        }
+        MoveStatus deleteStatus = pandanUtils.getDeleteStatus(note.getPreviousId(), note.getNextId());
 
-        try {
-            nextNote.updatePreviousIdAndNextId(previousNote.getNoteId(), nextNote.getNextId());
-        } catch (Exception e) {
-            log.info(e.toString());
+        switch (deleteStatus){
+            case UNIQUE:
+                break;
+            case CURRENTTOP:
+                previousNote.updateNextId(0L);
+                break;
+            case CURRENTBOTTOM:
+                nextNote.updatePreviousId(0L);
+                break;
+            case CURRENTBETWEEN:
+                previousNote.updateNextId(nextNote.getNoteId());
+                nextNote.updatePreviousId(previousNote.getNoteId());
+                break;
         }
 
         // Note 삭제
@@ -308,6 +313,4 @@ public class NoteService {
         List<NoteEachSearchInMineResponseDto> resultList = noteRepository.findNotesByUserIdAndKeywordInMine(currentUser.getUserId(), keywordList);
         return NoteSearchInMineResponseDto.builder().noteList(resultList).build();
     }
-
-
 }

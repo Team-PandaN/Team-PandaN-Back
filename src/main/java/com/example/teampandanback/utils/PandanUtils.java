@@ -199,4 +199,20 @@ public class PandanUtils {
 
         return moveStatuses;
     }
+
+    // 승연: 4가지 deleteStatus 중 현재 상황이 어떤 것인지 정하기 위한 메소드입니다.
+    public MoveStatus getDeleteStatus(Long previousId, Long nextId){
+        if (previousId == 0L && nextId == 0L){
+            return MoveStatus.UNIQUE;
+        }
+        else if (previousId != 0L && nextId == 0L){
+            return MoveStatus.CURRENTTOP;
+        }
+        else if (previousId == 0L && nextId != 0L){
+            return MoveStatus.CURRENTBOTTOM;
+        }
+        else{
+            return MoveStatus.CURRENTBETWEEN;
+        }
+    }
 }
