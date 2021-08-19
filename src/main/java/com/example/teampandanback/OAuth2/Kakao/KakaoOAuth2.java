@@ -99,6 +99,7 @@ public class KakaoOAuth2 {
         //null-safe하지 않은 값들.
         String email = "";
         if(body.getJSONObject("kakao_account").getBoolean("has_email")){
+            if(!body.getJSONObject("kakao_account").getBoolean("email_needs_agreement"))
             email = body.getJSONObject("kakao_account").getString("email");
         }
         String picture = "https://s3.ap-northeast-2.amazonaws.com/front.blossomwhale.shop/ico-user.svg";

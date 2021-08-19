@@ -3,7 +3,8 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
+      #Switching
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
