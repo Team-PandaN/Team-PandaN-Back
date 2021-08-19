@@ -121,7 +121,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
 
         return queryFactory
                 .select(Projections.constructor(noteEachSearchInTotalResponseDto.class,
-                        note.noteId, note.title, note.step, project.projectId, project.title, user.name))
+                        note.noteId, note.title, note.step, project.projectId, project.title, user.name, note.createdAt))
                 .from(note)
                 .join(note.project, project)
                 .join(note.user, user)
@@ -137,7 +137,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
 
         return queryFactory
                 .select(Projections.constructor(NoteEachSearchInMineResponseDto.class,
-                        note.noteId, note.title, note.step, project.projectId, project.title))
+                        note.noteId, note.title, note.step, project.projectId, project.title, note.createdAt))
                 .from(note)
                 .where(note.user.userId.eq(userId).and(builder))
                 .orderBy(note.modifiedAt.desc())
