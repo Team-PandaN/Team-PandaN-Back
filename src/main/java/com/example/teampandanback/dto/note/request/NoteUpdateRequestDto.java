@@ -7,5 +7,4 @@ public class NoteUpdateRequestDto {
     private String title;
     private String content;
     private String deadline;
-    private String step;
 }

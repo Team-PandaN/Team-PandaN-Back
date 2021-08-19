@@ -5,6 +5,7 @@ import com.example.teampandanback.dto.note.response.NoteEachMineInTotalResponseD
 import com.example.teampandanback.dto.note.response.noteEachSearchInTotalResponseDto;
 import com.example.teampandanback.dto.note.response.NoteResponseDto;
 import com.example.teampandanback.dto.note.response.NoteEachSearchInMineResponseDto;
+import com.example.teampandanback.exception.ApiRequestException;
 import com.example.teampandanback.utils.PandanUtils;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
@@ -171,6 +172,15 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
         return queryFactory
                 .selectFrom(note)
                 .where(note.project.projectId.eq(projectId))
+                .fetch();
+    }
+
+    @Override
+    public List<Note> findNotesByNoteIdList(List<Long> noteIdList) {
+        return queryFactory
+                .selectFrom(note)
+                .where(note.noteId.in(noteIdList))
+                .orderBy(note.step.desc())
                 .fetch();
     }
 }
