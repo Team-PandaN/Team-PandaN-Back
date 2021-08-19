@@ -7,10 +7,12 @@ import lombok.Getter;
 public class CrewResponseDto {
     private Long userId;
     private String userName;
+    private String userPicture;
 
     @Builder
-    public CrewResponseDto(Long userId, String userName) {
+    public CrewResponseDto(Long userId, String userName, String userPicture) {
         this.userId = userId;
         this.userName = userName;
+        this.userPicture = userPicture;
     }
 }
