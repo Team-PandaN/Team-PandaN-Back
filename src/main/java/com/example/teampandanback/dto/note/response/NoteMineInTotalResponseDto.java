@@ -32,7 +32,7 @@ public class NoteMineInTotalResponseDto {
                 .myNoteList(myNoteList)
                 .totalPages(customPage.getTotalPages())
                 .totalElements(customPage.getTotalElements())
-                .pageNumber(customPage.getNumber())
+                .pageNumber(customPage.getNumber() + 1)
                 .first(customPage.isFirst())
                 .last(customPage.isLast())
                 .build();
