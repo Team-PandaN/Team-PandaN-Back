@@ -124,7 +124,7 @@ public class NoteService {
                 break;
         }
 
-        // Step 이동이든 아니든 DynamicUpdate에 의해서 이동한 경우만 반영하게 된다. 민서님 고마워요! bb
+        // Step 이동이든 아니든 DynamicUpdate에 의해서 이동한 경우만 반영하게 된다.
         currentNote.updateStepWhileMoveNote(Step.valueOf(noteMoveRequestDto.getStep()));
         return NoteUpdateResponseDto.of(currentNote);
     }
