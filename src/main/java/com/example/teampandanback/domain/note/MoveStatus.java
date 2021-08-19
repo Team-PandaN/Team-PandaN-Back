@@ -5,13 +5,11 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Step {
-    STORAGE(0, "창고"),
-    TODO(1, "할것"),
-    PROCESSING(2, "진행중"),
-    DONE(3, "끝");
+public enum MoveStatus {
+    UNIQUE(0),
+    CURRENTTOP(1),
+    CURRENTBOTTOM(2),
+    CURRENTBETWEEN(3);
 
     private final int id;
-    private final String step;
-
 }

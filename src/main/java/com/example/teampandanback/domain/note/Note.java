@@ -44,33 +44,49 @@ public class Note extends Timestamped {
     @JoinColumn(name = "PROJECT_ID")
     private Project project;
 
+    @Column(name = "PREVIOUS")
+    private Long previousId;
+
+    @Column(name = "NEXT")
+    private Long nextId;
 
     @Builder
-    public Note(String title, String content, LocalDate deadline, Step step, User user, Project project){
+    public Note(String title, String content, LocalDate deadline, Step step, User user, Project project, Long previousId, Long nextId){
         this.title = title;
         this.content = content;
         this.deadline = deadline;
         this.step = step;
         this.user = user;
         this.project = project;
+        this.previousId = previousId;
+        this.nextId = nextId;
     }
 
-    // #1
-    // What: Note.java에서 changeType 메소드를 삭제하고, update 메소드는 형변환이 완료된 LocalDate 파라미터를 받게 하였습니다.
-    // Why: NoteService.java 에서 형변환이 자주 일어나는 바, NoteService.java 에서 형변환 메소드를 정적으로 정의하여 공용으로 쓰기 위함입니다.
-    // How: NoteService의 updateNoteDetail 함수는 전달받은 noteRequestDto의 String을 꺼내 localDate으로 변환 후 여기에 전달합니다.
-    public void update(NoteUpdateRequestDto noteUpdateRequestDto, LocalDate updateLocalDate, Step step) {
+    public void update(NoteUpdateRequestDto noteUpdateRequestDto, LocalDate updateLocalDate) {
         this.title = noteUpdateRequestDto.getTitle();
         this.content = noteUpdateRequestDto.getContent();
         this.deadline = updateLocalDate;
+    }
+
+    public void updatePreviousIdAndNextId(Long previousId, Long nextId){
+        this.previousId = previousId;
+        this.nextId = nextId;
+    }
+
+    public void updatePreviousId(Long previousId){
+        this.previousId = previousId;
+    }
+
+    public void updateNextId(Long nextId){
+        this.nextId = nextId;
+    }
+
+    public void updateStepWhileMoveNote(Step step){
         this.step = step;
     }
 
-    // #2
-    // What: of 메소드를 만들어서 dto를
-    // Why: 서비스에서
-    // How:
-    public static Note of(NoteCreateRequestDto noteCreateRequestDto, LocalDate deadline, Step step, User user, Project project) {
+
+        public static Note of(NoteCreateRequestDto noteCreateRequestDto, LocalDate deadline, Step step, User user, Project project, Long previousId, Long nextId) {
         return Note.builder()
                 .title(noteCreateRequestDto.getTitle())
                 .content(noteCreateRequestDto.getContent())
@@ -78,6 +94,8 @@ public class Note extends Timestamped {
                 .step(step)
                 .user(user)
                 .project(project)
+                .previousId(previousId)
+                .nextId(nextId)
                 .build();
     }
 }

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 public class NoteUpdateResponseDto {
@@ -14,14 +15,19 @@ public class NoteUpdateResponseDto {
     private String content;
     private String deadline;
     private String step;
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
 
     @Builder
-    public NoteUpdateResponseDto(Long noteId, String title, String content, LocalDate deadline, Step step) {
+    public NoteUpdateResponseDto(Long noteId, String title, String content, LocalDate deadline, Step step,
+                                 LocalDateTime createdAt, LocalDateTime modifiedAt) {
         this.noteId = noteId;
         this.title = title;
         this.content = content;
         this.deadline = deadline.toString();
         this.step = step.toString();
+        this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
     }
 
     public static NoteUpdateResponseDto of (Note note) {
@@ -31,6 +37,8 @@ public class NoteUpdateResponseDto {
                 .content(note.getContent())
                 .deadline(note.getDeadline())
                 .step(note.getStep())
+                .createdAt(note.getCreatedAt())
+                .modifiedAt(note.getModifiedAt())
                 .build();
     }
 }
