@@ -77,6 +77,8 @@ public class UserService {
         User user = User.builder()
                 .name(name)
                 .password(password)
+                //TODO: 바꿔야함
+                .picture("https://s3.ap-northeast-2.amazonaws.com/front.blossomwhale.shop/ico-user.svg")
                 .build();
         userRepository.save(user);
     }

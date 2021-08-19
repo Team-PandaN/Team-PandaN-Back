@@ -192,6 +192,7 @@ public class ProjectService {
                 crew -> CrewResponseDto.builder()
                         .userId(crew.getUser().getUserId())
                         .userName(crew.getUser().getName())
+                        .userPicture(crew.getUser().getPicture())
                         .build())
                 .collect(Collectors.toList());
 

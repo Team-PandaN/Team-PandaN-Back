@@ -31,7 +31,7 @@ public class BookmarkController {
     }
 
     // 북마크한 노트들 중에서 노트 제목 검색
-    @ApiOperation(value = "내가 북마크 한 노트들 중에서 노트 검색 (제목으로)")
+    @ApiOperation(value = "내가 북마크 한 노트들 중에서 노트 검색 (제목으로)", notes = "http://{hostName}/api/notes/search/bookmarks/?keyword=xxxx")
     @GetMapping("/api/notes/search/bookmarks")
     public NoteSearchInBookmarkResponseDto searchNoteInBookmark(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("keyword") String rawKeyword){
         return bookmarkService.searchNoteInBookmarks(userDetails.getUser(), rawKeyword);

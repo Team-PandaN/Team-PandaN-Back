@@ -95,6 +95,7 @@ public class BookmarkService {
     public NoteSearchInBookmarkResponseDto searchNoteInBookmarks(User currentUser, String rawKeyword){
         List<String> keywordList = pandanUtils.parseKeywordToList(rawKeyword);
         List<NoteEachSearchInBookmarkResponseDto> resultList = bookmarkRepository.findNotesByUserIdAndKeywordInBookmarks(currentUser.getUserId(), keywordList);
+
         return NoteSearchInBookmarkResponseDto.builder().noteList(resultList).build();
     }
 }
