@@ -16,9 +16,8 @@ import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
 import com.example.teampandanback.dto.note.request.NoteMoveRequestDto;
 import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
 import com.example.teampandanback.dto.note.response.*;
-import com.example.teampandanback.dto.note.response.noteEachSearchInTotalResponseDto;
-import com.example.teampandanback.dto.note.response.NoteSearchInTotalResponseDto;
 import com.example.teampandanback.exception.ApiRequestException;
+import com.example.teampandanback.utils.CustomPageImpl;
 import com.example.teampandanback.utils.PandanUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -76,7 +75,7 @@ public class NoteService {
         Map<Long, Note> rawMap = pandanUtils.getRawMap(rawNoteList);
 
         // from과 To 그리고 currentNote의 연결 관계 검증
-        if (!pandanUtils.checkSync(noteId, noteMoveRequestDto, rawNoteList, rawMap)){
+        if (!pandanUtils.checkSync(noteId, noteMoveRequestDto, rawNoteList, rawMap)) {
             throw new ApiRequestException("새로 고침이 필요합니다.");
         }
 
@@ -89,7 +88,7 @@ public class NoteService {
         MoveStatus[] moveStatuses = pandanUtils.getMoveStatus(noteMoveRequestDto);
 
         // From 에서 fromPre와 fromNext 연결관계 정리한다.
-        switch (moveStatuses[0]){
+        switch (moveStatuses[0]) {
             case UNIQUE:
                 break;
             case CURRENTTOP:
@@ -105,7 +104,7 @@ public class NoteService {
         }
 
         // To 에서 toPre와 toNext 연결관계 정리한다.
-        switch (moveStatuses[1]){
+        switch (moveStatuses[1]) {
             case UNIQUE:
                 currentNote.updatePreviousIdAndNextId(0L, 0L);
                 break;
@@ -175,25 +174,27 @@ public class NoteService {
         );
 
         // 해당 Project 에서 내가 작성한 Note 죄회
-        List<NoteReadMineEachResponseDto> myNoteList =
-                noteRepository.findAllNoteByProjectAndUserOrderByCreatedAtDesc(
-                        projectId, currentUser.getUserId(), pandanUtils.dealWithPageRequestParam(page, size))
-                        .stream()
-                        .map(NoteReadMineEachResponseDto::fromEntity)
-                        .collect(Collectors.toList());
+        CustomPageImpl<Note> noteCustomPage = noteRepository.findAllNoteByProjectAndUserOrderByCreatedAtDesc(
+                projectId, currentUser.getUserId(), pandanUtils.dealWithPageRequestParam(page, size));
 
-        return NoteMineInProjectResponseDto.of(myNoteList);
+        List<NoteReadMineEachResponseDto> myNoteList = noteCustomPage.toList()
+                .stream()
+                .map(NoteReadMineEachResponseDto::fromEntity)
+                .collect(Collectors.toList());
+
+        return NoteMineInProjectResponseDto.fromEntity(myNoteList, noteCustomPage);
     }
 
     // 전체 Project 에서 내가 북마크한 Note 조회
     public NoteBookmarkedResponseDto readBookmarkedMine(User currentUser, int page, int size) {
 
         // 해당 북마크한 Note 조회
-        List<NoteEachBookmarkedResponseDto> noteEachBookmarkedResponseDto =
+
+        CustomPageImpl<NoteEachBookmarkedResponseDto> noteEachBookmarkCustomPage =
                 bookmarkRepository.findNoteByUserIdInBookmark(
                         currentUser.getUserId(), pandanUtils.dealWithPageRequestParam(page, size));
 
-        return NoteBookmarkedResponseDto.builder().noteList(noteEachBookmarkedResponseDto).build();
+        return NoteBookmarkedResponseDto.fromEntity(noteEachBookmarkCustomPage.toList(), noteEachBookmarkCustomPage);
     }
 
     // Note 삭제
@@ -215,7 +216,7 @@ public class NoteService {
 
         MoveStatus deleteStatus = pandanUtils.getDeleteStatus(note.getPreviousId(), note.getNextId());
 
-        switch (deleteStatus){
+        switch (deleteStatus) {
             case UNIQUE:
                 break;
             case CURRENTTOP:
@@ -282,22 +283,22 @@ public class NoteService {
         Project project = projectRepository.findById(projectId).orElseThrow(
                 () -> new ApiRequestException("파일을 조회할 프로젝트가 없습니다.")
         );
+        CustomPageImpl<Note> ordinaryNoteCustomPage = noteRepository.findAllByProjectOrderByModifiedAtDesc(
+                project, pandanUtils.dealWithPageRequestParam(page, size));
 
-
-        for (Note note : noteRepository.findAllByProjectOrderByCreatedAtDesc(
-                project, pandanUtils.dealWithPageRequestParam(page, size))) {
+        for (Note note : ordinaryNoteCustomPage.toList()) {
             ordinaryNoteEachResponseDtoList.add((OrdinaryNoteEachResponseDto.fromEntity(note)));
         }
 
-        return NoteSearchResponseDto.of(ordinaryNoteEachResponseDtoList);
+        return NoteSearchResponseDto.fromEntity(ordinaryNoteEachResponseDtoList, ordinaryNoteCustomPage);
     }
 
     // 전체 프로젝트에서 내가 작성한 노트 조회
     public NoteMineInTotalResponseDto readMyNoteInTotalProject(User currentUser, int page, int size) {
-        List<NoteEachMineInTotalResponseDto> resultList =
+        CustomPageImpl<NoteEachMineInTotalResponseDto> totalNoteCustomPage =
                 noteRepository.findUserNoteInTotalProject(
                         currentUser.getUserId(), pandanUtils.dealWithPageRequestParam(page, size));
-        return NoteMineInTotalResponseDto.builder().myNoteList(resultList).build();
+        return NoteMineInTotalResponseDto.fromEntity(totalNoteCustomPage.toList(), totalNoteCustomPage);
     }
 
     // 내가 소속된 프로젝트에서 제목으로 노트 검색
