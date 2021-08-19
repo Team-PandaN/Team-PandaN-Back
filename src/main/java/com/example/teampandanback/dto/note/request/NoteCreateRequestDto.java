@@ -8,5 +8,4 @@ public class NoteCreateRequestDto {
     private String content;
     private String deadline;
     private String step;
-    private Long previousNoteId;
 }
