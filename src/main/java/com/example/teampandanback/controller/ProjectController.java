@@ -94,5 +94,12 @@ public class ProjectController {
         return projectService.invitedProject(projectInvitedRequestDto,userDetails.getUser());
     }
 
+    //프로젝트 탈퇴
+//    @ApiOperation(value = "프로젝트 탈퇴")
+//    @PostMapping("/un-invite/{projectId}")
+//    public void unInvite(@PathVariable("projectId") Long projectId, @AuthenticationPrincipal UserDetailsImpl userDetails){
+//        projectService.unInviteProject(projectId,userDetails.getUser());
+//    }
+
 
 }

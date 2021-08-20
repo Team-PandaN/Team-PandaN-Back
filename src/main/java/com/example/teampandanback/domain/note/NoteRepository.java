@@ -1,6 +1,7 @@
 package com.example.teampandanback.domain.note;
 
 import com.example.teampandanback.domain.project.Project;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,6 +21,11 @@ public interface NoteRepository extends JpaRepository<Note,Long>, NoteRepository
 
     // Project 에 연관된 Note 삭제
     void deleteByProject_ProjectId(Long projectId);
+
+
+    @EntityGraph(attributePaths = {"user","project"})
+    @Query("select note from Note note where note.noteId = :noteIdGenerated")
+    Optional<Note> findByIdFetch(@Param("noteIdGenerated") long noteIdGenerated);
 
     // 특정 Project 에서 내가 작성한 Note 조회
     // @Query("select n from Note n where n.project.projectId = :projectId and n.user.userId =:userId")

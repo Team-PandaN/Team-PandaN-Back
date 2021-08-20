@@ -14,6 +14,11 @@ import com.example.teampandanback.domain.user.UserRepository;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectRole;
+import com.example.teampandanback.dto.comment.request.CommentCreateRequestDto;
+import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
+import com.example.teampandanback.service.BookmarkService;
+import com.example.teampandanback.service.CommentService;
+import com.example.teampandanback.service.NoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -22,10 +27,11 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 //Switching
-@Component
+//@Component
 public class testDataRunner implements ApplicationRunner {
 
     @Autowired
@@ -47,289 +53,303 @@ public class testDataRunner implements ApplicationRunner {
     CommentRepository commentRepository;
 
     @Autowired
+    NoteService noteService;
+
+    @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Autowired
+    BookmarkService bookmarkService;
+
+    @Autowired
+    CommentService commentService;
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
-        List<User> userList = new ArrayList<>();
-        List<Project> projectList = new ArrayList<>();
+        //Initial Value
+        int userCount = 100; //
+        int projectCount = userCount+25;
+
+        int userInvitedToProjectCountUpperBound = 10; // 유저는 프로젝트 N개에만 참여 가능하다.
+        int userInvitedToProjectCountLowerBound = 7;
+
+        int noteWroteAtProjectCountUpperBound = 100;
+
+
+        //Set Array
+        List<User> userList = new ArrayList<>(userCount);
+        List<Project> projectList = new ArrayList<>(projectCount);
+        List<Integer> userInvitedToProjectCount = new ArrayList<>(userCount); // 각 index의 유저가, 참여한 프로젝트 갯수,
+        // 따라서 각 index가 userList와 일치하게끔 설계했으므로, 사이즈는 userCount
+        // userInvitedToProjectCountUpperBound 로 제한 예정
+        for (int i = 0; i < userCount; i++) {
+            userInvitedToProjectCount.add(0);
+        }
+        //0으로 초기화
+
+        List<Integer> noteWroteAtProjectCount = new ArrayList<>(projectCount); // 각 index의 프로젝트에, 써있는 노트 갯수,
+        // 따라서 각 index가 projectList와 일치하게끔 설계했으므로, 사이즈는 projectCount
+        // noteWroteAtProjectCountUpperBound로 제한 예정
+        for (int i = 0; i < projectCount; i++) {
+            noteWroteAtProjectCount.add(0);
+        }
+        //0으로 초기화화
+
+
         List<UserProjectMapping> userProjectMappingList = new ArrayList<>();
         List<Note> noteList = new ArrayList<>();
         List<Comment> commentList = new ArrayList<>();
         List<Bookmark> bookmarkList = new ArrayList<>();
 
-        int UserNumber = 10;
-        for (int i = 1; i <= UserNumber; i++) {
-            String strNum = Integer.toString(i);
+
+        System.out.println("Users are creating...");
+        //유저 생성
+        for (int i = 0; i < userCount; i++) {
+            String iterationStr = Integer.toString(i + 1);
             User user = User.builder()
-                    .name("User" + strNum)
-                    .password(passwordEncoder.encode("User" + strNum))
-                    .email("User" + strNum + "@")
+                    .name("User" + iterationStr)
+                    .password(passwordEncoder.encode("User" + iterationStr))
+                    .email("User" + iterationStr + "@email.com")
                     .picture("https://s3.ap-northeast-2.amazonaws.com/front.blossomwhale.shop/ico-user.svg")
                     .build();
             userRepository.save(user);
             userList.add(user);
+        }
+
+
+        System.out.println("Users are creating projects...");
+        //유저가 프로젝트를 생성 (OWNER)
+
+        // 프로젝트 입장에서 볼때, 프로젝트는 중복되지 않은 난수를 생성하며, 아니 걍 순서대로.
+        // 프로젝트가 이미 한번 뽑힌, 유저를 다시 선택해도 좋다. (중복된 유저 난수를 사용해도 좋다.) 이와같은 상황은
+        // 한 유저가 여러 프로젝트를 생성한 경우이다.
+
+        // 그런데 그 유저는 10개 이상의 프로젝트를 생성해선 안됀다.
+
+        //fix - 위와 같이 코드를 짜면, userRand로 어떤 유저가 이 프로젝트에 뽑힐 지를, 선택할 때,
+        //10개라는 프로젝트 제한에 의해, 적합한 유저를 찾기까지 엄청나게 오래 걸릴 확률이 존재.
+
+        //fix - user가 확률상으로 프로젝트를 몇개 가져갈지 결정 할 경우, 최악의 경우 여러 유저들이 프로젝트에 참여하지
+        // 못하는 상황이 발생함.
+
+        //fin - 그대로 프로젝트가 유저를 선택하지만, 10개가 찬 유저는 더 이상 랜덤으로 뽑히지 않도록 커스텀 클래스를 설계
+        DupRandGenerator userRandGen = DupRandGenerator.init(userCount); //
+        for (int i = 0; i < projectCount; i++) {
+
+            if (userRandGen.isEmpty()) { // 더 이상 user가 프로젝트에 참여할 수 없음. 각 유저가 모두 프로젝트를 10개 초과 만들었음.
+                break;
+            }
+
+            int userRand = userRandGen.get();
+
+
+            //지금 이 유저가 프로젝트를 상계만큼 생성 했는가? 그렇다면 이 유저는 안됌.
+            if (userInvitedToProjectCount.get(userRand) >= userInvitedToProjectCountUpperBound) {
+                userRandGen.dropNumber(userRand);
+
+                if (userRandGen.isEmpty()) {
+                    break;
+                }
+                userRand = userRandGen.get();
+            }
+
+            String userRandStr = Integer.toString(userRand + 1);
+            String projectNumStr = Integer.toString(i + 1);
 
             Project project = Project.builder()
-                    .title("Project" + strNum)
-                    .detail("Project" + strNum + "OWNER:USER" + strNum)
+                    .title("Project" + projectNumStr)
+                    .detail("Project-" + projectNumStr + " OWNER:USER" + userRandStr)
                     .build();
             projectRepository.save(project);
             projectList.add(project);
 
             UserProjectMapping userProjectMapping = UserProjectMapping.builder()
                     .userProjectRole(UserProjectRole.OWNER)
-                    .user(user)
+                    .user(userList.get(userRand))
                     .project(project)
                     .build();
             userProjectMappingRepository.save(userProjectMapping);
             userProjectMappingList.add(userProjectMapping);
+            userInvitedToProjectCount.set(userRand, userInvitedToProjectCount.get(userRand) + 1);
         }
 
-        for (int i = 1; i <= 80; i++) {
-            int userRand = (int) (Math.random() * UserNumber);
-            int projectRand = (int) (Math.random() * UserNumber);
+        System.out.println("Users are inviting to Projects...");
+        //유저들이 다른 유저의 프로젝트에 참여 시도 (CREW)
 
-            UserProjectMapping userProjectMapping = UserProjectMapping.builder()
-                    .userProjectRole(UserProjectRole.CREW)
-                    .user(userList.get(userRand))
-                    .project(projectList.get(projectRand))
-                    .build();
+        //모든 유저들이 하계보다는 많은 프로젝트에 참여하도록 한다.
+        //따라서 유저를 기준으로 루프를 돈다.
 
-            boolean duplicate = false;
-            for (UserProjectMapping each : userProjectMappingList) {
-                if (each.getUser().equals(userProjectMapping.getUser()) &&
-                        each.getProject().equals(userProjectMapping.getProject())) {
-                    duplicate = true;
-                    break;
+        for (int i = 0; i < userCount; i++) {
+            String userNumStr = Integer.toString(i + 1);
+
+            NoDupRandGenerator projectRandGen = NoDupRandGenerator.init(projectCount);
+            while (userInvitedToProjectCount.get(i) < userInvitedToProjectCountLowerBound && !projectRandGen.isEmpty()) {
+                int projectRand = projectRandGen.get();
+
+                boolean hasAlreadyInvitedToThisProject = false;
+                //해당 프로젝트에 이미 참여 했는지,
+                for (UserProjectMapping each : userProjectMappingList) {
+                    if (each.getUser().getUserId() - 1L == (long) i &&
+                            each.getProject().getProjectId() - 1L == (long) projectRand) {
+                        hasAlreadyInvitedToThisProject = true;
+                        break;
+                    }
                 }
-            }
-            if (duplicate == false) {
-                userProjectMappingRepository.save(userProjectMapping);
-                userProjectMappingList.add(userProjectMapping);
+
+                if (!hasAlreadyInvitedToThisProject) {
+                    //참여 안했으면 걍 CREW로 참가
+                    UserProjectMapping userProjectMapping = UserProjectMapping.builder()
+                            .user(userList.get(i))
+                            .project(projectList.get(projectRand))
+                            .userProjectRole(UserProjectRole.CREW)
+                            .build();
+                    userProjectMappingRepository.save(userProjectMapping);
+                    userProjectMappingList.add(userProjectMapping);
+                    userInvitedToProjectCount.set(i, userInvitedToProjectCount.get(i) + 1);
+                }
+
             }
         }
 
+
+        System.out.println("Create Notes...");
         // 노트 생성
-        for (int i = 0; i < 700; i++) {
-            int userProjectRand = (int) (Math.random() * userProjectMappingList.size());
-            UserProjectMapping userProjectMapping = userProjectMappingList.get(userProjectRand);
-            int enumRand = (int) (Math.random() * 4 + 1);
-            Step step;
-            if (enumRand == 1) {
-                step = Step.STORAGE;
-            } else if (enumRand == 2) {
-                step = Step.TODO;
-            } else if (enumRand == 3) {
-                step = Step.PROCESSING;
-            } else {
-                step = Step.DONE;
-            }
 
-            Note note = Note.builder()
-                    .user(userProjectMapping.getUser())
-                    .project(userProjectMapping.getProject())
-                    .deadline(LocalDate.parse("2015-10-" + (int) (Math.random() * 21 + 10)))
-                    .title("title"+(int)(Math.random()*100))
-                    .content("content")
-                    .step(step)
-                    .build();
-            noteRepository.save(note);
-            noteList.add(note);
-        }
+        //도저히 균일하게 노트를 생성할 방안이 떠오르지 않아, 확률에 기댈 예정.
+        //프로젝트를 기준으로 확률에 의존함.
 
-        //북마크 생성
-        for(int i =1; i<= 500; i++) {
-            int noteRand = (int) (Math.random() * noteList.size());
-            Note note = noteList.get(noteRand);
+        int noteIdGenerated = 0;
+        for (int i = 0; i < projectCount; i++) {
 
-            Bookmark bookmark = Bookmark.builder()
-                    .user(note.getUser())
-                    .note(note)
-                    .build();
+            for (UserProjectMapping each : userProjectMappingList) {
+                if (each.getProject().getProjectId() - 1L == (long) i) {
+                    boolean isFull = false;
+                    while ((int) (Math.random() * 15) != 0) { // 여깄는 숫자가 기댓값임.
+                        // 각각 1/4 확률로 해당 step의 노트를 작성한다.
 
-            boolean duplicate = false;
-            for (Bookmark each : bookmarkList) {
-                if (each.getUser().equals(bookmark.getUser()) &&
-                        each.getNote().equals(bookmark.getNote())) {
-                    duplicate = true;
-                    break;
+                        if (noteWroteAtProjectCount.get(i) >= noteWroteAtProjectCountUpperBound) { // 해당 프로젝트에 노트가 꽉 차도 break
+                            isFull = true;
+                            break;
+                        }
+
+                        int enumRand = (int) (Math.random() * 4);
+                        Step step;
+                        if (enumRand == 0) {
+                            step = Step.STORAGE;
+                        } else if (enumRand == 1) {
+                            step = Step.TODO;
+                        } else if (enumRand == 2) {
+                            step = Step.PROCESSING;
+                        } else {
+                            step = Step.DONE;
+                        }
+
+                        NoteCreateRequestDto noteCreateRequestDto = NoteCreateRequestDto.builder()
+                                .content("content")
+                                .deadline("2021-08-" + (int) (Math.random() * 21 + 10))
+                                .step(step.toString())
+                                .title("Author: " + each.getUser().getName() + " " + each.getProject().getTitle())
+                                .build();
+
+
+                        noteService.createNote(each.getProject().getProjectId(), noteCreateRequestDto, each.getUser());
+                        noteIdGenerated += 1;
+                        Note note = noteRepository.findByIdFetch((long) noteIdGenerated).orElseThrow(
+                                () -> new IllegalArgumentException("Something has wrong...")
+                        );
+                        noteList.add(note);
+                        noteWroteAtProjectCount.set(i, noteWroteAtProjectCount.get(i) + 1);
+                    }
+                    if (isFull == true) {
+                        break;
+                    }
                 }
             }
-            if (duplicate == false) {
-                bookmarkRepository.save(bookmark);
-                bookmarkList.add(bookmark);
+        }
+
+        System.out.println("Bookmarks are creating...");
+        //북마크 생성
+        //마찬가지로 확률 이용
+        for(int i=0 ;i<noteList.size();i++){
+            Long curNoteId = (long)(i+1);
+            for(UserProjectMapping each : userProjectMappingList){
+                if(each.getProject().getProjectId().equals(noteList.get(i).getProject().getProjectId())){
+                    if((int)(Math.random()*3)==0){ // 각 노트에 대해서 이 유저가 북마크 확률 33%
+                        bookmarkService.bookmarkNote(curNoteId, each.getUser());
+                    }
+                }
             }
         }
 
+        System.out.println("Comments are creating...");
         //코멘트 생성
-        for(int i = 1 ; i<=500;i++){
-            int userRand = (int)(Math.random()*userList.size());
-            int noteRand = (int)(Math.random()*noteList.size());
-
-            User user = userList.get(userRand);
-            Note note = noteList.get(noteRand);
-
-            Comment comment = Comment.builder()
-                    .note(note)
-                    .user(user)
-                    .content("User:"+user.getUserId()+"이 Note:"+note.getNoteId()+"에 작성")
-                    .build();
-
-            commentRepository.save(comment);
-            commentList.add(comment);
+        for(int i=0 ;i<noteList.size();i++){
+            Long curNoteId = (long)(i+1);
+            for(UserProjectMapping each : userProjectMappingList){
+                if(each.getProject().getProjectId().equals(noteList.get(i).getProject().getProjectId())){
+                    if((int)(Math.random()*3)==0){ // 각 노트에 대해서 이 유저가 코멘트 작성 확률 33%
+                        CommentCreateRequestDto commentCreateRequestDto = CommentCreateRequestDto.builder()
+                                .content(each.getUser().getName()+"가 noteId: "+ noteList.get(i).getNoteId() + "에 작성한 코멘트")
+                                .build();
+                        commentService.createComment(curNoteId,each.getUser(),commentCreateRequestDto);
+                    }
+                }
+            }
         }
-
         System.out.println("DONE");
-
-
-//        User user1 = User.builder()
-//                .name("User1")
-//                .password(passwordEncoder.encode("User1"))
-//                .email("User1@")
-//                .build();
-//        userRepository.save(user1);
-        //===========================================
-//        Project project1 = Project.builder()
-//                .title("Project1")
-//                .detail("Project1->detail")
-//                .build();
-//        projectRepository.save(project1);
-//
-//        Project project2 = Project.builder()
-//                .title("Project2")
-//                .detail("Project2->detail")
-//                .build();
-//        projectRepository.save(project2);
-//
-//        Project project3 = Project.builder()
-//                .title("Project3")
-//                .detail("Project3->detail")
-//                .build();
-//        projectRepository.save(project3);
-//        //===========================================
-//        UserProjectMapping userProjectMapping1 = UserProjectMapping.builder()
-//                .userProjectRole(UserProjectRole.OWNER)
-//                .project(project1)
-//                .user(user1)
-//                .build();
-//        userProjectMappingRepository.save(userProjectMapping1);
-//
-//        UserProjectMapping userProjectMapping2 = UserProjectMapping.builder()
-//                .userProjectRole(UserProjectRole.OWNER)
-//                .project(project2)
-//                .user(user2)
-//                .build();
-//        userProjectMappingRepository.save(userProjectMapping2);
-//
-//        UserProjectMapping userProjectMapping3 = UserProjectMapping.builder()
-//                .userProjectRole(UserProjectRole.OWNER)
-//                .project(project3)
-//                .user(user3)
-//                .build();
-//        userProjectMappingRepository.save(userProjectMapping3);
-//        //==============================================
-//        UserProjectMapping userProjectMapping4 = UserProjectMapping.builder()
-//                .userProjectRole(UserProjectRole.CREW)
-//                .project(project1)
-//                .user(user2)
-//                .build();
-//        userProjectMappingRepository.save(userProjectMapping4);
-//
-//        UserProjectMapping userProjectMapping5 = UserProjectMapping.builder()
-//                .userProjectRole(UserProjectRole.CREW)
-//                .project(project1)
-//                .user(user3)
-//                .build();
-//        userProjectMappingRepository.save(userProjectMapping5);
-//
-//        //=================================================
-//        UserProjectMapping userProjectMapping6 = UserProjectMapping.builder()
-//                .userProjectRole(UserProjectRole.CREW)
-//                .project(project2)
-//                .user(user3)
-//                .build();
-//        userProjectMappingRepository.save(userProjectMapping6);
-//        //==================================================
-//        Note note1 = Note.builder()
-//                .step(Step.PROCESSING)
-//                .title("User:1 , Project:1 에 작성한 노트1")
-//                .user(user1)
-//                .project(project1)
-//                .deadline(LocalDate.of(2019, 11, 12))
-//                .content("컨텐츠1")
-//                .build();
-//        noteRepository.save(note1);
-//
-//        Note note2 = Note.builder()
-//                .step(Step.PROCESSING)
-//                .title("User:1 , Project:1 에 작성한 노트2")
-//                .user(user1)
-//                .project(project1)
-//                .deadline(LocalDate.of(2019, 11, 13))
-//                .content("컨텐츠2")
-//                .build();
-//        noteRepository.save(note2);
-//
-//        Note note3 = Note.builder()
-//                .step(Step.PROCESSING)
-//                .title("User:1 , Project:1 에 작성한 노트3")
-//                .user(user1)
-//                .project(project1)
-//                .deadline(LocalDate.of(2019, 11, 14))
-//                .content("컨텐츠3")
-//                .build();
-//        noteRepository.save(note3);
-//
-//        Note note4 = Note.builder()
-//                .step(Step.PROCESSING)
-//                .title("User:2 , Project:2 에 작성한 노트1")
-//                .user(user2)
-//                .project(project2)
-//                .deadline(LocalDate.of(2019, 11, 14))
-//                .content("컨텐츠4")
-//                .build();
-//        noteRepository.save(note4);
-//
-//        Note note5 = Note.builder()
-//                .step(Step.PROCESSING)
-//                .title("User:2 , Project:2 에 작성한 노트3")
-//                .user(user2)
-//                .project(project2)
-//                .deadline(LocalDate.of(2019, 11, 14))
-//                .content("컨텐츠5")
-//                .build();
-//        noteRepository.save(note5);
-//
-//        Note note6 = Note.builder()
-//                .step(Step.PROCESSING)
-//                .title("User:2 , Project:2 에 작성한 노트3")
-//                .user(user2)
-//                .project(project2)
-//                .deadline(LocalDate.of(2019, 11, 14))
-//                .content("컨텐츠3")
-//                .build();
-//        noteRepository.save(note6);
-//
-//        Note note7 = Note.builder()
-//                .step(Step.PROCESSING)
-//                .title("User:3 , Project:2 에 작성한 노트3")
-//                .user(user3)
-//                .project(project2)
-//                .deadline(LocalDate.of(2019, 11, 14))
-//                .content("컨텐츠4")
-//                .build();
-//        noteRepository.save(note7);
-//
-//        //===========================================================
-//
-//        Bookmark bookmark1 = Bookmark.builder()
-//                .user(user2)
-//                .note(note7)
-//                .build();
-//        bookmarkRepository.save(bookmark1);
-
-
     }
+
+}
+
+class NoDupRandGenerator { // 연속된 숫자 중, 중복되지 않는 난수를 생성하기 위한 커스텀 클래스
+    List<Integer> randList = new ArrayList<>();
+
+    public NoDupRandGenerator(int x) {
+        for (int i = 0; i < x; i++) {
+            randList.add(i);
+        }
+        Collections.shuffle(randList);
+    }
+
+    public static NoDupRandGenerator init(int x) { // 0~ (x-1)의 난수를 반환할 준비를 함.
+        return new NoDupRandGenerator(x);
+    }
+
+    public int get() {
+        int result = randList.get(0);
+        randList.remove(0);
+        return result;
+    }
+
+    public boolean isEmpty() {
+        return randList.size() == 0;
+    }
+}
+
+class DupRandGenerator {
+    List<Integer> randList = new ArrayList<>();
+
+    public DupRandGenerator(int x) {
+        for (int i = 0; i < x; i++) {
+            randList.add(i);
+        }
+    }
+
+    public static DupRandGenerator init(int x) {
+        return new DupRandGenerator(x);
+    }
+
+    public int get() {
+        int randNum = (int) (Math.random() * randList.size());
+        return randList.get(randNum);
+    }
+
+    public void dropNumber(int x) {
+        randList.remove(x);
+    }
+
+    public boolean isEmpty() {
+        return randList.size() == 0;
+    }
+
 }
