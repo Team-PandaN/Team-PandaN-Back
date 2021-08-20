@@ -309,4 +309,19 @@ public class ProjectService {
 
         return userProjectMappingRepository.findProjectListTopSize(currentUser.getUserId(), readSize);
     }
+
+//    //프로젝트 탈퇴
+//    public void unInviteProject(Long projectId, User user) {
+//        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUserIdAndProjectId(user.getUserId(), projectId).orElseThrow(
+//                () -> new ApiRequestException("참여하지 않은 프로젝트에서 탈퇴하려 합니다.")
+//        );
+//
+//        Long countedUserAtThisProject = userProjectMappingRepository.countByProjectId(projectId);
+//
+//        if(countedUserAtThisProject <= 1L){
+//
+//        }
+//
+//        userProjectMappingRepository.delete(userProjectMapping);
+//    }
 }

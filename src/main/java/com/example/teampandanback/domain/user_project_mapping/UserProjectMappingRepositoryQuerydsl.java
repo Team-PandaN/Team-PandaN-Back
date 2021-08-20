@@ -35,4 +35,5 @@ public interface UserProjectMappingRepositoryQuerydsl {
     void deleteByProjectId(Long projectId);
 
 
+    Long countByProjectId(Long projectId);
 }
