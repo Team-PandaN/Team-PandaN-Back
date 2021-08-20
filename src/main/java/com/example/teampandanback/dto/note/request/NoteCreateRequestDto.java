@@ -2,8 +2,10 @@ package com.example.teampandanback.dto.note.request;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class NoteCreateRequestDto {
     private String title;
     private String content;

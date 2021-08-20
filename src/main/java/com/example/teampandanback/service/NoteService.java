@@ -131,6 +131,14 @@ public class NoteService {
     // Note 작성
     @Transactional
     public NoteCreateResponseDto createNote(Long projectId, NoteCreateRequestDto noteCreateRequestDto, User currentUser) {
+        //프로젝트에 쓰여진 노트 총 갯수
+        Long theNumberOfNoteWroteToProject = noteRepository.countByProjectId(projectId);
+
+        Long theNumberOfNoteWroteToProjectUpperBound = 100L;
+        if(theNumberOfNoteWroteToProject >= theNumberOfNoteWroteToProjectUpperBound){
+            throw new ApiRequestException("프로젝트에 이미 "+theNumberOfNoteWroteToProjectUpperBound+"개의 노트가 작성되어있습니다.");
+        }
+
 
         UserProjectMapping userProjectMapping = userProjectMappingRepository
                 .findByUserIdAndProjectId(currentUser.getUserId(), projectId)
