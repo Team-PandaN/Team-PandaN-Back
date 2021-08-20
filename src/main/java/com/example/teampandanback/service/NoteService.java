@@ -3,6 +3,8 @@ package com.example.teampandanback.service;
 import com.example.teampandanback.domain.Comment.CommentRepository;
 import com.example.teampandanback.domain.bookmark.Bookmark;
 import com.example.teampandanback.domain.bookmark.BookmarkRepository;
+import com.example.teampandanback.domain.file.File;
+import com.example.teampandanback.domain.file.FileRepository;
 import com.example.teampandanback.domain.note.MoveStatus;
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
@@ -12,6 +14,7 @@ import com.example.teampandanback.domain.project.ProjectRepository;
 import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
+import com.example.teampandanback.dto.file.response.FileDetailResponseDto;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
 import com.example.teampandanback.dto.note.request.NoteMoveRequestDto;
 import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
@@ -38,16 +41,24 @@ public class NoteService {
     private final BookmarkRepository bookmarkRepository;
     private final CommentRepository commentRepository;
     private final PandanUtils pandanUtils;
+    private final FileRepository fileRepository;
 
     // Note 상세 조회
     @Transactional
-    public NoteResponseDto readNoteDetail(Long noteId, User currentUser) {
+    public NoteDetailResponseDto readNoteDetail(Long noteId, User currentUser) {
         NoteResponseDto noteResponseDto = noteRepository.findByNoteId(noteId)
                 .orElseThrow(() -> new ApiRequestException("작성된 노트가 없습니다."));
 
         Optional<Bookmark> bookmark = bookmarkRepository.findByUserIdAndNoteId(currentUser.getUserId(), noteId);
         noteResponseDto.setBookmark(bookmark.isPresent());
-        return noteResponseDto;
+
+        List<File> fileList = fileRepository.findFilesByNoteId(noteId);
+        List<FileDetailResponseDto> fileDetailResponseDtoList = new ArrayList<>();
+        for (File fileUnit : fileList) {
+            fileDetailResponseDtoList.add(FileDetailResponseDto.fromEntity(fileUnit));
+        }
+
+        return NoteDetailResponseDto.fromEntity(noteResponseDto, fileDetailResponseDtoList);
     }
 
     // Note 상세 조회에서 내용 업데이트
@@ -204,6 +215,9 @@ public class NoteService {
         Note note = noteRepository.findById(noteId).orElseThrow(
                 () -> new ApiRequestException("이미 삭제된 노트입니다.")
         );
+
+        //Note에 연관된 파일 삭제
+        fileRepository.deleteFileByNoteId(noteId);
 
         // Note에 연관된  코멘트 삭제
         commentRepository.deleteCommentByNoteId(noteId);

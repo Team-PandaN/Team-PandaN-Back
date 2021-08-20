@@ -2,7 +2,6 @@ package com.example.teampandanback.domain.user_project_mapping;
 
 import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.user.User;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,4 +17,7 @@ public interface UserProjectMappingRepository extends JpaRepository<UserProjectM
     Optional<UserProjectMapping> findByUserAndProject(User newCrew, Project invitedProject);
 
     boolean existsByUserAndProject(User inviteOfferUser, Project inviteProject);
+
+    @Query("select upm from UserProjectMapping upm where upm.project.projectId = :projectId")
+    List<UserProjectMapping> findByProject_ProjectId(@Param("projectId") Long projectId);
 }

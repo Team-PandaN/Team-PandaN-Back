@@ -2,6 +2,7 @@ package com.example.teampandanback.service;
 
 import com.example.teampandanback.domain.Comment.CommentRepository;
 import com.example.teampandanback.domain.bookmark.BookmarkRepository;
+import com.example.teampandanback.domain.file.FileRepository;
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.domain.project.Project;
@@ -22,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -41,6 +41,7 @@ public class ProjectService {
     private final NoteRepository noteRepository;
     private final BookmarkRepository bookmarkRepository;
     private final CommentRepository commentRepository;
+    private final FileRepository fileRepository;
     private final AESEncryptor aesEncryptor;
 
     // Project 목록 조회
@@ -60,13 +61,13 @@ public class ProjectService {
                     .sorted(Comparator.comparing(Note::getModifiedAt))
                     .collect(Collectors.toList());
 
-            LocalDateTime recentNoteUpdateDate = LocalDateTime.of(3000,12,29,23,59);
-            if(!(sortedByLastUpdatedTime.size() == 0)){
+            LocalDateTime recentNoteUpdateDate = LocalDateTime.of(3000, 12, 29, 23, 59);
+            if (!(sortedByLastUpdatedTime.size() == 0)) {
                 recentNoteUpdateDate = sortedByLastUpdatedTime.get(0).getModifiedAt();
             }
 
             //현재 유저가 이 프로젝트에 북마크 누른 횟수를 구함
-            Long bookmarkCount = bookmarkRepository.countCurrentUserBookmarkedAtByProjectId(each.getUser().getUserId(),each.getProject().getProjectId());
+            Long bookmarkCount = bookmarkRepository.countCurrentUserBookmarkedAtByProjectId(each.getUser().getUserId(), each.getProject().getProjectId());
 
             //이 프로젝트 id에 참여해있는 유저들을 호출하기 위한 mapping records
             List<UserProjectMapping> userProjectMappingList = userProjectMappingRepository.findByProjectId(each.getProject().getProjectId());
@@ -92,8 +93,8 @@ public class ProjectService {
                     .build());
         }
         List<ProjectEachResponseDTO> sortedList = result.stream().sorted(Comparator.comparing(ProjectEachResponseDTO::getRecentNoteUpdateDate)).collect(Collectors.toList());
-        for(ProjectEachResponseDTO each: sortedList){
-            if(each.getRecentNoteUpdateDate().isEqual(LocalDateTime.of(3000,12,29,23,59))){
+        for (ProjectEachResponseDTO each : sortedList) {
+            if (each.getRecentNoteUpdateDate().isEqual(LocalDateTime.of(3000, 12, 29, 23, 59))) {
                 each.setRecentNoteUpdateDate(null);
             }
         }
@@ -157,6 +158,9 @@ public class ProjectService {
         } else if (!userProjectMapping.get().getRole().equals(UserProjectRole.OWNER)) { //   우선 해당 프로젝트의 CREW이더라도, OWNER가 아닌지,
             throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
         }
+
+        // 해당 Project 와 연관된 Note에 속한 파일 삭제
+        fileRepository.deleteFileByProjectId(projectId);
 
         // 해당 Project 와 연관된 Note에 속한 코멘트 삭제
         commentRepository.deleteCommentByProjectId(projectId);
