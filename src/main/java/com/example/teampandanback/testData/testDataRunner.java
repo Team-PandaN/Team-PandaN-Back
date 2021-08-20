@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 //Switching
-@Component
+//@Component
 public class testDataRunner implements ApplicationRunner {
 
     @Autowired
@@ -67,11 +67,11 @@ public class testDataRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
 
         //Initial Value
-        int userCount = 1000; //
-        int projectCount = userCount+200;
+        int userCount = 100; //
+        int projectCount = userCount+25;
 
         int userInvitedToProjectCountUpperBound = 10; // 유저는 프로젝트 N개에만 참여 가능하다.
-        int userInvitedToProjectCountLowerBound = 8;
+        int userInvitedToProjectCountLowerBound = 7;
 
         int noteWroteAtProjectCountUpperBound = 100;
 
@@ -223,9 +223,8 @@ public class testDataRunner implements ApplicationRunner {
 
             for (UserProjectMapping each : userProjectMappingList) {
                 if (each.getProject().getProjectId() - 1L == (long) i) {
-                    int thisUser = (int) (each.getUser().getUserId() - 1L);
                     boolean isFull = false;
-                    while ((int) (Math.random() * 20) != 0) { //
+                    while ((int) (Math.random() * 15) != 0) { // 여깄는 숫자가 기댓값임.
                         // 각각 1/4 확률로 해당 step의 노트를 작성한다.
 
                         if (noteWroteAtProjectCount.get(i) >= noteWroteAtProjectCountUpperBound) { // 해당 프로젝트에 노트가 꽉 차도 break
