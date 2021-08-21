@@ -66,7 +66,7 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
                         .orderBy(bookmark.seq.desc())
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize())
-                        .leftJoin(bookmark.note, note)
+                        .join(bookmark.note, note)
                         .fetchResults();
 
         return new CustomPageImpl<NoteEachBookmarkedResponseDto>(results.getResults(), pageable, results.getTotal());
