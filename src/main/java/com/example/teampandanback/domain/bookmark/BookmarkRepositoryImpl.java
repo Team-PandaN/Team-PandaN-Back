@@ -1,17 +1,16 @@
 package com.example.teampandanback.domain.bookmark;
 
+import com.example.teampandanback.dto.bookmark.response.BookmarkDetailForProjectListDto;
 import com.example.teampandanback.dto.note.response.NoteEachBookmarkedResponseDto;
 import com.example.teampandanback.dto.note.response.NoteEachSearchInBookmarkResponseDto;
 import com.example.teampandanback.utils.PandanUtils;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Pageable;
 
 import javax.persistence.EntityManager;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -108,19 +107,18 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
                 .fetch();
     }
 
+
+    // 유저가 가진 프로젝트들의 북마크 정보 조회
     @Override
-    public Long countCurrentUserBookmarkedAtByProjectId(Long userId, Long projectId) {
+    public List<BookmarkDetailForProjectListDto> findBookmarkCountByProject(List<Long> projectIdList, Long userId) {
         return queryFactory
-                .selectFrom(bookmark)
-                .where(
-                        bookmark.note.noteId.in(
-                                JPAExpressions
-                                        .select(note.noteId)
-                                        .from(note)
-                                        .where(note.project.projectId.eq(projectId))
-                        ),
-                        bookmark.user.userId.eq(userId)
-                )
-                .fetchCount();
+                .select(
+                        Projections.constructor(BookmarkDetailForProjectListDto.class,
+                        note.project.projectId, bookmark.count()))
+                .from(bookmark)
+                .join(bookmark.note, note)
+                .where(note.project.projectId.in(projectIdList), note.user.userId.eq(userId))
+                .groupBy(note.project.projectId)
+                .fetch();
     }
 }

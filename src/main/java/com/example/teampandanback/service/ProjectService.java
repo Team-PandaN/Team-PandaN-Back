@@ -2,7 +2,6 @@ package com.example.teampandanback.service;
 
 import com.example.teampandanback.domain.Comment.CommentRepository;
 import com.example.teampandanback.domain.bookmark.BookmarkRepository;
-import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.project.ProjectRepository;
@@ -11,10 +10,12 @@ import com.example.teampandanback.domain.user.UserRepository;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectRole;
+import com.example.teampandanback.dto.bookmark.response.BookmarkDetailForProjectListDto;
 import com.example.teampandanback.dto.project.request.ProjectInvitedRequestDto;
 import com.example.teampandanback.dto.project.request.ProjectRequestDto;
 import com.example.teampandanback.dto.project.request.ProjectResponseDto;
 import com.example.teampandanback.dto.project.response.*;
+import com.example.teampandanback.dto.user.CrewDetailForProjectListDto;
 import com.example.teampandanback.exception.ApiRequestException;
 import com.example.teampandanback.utils.AESEncryptor;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -43,62 +39,44 @@ public class ProjectService {
     private final CommentRepository commentRepository;
     private final AESEncryptor aesEncryptor;
 
+    // 사이드바에 들어갈 Project 최대 갯수
+    private static final int sidebarSize = 5;
+
+
     // Project 목록 조회
-    @Transactional
-    public List<ProjectEachResponseDTO> readProjectList(User currentUser) {
-        List<ProjectEachResponseDTO> result = new ArrayList<>();
+    @Transactional(readOnly = true)
+    public List<ProjectEachResponseDto> readProjectList(User currentUser) {
+        // 유저가 참여하고 있는 프로젝트 목록 조회
+        List<UserProjectMapping> userProjectList = userProjectMappingRepository.findByUserId(currentUser.getUserId());
+        // 유저가 참여하고 있는 프로젝트 id의 목록
+        List<Long> projectIdList = userProjectList.stream()
+                                                    .map(userProjectMapping-> userProjectMapping.getProject().getProjectId())
+                                                    .collect(Collectors.toList());
+        // 유저가 참여하고 있는 프로젝트들의 세부정보 조회
+        List<ProjectDetailForProjectListDto> projectDetail = projectRepository.findProjectDetailForProjectList(projectIdList);
 
-        List<UserProjectMapping> currentUserProjectMappingList = userProjectMappingRepository.findByUserId(currentUser.getUserId());
+        // 유저가 참여하고 있는 프로젝트들의 크루정보 조회
+        List<CrewDetailForProjectListDto> rawCrewList =
+                userProjectMappingRepository.findCrewDetailForProjectList(projectIdList);
 
-        for (UserProjectMapping each : currentUserProjectMappingList) {
-            //noteCount와 recentNoteUpdateDate를 순서대로 넣음. 아직 최종 sorting은 안된 과정
+        // 유저가 참여하고 있는 프로젝트들의 크루정보 정렬
+        Map<Long, ArrayList<CrewDetailForProjectListDto>> crewMap = new HashMap<>();
+        projectIdList.forEach(projectId-> crewMap.put(projectId, new ArrayList<>()));
 
-            List<Note> noteList = noteRepository.findAllByProjectId(each.getProject().getProjectId());
-            Long noteCount = (long) noteList.size();
-
-            List<Note> sortedByLastUpdatedTime = noteList.stream()
-                    .sorted(Comparator.comparing(Note::getModifiedAt))
-                    .collect(Collectors.toList());
-
-            LocalDateTime recentNoteUpdateDate = LocalDateTime.of(3000,12,29,23,59);
-            if(!(sortedByLastUpdatedTime.size() == 0)){
-                recentNoteUpdateDate = sortedByLastUpdatedTime.get(0).getModifiedAt();
-            }
-
-            //현재 유저가 이 프로젝트에 북마크 누른 횟수를 구함
-            Long bookmarkCount = bookmarkRepository.countCurrentUserBookmarkedAtByProjectId(each.getUser().getUserId(),each.getProject().getProjectId());
-
-            //이 프로젝트 id에 참여해있는 유저들을 호출하기 위한 mapping records
-            List<UserProjectMapping> userProjectMappingList = userProjectMappingRepository.findByProjectId(each.getProject().getProjectId());
-            Long crewCount = (long) userProjectMappingList.size();
-            List<String> crewProfiles = new ArrayList<>();
-            for (int i = 0; i < 3; i++) {
-                try {
-                    crewProfiles.add(userProjectMappingList.get(i).getUser().getPicture());
-                } catch (Exception ignored) {
-                    break;
-                }
-            }
-
-            result.add(ProjectEachResponseDTO.builder()
-                    .noteCount(noteCount)
-                    .recentNoteUpdateDate(recentNoteUpdateDate)
-                    .bookmarkCount(bookmarkCount)
-                    .crewCount(crewCount)
-                    .crewProfiles(crewProfiles)
-                    .projectId(each.getProject().getProjectId())
-                    .title(each.getProject().getTitle())
-                    .detail(each.getProject().getDetail())
-                    .build());
+        for (CrewDetailForProjectListDto crew:rawCrewList){
+            crewMap.get(crew.getProjectId()).add(crew);
         }
-        List<ProjectEachResponseDTO> sortedList = result.stream().sorted(Comparator.comparing(ProjectEachResponseDTO::getRecentNoteUpdateDate)).collect(Collectors.toList());
-        for(ProjectEachResponseDTO each: sortedList){
-            if(each.getRecentNoteUpdateDate().isEqual(LocalDateTime.of(3000,12,29,23,59))){
-                each.setRecentNoteUpdateDate(null);
-            }
-        }
-        return sortedList;
 
+        // 유저가 참여하고 있는 프로젝트들의 북마크 정보 조회
+        List<BookmarkDetailForProjectListDto> bookmarkCountList = bookmarkRepository.findBookmarkCountByProject(projectIdList, currentUser.getUserId());
+        Map<Long, Long> bookmarkMap = new HashMap<>();
+        bookmarkCountList.forEach(bookmark-> bookmarkMap.put(bookmark.getProjectId(), bookmark.getBookmarkCount()));
+
+        return projectDetail.stream()
+                .map(project->
+                    ProjectEachResponseDto
+                            .of(project, userProjectList, crewMap.get(project.getProjectId()), bookmarkMap.get(project.getProjectId()))
+                ).collect(Collectors.toList());
     }
 
     // Project 생성
@@ -202,6 +180,7 @@ public class ProjectService {
                 .build();
     }
 
+    // 초대 코드로 프로젝트 참여
     @Transactional
     public ProjectInvitedResponseDto invitedProject(ProjectInvitedRequestDto projectInvitedRequestDto, User currentUser) {
 
@@ -282,11 +261,10 @@ public class ProjectService {
         return responseDto;
     }
 
-    // 사이드 바에 들어갈 Project 목록 조회(최대 5개)
+    // 사이드 바에 들어갈 Project 목록 조회(최대 sidebarSize 개)
     @Transactional(readOnly = true)
     public List<ProjectSidebarResponseDto> readProjectListSidebar(User currentUser) {
-        Long readSize = 5L;
 
-        return userProjectMappingRepository.findProjectListTopSize(currentUser.getUserId(), readSize);
+        return userProjectMappingRepository.findProjectListTopSize(currentUser.getUserId(), sidebarSize);
     }
 }

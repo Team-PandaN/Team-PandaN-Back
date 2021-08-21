@@ -2,13 +2,11 @@ package com.example.teampandanback.domain.note;
 
 import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.dto.note.response.NoteEachMineInTotalResponseDto;
-import com.example.teampandanback.dto.note.response.noteEachSearchInTotalResponseDto;
-import com.example.teampandanback.dto.note.response.NoteResponseDto;
 import com.example.teampandanback.dto.note.response.NoteEachSearchInMineResponseDto;
-import com.example.teampandanback.exception.ApiRequestException;
+import com.example.teampandanback.dto.note.response.NoteResponseDto;
+import com.example.teampandanback.dto.note.response.noteEachSearchInTotalResponseDto;
 import com.example.teampandanback.utils.PandanUtils;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Pageable;

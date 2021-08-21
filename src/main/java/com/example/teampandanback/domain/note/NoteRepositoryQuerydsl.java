@@ -1,10 +1,7 @@
 package com.example.teampandanback.domain.note;
 
 import com.example.teampandanback.domain.project.Project;
-import com.example.teampandanback.dto.note.response.NoteEachMineInTotalResponseDto;
-import com.example.teampandanback.dto.note.response.noteEachSearchInTotalResponseDto;
-import com.example.teampandanback.dto.note.response.NoteResponseDto;
-import com.example.teampandanback.dto.note.response.NoteEachSearchInMineResponseDto;
+import com.example.teampandanback.dto.note.response.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 
@@ -21,8 +18,8 @@ public interface NoteRepositoryQuerydsl {
     void deleteByProjectId(Long projectId);
 
     List<Note> findAllNoteByProjectAndUserOrderByCreatedAtDesc(Long projectId, Long userId, Pageable pageable);
-    List<noteEachSearchInTotalResponseDto> findNotesByUserIdAndKeywordInTotal(Long userId, List<String> kewordList);
-    List<NoteEachSearchInMineResponseDto> findNotesByUserIdAndKeywordInMine(Long userId, List<String> kewordList);
+    List<noteEachSearchInTotalResponseDto> findNotesByUserIdAndKeywordInTotal(Long userId, List<String> keywordList);
+    List<NoteEachSearchInMineResponseDto> findNotesByUserIdAndKeywordInMine(Long userId, List<String> keywordList);
     List<Note> findNotesByNoteIdList(List<Long> noteIdList);
     List<Note> findAllByProjectOrderByCreatedAtDesc(Project project, Pageable pageable);
 
