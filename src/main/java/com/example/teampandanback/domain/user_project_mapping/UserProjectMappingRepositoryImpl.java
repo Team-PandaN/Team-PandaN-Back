@@ -1,9 +1,9 @@
 package com.example.teampandanback.domain.user_project_mapping;
 
-import com.example.teampandanback.domain.user.QUser;
-import com.example.teampandanback.dto.project.response.ProjectDetailResponseDto;
 import com.example.teampandanback.dto.project.request.ProjectResponseDto;
+import com.example.teampandanback.dto.project.response.ProjectDetailResponseDto;
 import com.example.teampandanback.dto.project.response.ProjectSidebarResponseDto;
+import com.example.teampandanback.dto.user.CrewDetailForProjectListDto;
 import com.example.teampandanback.exception.ApiRequestException;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -27,21 +27,10 @@ public class UserProjectMappingRepositoryImpl implements UserProjectMappingRepos
 
 
     @Override
-    public List<UserProjectMapping> findByProjectId(Long projectId) {
-        return queryFactory
-                .select(userProjectMapping)
-                .from(userProjectMapping)
-                .join(userProjectMapping.user, user).fetchJoin()
-                .where(userProjectMapping.project.projectId.eq(projectId))
-                .fetch();
-    }
-
-    @Override
     public List<UserProjectMapping> findByUserId(Long userId) {
         return queryFactory
                 .select(userProjectMapping)
                 .from(userProjectMapping)
-                .join(userProjectMapping.project,project).fetchJoin()
                 .where(userProjectMapping.user.userId.eq(userId))
                 .fetch();
     }
@@ -73,7 +62,7 @@ public class UserProjectMappingRepositoryImpl implements UserProjectMappingRepos
 
     // 사이드 바에 들어갈 프로젝트의 목록 (최대 N개)
     @Override
-    public List<ProjectSidebarResponseDto> findProjectListTopSize(long userId, Long readSize) {
+    public List<ProjectSidebarResponseDto> findProjectListTopSize(long userId, int readSize) {
         return queryFactory
                 .select(
                         Projections.constructor(ProjectSidebarResponseDto.class,
@@ -128,6 +117,23 @@ public class UserProjectMappingRepositoryImpl implements UserProjectMappingRepos
                 .where(userProjectMapping.user.userId.eq(userId), userProjectMapping.project.projectId.eq(projectId))
                 .fetchFirst())
                 .orElseThrow(() -> new ApiRequestException("프로젝트에 참가한 사용자가 아닙니다."));
+    }
+
+
+    // 주어진 프로젝트에 참여하고 있는 크루 정보 조회
+    @Override
+    public List<CrewDetailForProjectListDto> findCrewDetailForProjectList(List<Long> projectIdList) {
+
+        return queryFactory
+                .select(
+                        Projections.constructor(CrewDetailForProjectListDto.class,
+                                userProjectMapping.project.projectId, user.userId, user.picture)
+                )
+                .from(userProjectMapping)
+                .join(userProjectMapping.user, user)
+                .where(userProjectMapping.project.projectId.in(projectIdList))
+                .fetch();
+
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.example.teampandanback.domain.bookmark;
 
+import com.example.teampandanback.dto.bookmark.response.BookmarkDetailForProjectListDto;
 import com.example.teampandanback.dto.note.response.NoteEachBookmarkedResponseDto;
 import com.example.teampandanback.dto.note.response.NoteEachSearchInBookmarkResponseDto;
 import com.example.teampandanback.utils.CustomPageImpl;
@@ -23,5 +24,6 @@ public interface BookmarkRepositoryQuerydsl {
     @Modifying(clearAutomatically = true)
     void deleteByNote(Long noteId);
 
-    Long countCurrentUserBookmarkedAtByProjectId(Long userId, Long projectId);
+    // 유저가 가진 프로젝트들의 북마크 정보 조회
+    List<BookmarkDetailForProjectListDto> findBookmarkCountByProject(List<Long> projectIdList, Long userId);
 }
