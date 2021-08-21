@@ -3,6 +3,8 @@ package com.example.teampandanback.service;
 import com.example.teampandanback.domain.Comment.CommentRepository;
 import com.example.teampandanback.domain.bookmark.Bookmark;
 import com.example.teampandanback.domain.bookmark.BookmarkRepository;
+import com.example.teampandanback.domain.file.File;
+import com.example.teampandanback.domain.file.FileRepository;
 import com.example.teampandanback.domain.note.MoveStatus;
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
@@ -12,6 +14,8 @@ import com.example.teampandanback.domain.project.ProjectRepository;
 import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
+import com.example.teampandanback.dto.file.request.FileDetailRequestDto;
+import com.example.teampandanback.dto.file.response.FileDetailResponseDto;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
 import com.example.teampandanback.dto.note.request.NoteMoveRequestDto;
 import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
@@ -37,28 +41,54 @@ public class NoteService {
     private final ProjectRepository projectRepository;
     private final BookmarkRepository bookmarkRepository;
     private final CommentRepository commentRepository;
+    private final FileRepository fileRepository;
     private final PandanUtils pandanUtils;
 
     // Note 상세 조회
     @Transactional
-    public NoteResponseDto readNoteDetail(Long noteId, User currentUser) {
+    public NoteDetailResponseDto readNoteDetail(Long noteId, User currentUser) {
         NoteResponseDto noteResponseDto = noteRepository.findByNoteId(noteId)
                 .orElseThrow(() -> new ApiRequestException("작성된 노트가 없습니다."));
 
         Optional<Bookmark> bookmark = bookmarkRepository.findByUserIdAndNoteId(currentUser.getUserId(), noteId);
         noteResponseDto.setBookmark(bookmark.isPresent());
-        return noteResponseDto;
+
+        List<File> fileList = fileRepository.findFilesByNoteId(noteId);
+        List<FileDetailResponseDto> fileDetailResponseDtoList = new ArrayList<>();
+        for (File fileUnit : fileList) {
+            fileDetailResponseDtoList.add(FileDetailResponseDto.fromEntity(fileUnit));
+        }
+
+        return NoteDetailResponseDto.fromEntity(noteResponseDto, fileDetailResponseDtoList);
     }
 
     // Note 상세 조회에서 내용 업데이트
     @Transactional
-    public NoteUpdateResponseDto updateNoteDetail(Long noteId, NoteUpdateRequestDto noteUpdateRequestDto) {
+    public NoteUpdateResponseDto updateNoteDetail(Long noteId, User currentUser, NoteUpdateRequestDto noteUpdateRequestDto) {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
 
+        List<FileDetailRequestDto> files = new ArrayList<>(noteUpdateRequestDto.getFiles());
+        files.stream()
+                .map(file -> new File(file.getFileName(), file.getFileUrl(), currentUser, note))
+                .forEach(fileRepository::save);
+
+        List<File> fileList = fileRepository.findFilesByNoteId(noteId);
+        if (fileList.size() > pandanUtils.limitOfFile()) {
+            throw new ApiRequestException(pandanUtils.messageForLimitOfFile());
+        }
+
+        List<FileDetailResponseDto> fileDetailResponseDtoList = new ArrayList<>();
+        for (File file : fileList) {
+            fileDetailResponseDtoList.add(FileDetailResponseDto.fromEntity(file));
+        }
+
         note.update(noteUpdateRequestDto, pandanUtils.changeType(noteUpdateRequestDto.getDeadline()));
 
-        return NoteUpdateResponseDto.of(note);
+        NoteUpdateResponseDto noteUpdateResponseDto = NoteUpdateResponseDto.of(note);
+        noteUpdateResponseDto.uploadFile(fileDetailResponseDtoList);
+
+        return noteUpdateResponseDto;
     }
 
     // Note 칸반 이동 시 순서 업데이트
@@ -158,18 +188,37 @@ public class NoteService {
                 .filter(note -> note.getStep().equals(step))
                 .findFirst().orElse(null);
 
+        List<FileDetailRequestDto> files = new ArrayList<>(noteCreateRequestDto.getFiles());
+
         // topNote가 있다면, topNote의 pre와 next 바꿔주고 dtoNote 저장한다.
         if (topNote != null) {
             Note savedNote = noteRepository.save(Note
                     .of(noteCreateRequestDto, deadline, step, user, project, topNote.getNoteId(), 0L));
             topNote.updatePreviousIdAndNextId(topNote.getPreviousId(), savedNote.getNoteId());
-            return NoteCreateResponseDto.of(savedNote);
+            NoteCreateResponseDto noteCreateResponseDto = NoteCreateResponseDto.of(savedNote);
+            files.stream()
+                    .map(file -> new File(file.getFileName(), file.getFileUrl(), user, savedNote))
+                    .forEach(fileRepository::save);
+            if (files.size() > pandanUtils.limitOfFile()) {
+                throw new ApiRequestException(pandanUtils.messageForLimitOfFile());
+            }
+            noteCreateResponseDto.uploadFile(files);
+            return noteCreateResponseDto;
         }
         // topNote 없다면, 그냥 저장한다
         else {
-            return NoteCreateResponseDto
-                    .of(noteRepository.save(Note
-                            .of(noteCreateRequestDto, deadline, step, user, project, 0L, 0L)));
+            Note savedNote = noteRepository.save(Note
+                    .of(noteCreateRequestDto, deadline, step, user, project, 0L, 0L));
+            NoteCreateResponseDto noteCreateResponseDto = NoteCreateResponseDto
+                    .of(savedNote);
+            files.stream()
+                    .map(file -> new File(file.getFileName(), file.getFileUrl(), user, savedNote))
+                    .forEach(fileRepository::save);
+            if (files.size() > pandanUtils.limitOfFile()) {
+                throw new ApiRequestException(pandanUtils.messageForLimitOfFile());
+            }
+            noteCreateResponseDto.uploadFile(files);
+            return noteCreateResponseDto;
         }
     }
 
@@ -211,6 +260,9 @@ public class NoteService {
         Note note = noteRepository.findById(noteId).orElseThrow(
                 () -> new ApiRequestException("이미 삭제된 노트입니다.")
         );
+
+        //Note에 연관된 파일 삭제
+        fileRepository.deleteFileByNoteId(noteId);
 
         // Note에 연관된  코멘트 삭제
         commentRepository.deleteCommentByNoteId(noteId);

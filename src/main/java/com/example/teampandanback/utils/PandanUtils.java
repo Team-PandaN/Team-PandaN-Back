@@ -139,7 +139,7 @@ public class PandanUtils {
             }
 
             // from 연결 관계가 맞고, To에 아무것도 없다고 하는 주장이
-            if (noteMoveRequestDto.getToPreNoteId() == 0L && noteMoveRequestDto.getToNextNodeId() == 0L){
+            if (noteMoveRequestDto.getToPreNoteId() == 0L && noteMoveRequestDto.getToNextNodeId() == 0L) {
 
                 // 해당 step의 topNote가 없는 것으로 실제 맞는 것이 확인되면 true, 아니라면 false
                 Note topNote = null;
@@ -166,34 +166,28 @@ public class PandanUtils {
     }
 
     // 승연: 16가지 moveStatus 중 현재 상황이 어떤 것인지 정하기 위한 메소드입니다.
-    public MoveStatus[] getMoveStatus(NoteMoveRequestDto noteMoveRequestDto){
+    public MoveStatus[] getMoveStatus(NoteMoveRequestDto noteMoveRequestDto) {
         MoveStatus[] moveStatuses = new MoveStatus[2];
 
         // From의 status 정한다.
-        if (noteMoveRequestDto.getFromPreNoteId() == 0L && noteMoveRequestDto.getFromNextNoteId() == 0L){
+        if (noteMoveRequestDto.getFromPreNoteId() == 0L && noteMoveRequestDto.getFromNextNoteId() == 0L) {
             moveStatuses[0] = MoveStatus.UNIQUE;
-        }
-        else if (noteMoveRequestDto.getFromPreNoteId() != 0L && noteMoveRequestDto.getFromNextNoteId() == 0L){
+        } else if (noteMoveRequestDto.getFromPreNoteId() != 0L && noteMoveRequestDto.getFromNextNoteId() == 0L) {
             moveStatuses[0] = MoveStatus.CURRENTTOP;
-        }
-        else if (noteMoveRequestDto.getFromPreNoteId() == 0L && noteMoveRequestDto.getFromNextNoteId() != 0L){
+        } else if (noteMoveRequestDto.getFromPreNoteId() == 0L && noteMoveRequestDto.getFromNextNoteId() != 0L) {
             moveStatuses[0] = MoveStatus.CURRENTBOTTOM;
-        }
-        else{
+        } else {
             moveStatuses[0] = MoveStatus.CURRENTBETWEEN;
         }
 
         // To의 status 정한다.
-        if (noteMoveRequestDto.getToPreNoteId() == 0L && noteMoveRequestDto.getToNextNodeId() == 0L){
+        if (noteMoveRequestDto.getToPreNoteId() == 0L && noteMoveRequestDto.getToNextNodeId() == 0L) {
             moveStatuses[1] = MoveStatus.UNIQUE;
-        }
-        else if (noteMoveRequestDto.getToPreNoteId() != 0L && noteMoveRequestDto.getToNextNodeId() == 0L){
+        } else if (noteMoveRequestDto.getToPreNoteId() != 0L && noteMoveRequestDto.getToNextNodeId() == 0L) {
             moveStatuses[1] = MoveStatus.CURRENTTOP;
-        }
-        else if (noteMoveRequestDto.getToPreNoteId() == 0L && noteMoveRequestDto.getToNextNodeId() != 0L){
+        } else if (noteMoveRequestDto.getToPreNoteId() == 0L && noteMoveRequestDto.getToNextNodeId() != 0L) {
             moveStatuses[1] = MoveStatus.CURRENTBOTTOM;
-        }
-        else{
+        } else {
             moveStatuses[1] = MoveStatus.CURRENTBETWEEN;
         }
 
@@ -201,18 +195,23 @@ public class PandanUtils {
     }
 
     // 승연: 4가지 deleteStatus 중 현재 상황이 어떤 것인지 정하기 위한 메소드입니다.
-    public MoveStatus getDeleteStatus(Long previousId, Long nextId){
-        if (previousId == 0L && nextId == 0L){
+    public MoveStatus getDeleteStatus(Long previousId, Long nextId) {
+        if (previousId == 0L && nextId == 0L) {
             return MoveStatus.UNIQUE;
-        }
-        else if (previousId != 0L && nextId == 0L){
+        } else if (previousId != 0L && nextId == 0L) {
             return MoveStatus.CURRENTTOP;
-        }
-        else if (previousId == 0L && nextId != 0L){
+        } else if (previousId == 0L && nextId != 0L) {
             return MoveStatus.CURRENTBOTTOM;
-        }
-        else{
+        } else {
             return MoveStatus.CURRENTBETWEEN;
         }
+    }
+
+    public int limitOfFile() {
+        return 5;
+    }
+
+    public String messageForLimitOfFile() {
+        return "파일을 " + limitOfFile() + "개 이상 생성할수 없습니다";
     }
 }
