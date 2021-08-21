@@ -122,4 +122,21 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
                 .groupBy(note.project.projectId)
                 .fetch();
     }
+
+    // 해당 프로젝트내에서 유저가 북마크 했던 기록 삭제
+    @Override
+    public void deleteByProjectIdAndUserId(Long projectId, Long userId) {
+        queryFactory
+                .delete(bookmark)
+                .where(
+                        bookmark.user.userId.eq(userId),
+                        bookmark.note.noteId.in(
+                                JPAExpressions
+                                        .select(note.noteId)
+                                        .from(note)
+                                        .where(note.project.projectId.eq(projectId))
+                        )
+                )
+                .execute();
+    }
 }

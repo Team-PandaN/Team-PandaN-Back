@@ -143,4 +143,15 @@ public class UserProjectMappingRepositoryImpl implements UserProjectMappingRepos
                 .where(userProjectMapping.project.projectId.eq(projectId))
                 .fetchCount();
     }
+
+    // 유저가 참여해 있는 모든 프로젝트들의 ID 목록을 조회
+    @Override
+    public List<Long> findProjectIdListByUserId(Long userId) {
+
+        return queryFactory
+                .select(userProjectMapping.project.projectId)
+                .from(userProjectMapping)
+                .where(userProjectMapping.user.userId.eq(userId))
+                .fetch();
+    }
 }

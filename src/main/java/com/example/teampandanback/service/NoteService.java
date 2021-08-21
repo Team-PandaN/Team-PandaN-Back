@@ -181,7 +181,7 @@ public class NoteService {
                 () -> new ApiRequestException("내가 작성한 문서를 조회할 프로젝트가 없습니다.")
         );
 
-        // 해당 Project 에서 내가 작성한 Note 죄회
+        // 해당 Project 에서 내가 작성한 Note 조회
         CustomPageImpl<Note> noteCustomPage = noteRepository.findAllNoteByProjectAndUserOrderByCreatedAtDesc(
                 projectId, currentUser.getUserId(), pandanUtils.dealWithPageRequestParam(page, size));
 
@@ -303,9 +303,15 @@ public class NoteService {
 
     // 전체 프로젝트에서 내가 작성한 노트 조회
     public NoteMineInTotalResponseDto readMyNoteInTotalProject(User currentUser, int page, int size) {
+
+        // 현재 내가 참여하고있는 프로젝트 id 목록 조회
+        List<Long> projectIdList = userProjectMappingRepository.findProjectIdListByUserId(currentUser.getUserId());
+
+        // 내가 작성한 노트 조회 with 페이징
         CustomPageImpl<NoteEachMineInTotalResponseDto> totalNoteCustomPage =
                 noteRepository.findUserNoteInTotalProject(
-                        currentUser.getUserId(), pandanUtils.dealWithPageRequestParam(page, size));
+                        currentUser.getUserId(), pandanUtils.dealWithPageRequestParam(page, size), projectIdList);
+
         return NoteMineInTotalResponseDto.fromEntity(totalNoteCustomPage.toList(), totalNoteCustomPage);
     }
 
@@ -318,8 +324,16 @@ public class NoteService {
 
     // 내가 작성한 문서들 중에서 제목으로 노트 검색
     public NoteSearchInMineResponseDto searchNoteInMyNotes(User currentUser, String rawKeyword) {
+        // 현재 내가 참여하고있는 프로젝트 id 목록 조회
+        List<Long> projectIdList = userProjectMappingRepository.findProjectIdListByUserId(currentUser.getUserId());
+
+        // 검색을 위해 받은 keyword 를 적절한 조건으로 parsing
         List<String> keywordList = pandanUtils.parseKeywordToList(rawKeyword);
-        List<NoteEachSearchInMineResponseDto> resultList = noteRepository.findNotesByUserIdAndKeywordInMine(currentUser.getUserId(), keywordList);
+
+        // 내가 작성한 노트 내에서 parsing 한 keyword 를 이용해서 검색
+        List<NoteEachSearchInMineResponseDto> resultList =
+                noteRepository.findNotesByUserIdAndKeywordInMine(currentUser.getUserId(), keywordList, projectIdList);
+
         return NoteSearchInMineResponseDto.builder().noteList(resultList).build();
     }
 }
