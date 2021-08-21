@@ -15,6 +15,7 @@ import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectRole;
 import com.example.teampandanback.dto.comment.request.CommentCreateRequestDto;
+import com.example.teampandanback.dto.file.request.FileDetailRequestDto;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
 import com.example.teampandanback.service.BookmarkService;
 import com.example.teampandanback.service.CommentService;
@@ -31,7 +32,7 @@ import java.util.Collections;
 import java.util.List;
 
 //Switching
-//@Component
+@Component
 public class testDataRunner implements ApplicationRunner {
 
     @Autowired
@@ -244,11 +245,22 @@ public class testDataRunner implements ApplicationRunner {
                             step = Step.DONE;
                         }
 
+                        // 임의로  파일을 넣어 둔거예요. 태강님 확인 부탁드려요
+                        List<FileDetailRequestDto> files = new ArrayList<>();
+
+                        for (int j = 0; j < (int)(Math.random() * 4 +1); j++) {
+                            files.add(FileDetailRequestDto.builder()
+                                    .fileName("나 파일")
+                                    .fileUrl("http://s3.com")
+                                    .build());
+                        }
+
                         NoteCreateRequestDto noteCreateRequestDto = NoteCreateRequestDto.builder()
                                 .content("content")
                                 .deadline("2021-08-" + (int) (Math.random() * 21 + 10))
                                 .step(step.toString())
                                 .title("Author: " + each.getUser().getName() + " " + each.getProject().getTitle())
+                                .files(files)
                                 .build();
 
 

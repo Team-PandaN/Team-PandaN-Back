@@ -190,4 +190,5 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl {
                 .orderBy(note.step.desc())
                 .fetch();
     }
+
 }
