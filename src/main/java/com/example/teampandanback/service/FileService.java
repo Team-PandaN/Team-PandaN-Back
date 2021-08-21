@@ -104,7 +104,6 @@ public class FileService {
         if (!projectIdList.contains(projectId)) {
             throw new ApiRequestException("파일을 수정할 권한이 없습니다.");
         }
-
         file.update(fileUpdateRequestDto);
 
         List<File> fileList = fileRepository.findFilesByNoteId(noteId);
@@ -112,11 +111,7 @@ public class FileService {
         for (File fileUnit : fileList) {
             fileDetailResponseDtoList.add(FileDetailResponseDto.fromEntity(fileUnit));
         }
-
-        Optional<Bookmark> bookmark = bookmarkRepository.findByUserIdAndNoteId(currentUser.getUserId(), noteId);
-        noteResponseDto.setBookmark(bookmark.isPresent());
-
-        return FileUpdateResponseDto.fromEntity(noteResponseDto, fileDetailResponseDtoList);
+        return FileUpdateResponseDto.fromEntity(fileDetailResponseDtoList);
     }
 
     @Transactional

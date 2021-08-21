@@ -10,18 +10,15 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class FileUpdateResponseDto {
-    private NoteResponseDto detail;
     private List<FileDetailResponseDto> files;
 
     @Builder
-    public FileUpdateResponseDto(NoteResponseDto noteResponseDto, List<FileDetailResponseDto> files) {
-        this.detail = noteResponseDto;
+    public FileUpdateResponseDto(List<FileDetailResponseDto> files) {
         this.files = files;
     }
 
-    public static FileUpdateResponseDto fromEntity(NoteResponseDto noteResponseDto, List<FileDetailResponseDto> files) {
+    public static FileUpdateResponseDto fromEntity(List<FileDetailResponseDto> files) {
         return FileUpdateResponseDto.builder()
-                .noteResponseDto(noteResponseDto)
                 .files(files)
                 .build();
     }
