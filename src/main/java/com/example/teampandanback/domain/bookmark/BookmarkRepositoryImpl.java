@@ -59,19 +59,14 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
         QueryResults<NoteEachBookmarkedResponseDto> results =
                 queryFactory
                         .select(Projections.constructor(NoteEachBookmarkedResponseDto.class,
-                                note.noteId, note.title, note.step, project.projectId, project.title, user.name))
+                                note.noteId, note.title, note.step, note.project.projectId, note.project.title,
+                                bookmark.user.name))
                         .from(bookmark)
-                        .where(bookmark.note.noteId.in(JPAExpressions
-                                .select(bookmark.note.noteId)
-                                .from(bookmark)
-                                .where(bookmark.user.userId.eq(userId))
-                        ))
+                        .where(bookmark.user.userId.eq(userId))
                         .orderBy(bookmark.seq.desc())
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize())
-                        .join(bookmark.note, note)
-                        .join(note.project, project)
-                        .join(note.user, user)
+                        .leftJoin(bookmark.note, note)
                         .fetchResults();
 
         return new CustomPageImpl<NoteEachBookmarkedResponseDto>(results.getResults(), pageable, results.getTotal());
@@ -115,7 +110,7 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
         return queryFactory
                 .select(
                         Projections.constructor(BookmarkDetailForProjectListDto.class,
-                        note.project.projectId, bookmark.count()))
+                                note.project.projectId, bookmark.count()))
                 .from(bookmark)
                 .join(bookmark.note, note)
                 .where(note.project.projectId.in(projectIdList), note.user.userId.eq(userId))

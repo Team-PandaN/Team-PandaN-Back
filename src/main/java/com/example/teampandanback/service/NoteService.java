@@ -197,7 +197,6 @@ public class NoteService {
     public NoteBookmarkedResponseDto readBookmarkedMine(User currentUser, int page, int size) {
 
         // 해당 북마크한 Note 조회
-
         CustomPageImpl<NoteEachBookmarkedResponseDto> noteEachBookmarkCustomPage =
                 bookmarkRepository.findNoteByUserIdInBookmark(
                         currentUser.getUserId(), pandanUtils.dealWithPageRequestParam(page, size));
