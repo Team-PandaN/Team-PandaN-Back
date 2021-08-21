@@ -2,7 +2,6 @@ package com.example.teampandanback.domain.file;
 
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.user.User;
-import com.example.teampandanback.dto.file.request.FileUpdateRequestDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,9 +40,5 @@ public class File {
         this.fileUrl = fileUrl;
         this.user = user;
         this.note = note;
-    }
-
-    public void update(FileUpdateRequestDto fileUpdateRequestDto) {
-        this.fileName = fileUpdateRequestDto.getFileName();
     }
 }

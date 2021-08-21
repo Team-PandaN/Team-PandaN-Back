@@ -1,7 +1,5 @@
 package com.example.teampandanback.service;
 
-import com.example.teampandanback.domain.bookmark.Bookmark;
-import com.example.teampandanback.domain.bookmark.BookmarkRepository;
 import com.example.teampandanback.domain.file.File;
 import com.example.teampandanback.domain.file.FileRepository;
 import com.example.teampandanback.domain.note.Note;
@@ -13,12 +11,9 @@ import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.dto.file.request.FileCreateRequestDto;
 import com.example.teampandanback.dto.file.request.FileDetailRequestDto;
-import com.example.teampandanback.dto.file.request.FileUpdateRequestDto;
 import com.example.teampandanback.dto.file.response.FileCreateResponseDto;
 import com.example.teampandanback.dto.file.response.FileDeleteResponseDto;
 import com.example.teampandanback.dto.file.response.FileDetailResponseDto;
-import com.example.teampandanback.dto.file.response.FileUpdateResponseDto;
-import com.example.teampandanback.dto.note.response.NoteResponseDto;
 import com.example.teampandanback.exception.ApiRequestException;
 import com.example.teampandanback.utils.PandanUtils;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +32,6 @@ public class FileService {
     private final NoteRepository noteRepository;
     private final FileRepository fileRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
-    private final BookmarkRepository bookmarkRepository;
     private final PandanUtils pandanUtils;
 
     @Transactional
@@ -77,41 +71,6 @@ public class FileService {
                 .files(fileDetailResponseDtoList)
                 .build();
 
-    }
-
-    @Transactional
-    public FileUpdateResponseDto updateFileName(Long fileId, User currentUser,
-                                                FileUpdateRequestDto fileUpdateRequestDto) {
-        File file = fileRepository.findById(fileId).orElseThrow(
-                () -> new ApiRequestException("이미 삭제된 파일입니다.")
-        );
-
-        Long noteId = file.getNote().getNoteId();
-
-        NoteResponseDto noteResponseDto = noteRepository.findByNoteId(noteId)
-                .orElseThrow(() -> new ApiRequestException("작성된 노트가 없습니다."));
-
-        Long projectId = file.getNote().getProject().getProjectId();
-
-        List<UserProjectMapping> userProjectMappingList =
-                userProjectMappingRepository.findByUserId(currentUser.getUserId());
-
-        List<Long> projectIdList = new ArrayList<>();
-
-        for (int i = 0; i < userProjectMappingList.size(); i++) {
-            projectIdList.add(userProjectMappingList.get(i).getProject().getProjectId());
-        }
-        if (!projectIdList.contains(projectId)) {
-            throw new ApiRequestException("파일을 수정할 권한이 없습니다.");
-        }
-        file.update(fileUpdateRequestDto);
-
-        List<File> fileList = fileRepository.findFilesByNoteId(noteId);
-        List<FileDetailResponseDto> fileDetailResponseDtoList = new ArrayList<>();
-        for (File fileUnit : fileList) {
-            fileDetailResponseDtoList.add(FileDetailResponseDto.fromEntity(fileUnit));
-        }
-        return FileUpdateResponseDto.fromEntity(fileDetailResponseDtoList);
     }
 
     @Transactional
