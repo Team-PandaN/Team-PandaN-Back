@@ -5,7 +5,6 @@ import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
 import com.example.teampandanback.dto.note.request.NoteMoveRequestDto;
 import com.example.teampandanback.dto.note.request.NoteUpdateRequestDto;
 import com.example.teampandanback.dto.note.response.*;
-import com.example.teampandanback.dto.note.response.NoteSearchInTotalResponseDto;
 import com.example.teampandanback.service.NoteService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,12 +24,12 @@ public class NoteController {
     //노트 칸반형 조회
     @ApiOperation(value = "노트 칸반형 조회")
     @GetMapping("/projects/{projectId}/kanbans")
-    public KanbanNoteSearchResponseDto kanbanNoteSearchResponse(@PathVariable("projectId") Long projectId){
+    public KanbanNoteSearchResponseDto kanbanNoteSearchResponse(@PathVariable("projectId") Long projectId) {
         return noteService.readKanbanNote(projectId);
     }
 
     //내가 쓴 노트 조회
-    @ApiOperation(value = "특정 프로젝트에서 내가 쓴 노트 조회",notes = "i.e) ?page=1&size=3")
+    @ApiOperation(value = "특정 프로젝트에서 내가 쓴 노트 조회", notes = "i.e) ?page=1&size=3")
     @GetMapping("/projects/{projectId}/mynotes")
     public NoteMineInProjectResponseDto readNotesMineOnly(@PathVariable("projectId") Long projectId, @AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("page") int page, @RequestParam("size") int size) {
         return noteService.readNotesMineOnly(projectId, userDetails.getUser(), page, size);
@@ -39,38 +38,39 @@ public class NoteController {
     //내가 북마크한 노트 조회
     @ApiOperation(value = "전체 프로젝트에서 내가 북마크 한 노트 조회")
     @GetMapping("/notes/mybookmarks")
-    public NoteBookmarkedResponseDto  readBookmarkedMine(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("page") int page, @RequestParam("size") int size) {
+    public NoteBookmarkedResponseDto readBookmarkedMine(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("page") int page, @RequestParam("size") int size) {
         return noteService.readBookmarkedMine(userDetails.getUser(), page, size);
     }
 
     //노트 상세 조회
     @ApiOperation(value = "노트 상세 조회")
     @GetMapping("/notes/{noteId}")
-    public NoteResponseDto noteDetail (@PathVariable("noteId") Long noteId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public NoteDetailResponseDto noteDetail(@PathVariable("noteId") Long noteId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return noteService.readNoteDetail(noteId, userDetails.getUser());
     }
 
     //내가 생성
     @ApiOperation(value = "노트 생성")
     @PostMapping("/notes/{projectId}")
-    public NoteCreateResponseDto createNote (@PathVariable Long projectId,
-                                             @RequestBody NoteCreateRequestDto noteCreateRequestDto,
-                                             @AuthenticationPrincipal UserDetailsImpl userDetails){
+    public NoteCreateResponseDto createNote(@PathVariable Long projectId,
+                                            @RequestBody NoteCreateRequestDto noteCreateRequestDto,
+                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return noteService.createNote(projectId, noteCreateRequestDto, userDetails.getUser());
     }
 
     //노트 상세 조회에서 수정
     @ApiOperation(value = "노트 상세 조회에서 수정")
     @PutMapping("/notes/details/{noteId}")
-    public NoteUpdateResponseDto updateNote (@PathVariable("noteId") Long noteId, @RequestBody NoteUpdateRequestDto noteUpdateRequestDto) {
-        return noteService.updateNoteDetail(noteId, noteUpdateRequestDto);
+    public NoteUpdateResponseDto updateNote(@PathVariable("noteId") Long noteId,
+                                            @AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody NoteUpdateRequestDto noteUpdateRequestDto) {
+        return noteService.updateNoteDetail(noteId, userDetails.getUser(), noteUpdateRequestDto);
         //  서비스의 메소드명은 변경될수있습니다.
     }
 
     //칸반형 조회 화면에서 노트 이동하여 수정
     @ApiOperation(value = "칸반형 조회 화면에서 노트 이동하여 수정")
     @PutMapping("/notes/{noteId}")
-    public NoteUpdateResponseDto moveNote (@PathVariable("noteId") Long noteId, @RequestBody NoteMoveRequestDto noteMoveRequestDto) {
+    public NoteUpdateResponseDto moveNote(@PathVariable("noteId") Long noteId, @RequestBody NoteMoveRequestDto noteMoveRequestDto) {
         return noteService.moveNote(noteId, noteMoveRequestDto);
         //  서비스의 메소드명은 변경될수있습니다.
     }
@@ -78,7 +78,7 @@ public class NoteController {
     //노트 삭제
     @ApiOperation(value = "노트 삭제")
     @DeleteMapping("/notes/{noteId}")
-    public NoteDeleteResponseDto deleteNote (@PathVariable("noteId") Long noteId) {
+    public NoteDeleteResponseDto deleteNote(@PathVariable("noteId") Long noteId) {
         return noteService.deleteNote(noteId);
     }
 
@@ -92,21 +92,21 @@ public class NoteController {
     // 전체 프로젝트에서 내가 작성한 노트 조회
     @ApiOperation(value = "전체 프로젝트에서 내가 작성한 노트 조회")
     @GetMapping("/notes/mynotes")
-    public NoteMineInTotalResponseDto readMyNoteInTotalProject(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("page") int page, @RequestParam("size") int size){
+    public NoteMineInTotalResponseDto readMyNoteInTotalProject(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("page") int page, @RequestParam("size") int size) {
         return noteService.readMyNoteInTotalProject(userDetails.getUser(), page, size);
     }
 
     // 사용자가 멤버인 프로젝트들 중에서 노트 제목 검색
     @ApiOperation(value = "내가 참여한 프로젝트들 중에서 노트 검색 (제목으로)")
     @GetMapping("/notes/search")
-    public NoteSearchInTotalResponseDto searchNoteInMyProjects(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("keyword") String rawKeyword){
+    public NoteSearchInTotalResponseDto searchNoteInMyProjects(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("keyword") String rawKeyword) {
         return noteService.searchNoteInMyProjects(userDetails.getUser(), rawKeyword);
     }
 
     // 내가 쓴 문서들 중에서 노트 제목 검색
     @ApiOperation(value = "내가 쓴 노트들 중에서 노트 검색 (제목으로)")
     @GetMapping("/notes/search/mynotes")
-    public NoteSearchInMineResponseDto searchNoteInMyNotes(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("keyword") String rawKeyword){
+    public NoteSearchInMineResponseDto searchNoteInMyNotes(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("keyword") String rawKeyword) {
         return noteService.searchNoteInMyNotes(userDetails.getUser(), rawKeyword);
     }
 }

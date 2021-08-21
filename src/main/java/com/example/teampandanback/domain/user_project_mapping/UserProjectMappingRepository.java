@@ -20,4 +20,7 @@ public interface UserProjectMappingRepository extends JpaRepository<UserProjectM
     boolean existsByUserAndProject(User inviteOfferUser, Project inviteProject);
 
     Long countByUser(User newCrew);
+
+    @Query("select upm from UserProjectMapping upm where upm.project.projectId = :projectId")
+    List<UserProjectMapping> findByProject_ProjectId(@Param("projectId") Long projectId);
 }

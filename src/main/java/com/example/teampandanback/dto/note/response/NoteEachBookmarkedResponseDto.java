@@ -12,9 +12,8 @@ public class NoteEachBookmarkedResponseDto {
     private String projectTitle;
     private String writer;
 
-    public NoteEachBookmarkedResponseDto(Long noteId, String title , Step step,
-                                         Long projectId, String projectTitle, String writer)
-    {
+    public NoteEachBookmarkedResponseDto(Long noteId, String title, Step step,
+                                         Long projectId, String projectTitle, String writer) {
         this.noteId = noteId;
         this.title = title;
         this.step = step.toString();

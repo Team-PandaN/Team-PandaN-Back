@@ -2,6 +2,8 @@ package com.example.teampandanback.service;
 
 import com.example.teampandanback.domain.Comment.CommentRepository;
 import com.example.teampandanback.domain.bookmark.BookmarkRepository;
+import com.example.teampandanback.domain.file.FileRepository;
+import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.project.ProjectRepository;
@@ -22,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,6 +39,7 @@ public class ProjectService {
     private final NoteRepository noteRepository;
     private final BookmarkRepository bookmarkRepository;
     private final CommentRepository commentRepository;
+    private final FileRepository fileRepository;
     private final AESEncryptor aesEncryptor;
 
     // 사이드바에 들어갈 Project 최대 갯수
@@ -100,8 +103,6 @@ public class ProjectService {
         // 프로젝트 생성하고 저장
         Project project = projectRepository.save(Project.toEntity(requestDto));
 
-
-
         // 유저-프로젝트 테이블에도 저장
         UserProjectMapping userProjectMapping = UserProjectMapping.builder()
                 .userProjectRole(UserProjectRole.OWNER)
@@ -148,6 +149,9 @@ public class ProjectService {
         } else if (!userProjectMapping.get().getRole().equals(UserProjectRole.OWNER)) { //   우선 해당 프로젝트의 CREW이더라도, OWNER가 아닌지,
             throw new ApiRequestException("프로젝트 소유주가 아닙니다.");
         }
+
+        // 해당 Project 와 연관된 Note에 속한 파일 삭제
+        fileRepository.deleteFileByProjectId(projectId);
 
         // 해당 Project 와 연관된 Note에 속한 코멘트 삭제
         commentRepository.deleteCommentByProjectId(projectId);

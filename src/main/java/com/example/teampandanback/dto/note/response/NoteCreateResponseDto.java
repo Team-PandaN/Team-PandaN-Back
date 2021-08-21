@@ -2,10 +2,12 @@ package com.example.teampandanback.dto.note.response;
 
 import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.Step;
+import com.example.teampandanback.dto.file.request.FileDetailRequestDto;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 public class NoteCreateResponseDto {
@@ -15,6 +17,7 @@ public class NoteCreateResponseDto {
     private String content;
     private String deadline;
     private String step;
+    private List<FileDetailRequestDto> files;
 
     @Builder
     public NoteCreateResponseDto(Long noteId, String title, String content, LocalDate deadline, Step step) {
@@ -25,7 +28,11 @@ public class NoteCreateResponseDto {
         this.step = step.toString();
     }
 
-    public static NoteCreateResponseDto of (Note note) {
+    public void uploadFile(List<FileDetailRequestDto> files) {
+        this.files = files;
+    }
+
+    public static NoteCreateResponseDto of(Note note) {
         return NoteCreateResponseDto.builder()
                 .noteId(note.getNoteId())
                 .title(note.getTitle())
