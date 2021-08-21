@@ -31,7 +31,7 @@ public class FileController {
     @ApiOperation(value = "파일 수정")
     @PutMapping("/api/files/{fileId}")
     public FileUpdateResponseDto updateFile(@PathVariable Long fileId, @AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody FileUpdateRequestDto fileUpdateRequestDto) {
-        return fileService.updateFile(fileId, userDetails.getUser(), fileUpdateRequestDto);
+        return fileService.updateFileName(fileId, userDetails.getUser(), fileUpdateRequestDto);
     }
 
     @ApiOperation(value = "파일 삭제")

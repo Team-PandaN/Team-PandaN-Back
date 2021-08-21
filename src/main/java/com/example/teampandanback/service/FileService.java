@@ -20,6 +20,7 @@ import com.example.teampandanback.dto.file.response.FileDetailResponseDto;
 import com.example.teampandanback.dto.file.response.FileUpdateResponseDto;
 import com.example.teampandanback.dto.note.response.NoteResponseDto;
 import com.example.teampandanback.exception.ApiRequestException;
+import com.example.teampandanback.utils.PandanUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,7 @@ public class FileService {
     private final FileRepository fileRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final PandanUtils pandanUtils;
 
     @Transactional
     public FileCreateResponseDto createFile(Long noteId, User currentUser, FileCreateRequestDto fileCreateRequestDto) {
@@ -62,8 +64,8 @@ public class FileService {
                 .forEach(fileRepository::save);
 
         List<File> fileList = fileRepository.findFilesByNoteId(noteId);
-        if (fileList.size() > 5) {
-            throw new ApiRequestException("파일을 5개 이상 저장 할수없습니다");
+        if (fileList.size() > pandanUtils.limitOfFile()) {
+            throw new ApiRequestException(pandanUtils.messageForLimitOfFile());
         }
 
         List<FileDetailResponseDto> fileDetailResponseDtoList = new ArrayList<>();
@@ -78,8 +80,8 @@ public class FileService {
     }
 
     @Transactional
-    public FileUpdateResponseDto updateFile(Long fileId, User currentUser,
-                                            FileUpdateRequestDto fileUpdateRequestDto) {
+    public FileUpdateResponseDto updateFileName(Long fileId, User currentUser,
+                                                FileUpdateRequestDto fileUpdateRequestDto) {
         File file = fileRepository.findById(fileId).orElseThrow(
                 () -> new ApiRequestException("이미 삭제된 파일입니다.")
         );
@@ -110,7 +112,6 @@ public class FileService {
         for (File fileUnit : fileList) {
             fileDetailResponseDtoList.add(FileDetailResponseDto.fromEntity(fileUnit));
         }
-
 
         Optional<Bookmark> bookmark = bookmarkRepository.findByUserIdAndNoteId(currentUser.getUserId(), noteId);
         noteResponseDto.setBookmark(bookmark.isPresent());

@@ -61,8 +61,9 @@ public class NoteController {
     //노트 상세 조회에서 수정
     @ApiOperation(value = "노트 상세 조회에서 수정")
     @PutMapping("/notes/details/{noteId}")
-    public NoteUpdateResponseDto updateNote(@PathVariable("noteId") Long noteId, @RequestBody NoteUpdateRequestDto noteUpdateRequestDto) {
-        return noteService.updateNoteDetail(noteId, noteUpdateRequestDto);
+    public NoteUpdateResponseDto updateNote(@PathVariable("noteId") Long noteId,
+                                            @AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody NoteUpdateRequestDto noteUpdateRequestDto) {
+        return noteService.updateNoteDetail(noteId, userDetails.getUser(), noteUpdateRequestDto);
         //  서비스의 메소드명은 변경될수있습니다.
     }
 

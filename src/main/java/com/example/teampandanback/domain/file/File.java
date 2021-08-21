@@ -43,9 +43,7 @@ public class File {
         this.note = note;
     }
 
-
     public void update(FileUpdateRequestDto fileUpdateRequestDto) {
         this.fileName = fileUpdateRequestDto.getFileName();
-        this.fileUrl = fileUpdateRequestDto.getFileUrl();
     }
 }

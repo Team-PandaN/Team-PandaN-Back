@@ -7,5 +7,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FileUpdateRequestDto {
     private String fileName;
-    private String fileUrl;
 }
