@@ -109,4 +109,22 @@ public class NoteController {
     public NoteSearchInMineResponseDto searchNoteInMyNotes(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("keyword") String rawKeyword){
         return noteService.searchNoteInMyNotes(userDetails.getUser(), rawKeyword);
     }
+
+    @ApiOperation(value = "현재 수정하려 하는 노트가 잠겨있는가")
+    @GetMapping("/notes/is-lock/{noteId}")
+    public Boolean isLock(@PathVariable Long noteId){
+        return noteService.isLock(noteId);
+    }
+
+    @ApiOperation(value = "현재 노트를 수정중임을 주기적으로 알림")
+    @PostMapping("/notes/using/{noteId}")
+    public void using(@PathVariable Long noteId){
+        noteService.using(noteId);
+    }
+
+    @ApiOperation(value = "해당 문서의 잠금 매니저를 시작함")
+    @PostMapping("/notes/start-lock-manager/{noteId}")
+    public void initLockManager(@PathVariable Long noteId) throws InterruptedException {
+        noteService.initLockManager(noteId);
+    }
 }

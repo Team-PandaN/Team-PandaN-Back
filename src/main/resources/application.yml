@@ -1,10 +1,10 @@
 spring:
 
   jpa:
-    show-sql: true
+#    show-sql: true
     hibernate:
       #Switching
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true

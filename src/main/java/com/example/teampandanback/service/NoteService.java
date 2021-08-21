@@ -38,6 +38,7 @@ public class NoteService {
     private final BookmarkRepository bookmarkRepository;
     private final CommentRepository commentRepository;
     private final PandanUtils pandanUtils;
+    private final LockManagerService lockManagerService;
 
     // Note 상세 조회
     @Transactional
@@ -322,4 +323,38 @@ public class NoteService {
         List<NoteEachSearchInMineResponseDto> resultList = noteRepository.findNotesByUserIdAndKeywordInMine(currentUser.getUserId(), keywordList);
         return NoteSearchInMineResponseDto.builder().noteList(resultList).build();
     }
+
+    public Boolean isLock(Long noteId) {
+        Note note = noteRepository.findById(noteId).orElseThrow(
+                ()-> new ApiRequestException("잠금 여부를 알아볼 노트가 없습니다.")
+        );
+
+        if(note.getLock()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    @Transactional
+    public void using(Long noteId) {
+        Note note = noteRepository.findById(noteId).orElseThrow(
+                ()->new ApiRequestException("해당 게시글이 없습니다.")
+        );
+        note.setUsing(true);
+    }
+
+    public void initLockManager(Long noteId) throws InterruptedException {
+        lockManagerService.preProcess(noteId);
+        while(true){
+            Thread.sleep(10000);
+            if(lockManagerService.isAnyoneWriting(noteId)){
+                lockManagerService.assumeThatNobodyIsWriting(noteId);
+            }else{
+                lockManagerService.deLock(noteId);
+                break;
+            }
+        }
+    }
+
 }
