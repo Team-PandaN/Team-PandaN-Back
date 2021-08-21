@@ -6,6 +6,7 @@ import com.example.teampandanback.dto.note.response.NoteEachSearchInBookmarkResp
 import com.example.teampandanback.utils.CustomPageImpl;
 import com.example.teampandanback.utils.PandanUtils;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
