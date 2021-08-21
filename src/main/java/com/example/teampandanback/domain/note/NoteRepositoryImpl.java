@@ -5,8 +5,10 @@ import com.example.teampandanback.dto.note.response.NoteEachMineInTotalResponseD
 import com.example.teampandanback.dto.note.response.NoteEachSearchInMineResponseDto;
 import com.example.teampandanback.dto.note.response.NoteResponseDto;
 import com.example.teampandanback.dto.note.response.noteEachSearchInTotalResponseDto;
+import com.example.teampandanback.utils.CustomPageImpl;
 import com.example.teampandanback.utils.PandanUtils;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +22,7 @@ import static com.example.teampandanback.domain.project.QProject.project;
 import static com.example.teampandanback.domain.user.QUser.user;
 import static com.example.teampandanback.domain.user_project_mapping.QUserProjectMapping.userProjectMapping;
 
-public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
+public class NoteRepositoryImpl implements NoteRepositoryQuerydsl {
 
     private final JPAQueryFactory queryFactory;
     private final PandanUtils pandanUtils;
@@ -41,7 +43,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
     }
 
     @Override
-    public Optional<NoteResponseDto> findByNoteId(Long noteId){
+    public Optional<NoteResponseDto> findByNoteId(Long noteId) {
         return Optional.ofNullable(
                 queryFactory
                         .select(
@@ -57,7 +59,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                                                 user.name,
                                                 note.createdAt,
                                                 note.modifiedAt
-                                                ))
+                                        ))
                         .from(note)
                         .join(note.project, project)
                         .on(note.noteId.eq(noteId))
@@ -67,8 +69,8 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
 
     // 전체 프로젝트 중 해당 유저가 작성한 노트 조회
     @Override
-    public List<NoteEachMineInTotalResponseDto> findUserNoteInTotalProject(Long userId, Pageable pageable) {
-        List<NoteEachMineInTotalResponseDto> results =
+    public CustomPageImpl<NoteEachMineInTotalResponseDto> findUserNoteInTotalProject(Long userId, Pageable pageable) {
+        QueryResults<NoteEachMineInTotalResponseDto> results =
                 queryFactory
                         .select(
                                 Projections.constructor(NoteEachMineInTotalResponseDto.class,
@@ -77,11 +79,11 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
                         .from(note)
                         .join(note.project, project)
                         .where(note.user.userId.eq(userId))
-                        .orderBy(note.createdAt.desc())
+                        .orderBy(note.modifiedAt.desc())
                         .offset(pageable.getOffset())
-                        .limit(pageable.getPageSize() + 1)
-                        .fetch();
-        return results;
+                        .limit(pageable.getPageSize())
+                        .fetchResults();
+        return new CustomPageImpl<NoteEachMineInTotalResponseDto>(results.getResults(), pageable, results.getTotal());
     }
 
     @Override
@@ -93,17 +95,18 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
     }
 
     @Override
-    public List<Note> findAllNoteByProjectAndUserOrderByCreatedAtDesc(Long projectId, Long userId, Pageable pageable) {
-        List<Note> results =
+    public CustomPageImpl<Note> findAllNoteByProjectAndUserOrderByCreatedAtDesc(Long projectId, Long userId,
+                                                                                Pageable pageable) {
+        QueryResults<Note> results =
                 queryFactory
                         .select(note)
                         .from(note)
                         .where(note.project.projectId.eq(projectId).and(note.user.userId.eq(userId)))
-                        .orderBy(note.createdAt.desc())
+                        .orderBy(note.modifiedAt.desc())
                         .offset(pageable.getOffset())
-                        .limit(pageable.getPageSize() + 1)
-                        .fetch();
-        return results;
+                        .limit(pageable.getPageSize())
+                        .fetchResults();
+        return new CustomPageImpl<Note>(results.getResults(), pageable, results.getTotal());
     }
 
     // keyword로 내가 참여하고 있는 프로젝트 안에서 노트 검색, 제목으로만 검색합니다.
@@ -119,7 +122,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
 
         return queryFactory
                 .select(Projections.constructor(noteEachSearchInTotalResponseDto.class,
-                        note.noteId, note.title, note.step, project.projectId, project.title, user.name))
+                        note.noteId, note.title, note.step, project.projectId, project.title, user.name, note.createdAt))
                 .from(note)
                 .join(note.project, project)
                 .join(note.user, user)
@@ -135,7 +138,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
 
         return queryFactory
                 .select(Projections.constructor(NoteEachSearchInMineResponseDto.class,
-                        note.noteId, note.title, note.step, project.projectId, project.title))
+                        note.noteId, note.title, note.step, project.projectId, project.title, note.createdAt))
                 .from(note)
                 .where(note.user.userId.eq(userId).and(builder))
                 .orderBy(note.modifiedAt.desc())
@@ -144,17 +147,17 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl{
     }
 
     @Override
-    public List<Note> findAllByProjectOrderByCreatedAtDesc(Project project, Pageable pageable) {
-        List<Note> results =
+    public CustomPageImpl<Note> findAllByProjectOrderByModifiedAtDesc(Project project, Pageable pageable) {
+        QueryResults<Note> results =
                 queryFactory
                         .select(note)
                         .from(note)
                         .where(note.project.eq(project))
-                        .orderBy(note.createdAt.desc())
+                        .orderBy(note.modifiedAt.desc())
                         .offset(pageable.getOffset())
-                        .limit(pageable.getPageSize() + 1)
-                        .fetch();
-        return results;
+                        .limit(pageable.getPageSize())
+                        .fetchResults();
+        return new CustomPageImpl<Note>(results.getResults(), pageable, results.getTotal());
     }
 
     @Override

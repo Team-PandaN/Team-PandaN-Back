@@ -12,6 +12,7 @@ import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 
+import static com.example.teampandanback.domain.note.QNote.note;
 import static com.example.teampandanback.domain.project.QProject.project;
 import static com.example.teampandanback.domain.user.QUser.user;
 import static com.example.teampandanback.domain.user_project_mapping.QUserProjectMapping.userProjectMapping;
@@ -135,4 +136,11 @@ public class UserProjectMappingRepositoryImpl implements UserProjectMappingRepos
 
     }
 
+    @Override
+    public Long countByProjectId(Long projectId) {
+        return queryFactory
+                .selectFrom(userProjectMapping)
+                .where(userProjectMapping.project.projectId.eq(projectId))
+                .fetchCount();
+    }
 }

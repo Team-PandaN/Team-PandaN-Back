@@ -3,6 +3,7 @@ package com.example.teampandanback.domain.bookmark;
 import com.example.teampandanback.dto.bookmark.response.BookmarkDetailForProjectListDto;
 import com.example.teampandanback.dto.note.response.NoteEachBookmarkedResponseDto;
 import com.example.teampandanback.dto.note.response.NoteEachSearchInBookmarkResponseDto;
+import com.example.teampandanback.utils.CustomPageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 
@@ -15,7 +16,8 @@ public interface BookmarkRepositoryQuerydsl {
     void deleteByProjectId(long projectId);
 
     Optional<Bookmark> findByUserIdAndNoteId(Long userId, Long noteId);
-    List<NoteEachBookmarkedResponseDto> findNoteByUserIdInBookmark(Long userId, Pageable pageable);
+
+    CustomPageImpl<NoteEachBookmarkedResponseDto> findNoteByUserIdInBookmark(Long userId, Pageable pageable);
 
     List<NoteEachSearchInBookmarkResponseDto> findNotesByUserIdAndKeywordInBookmarks(Long userId, List<String> keywordList);
 

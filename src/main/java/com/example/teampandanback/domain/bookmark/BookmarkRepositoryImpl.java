@@ -3,6 +3,7 @@ package com.example.teampandanback.domain.bookmark;
 import com.example.teampandanback.dto.bookmark.response.BookmarkDetailForProjectListDto;
 import com.example.teampandanback.dto.note.response.NoteEachBookmarkedResponseDto;
 import com.example.teampandanback.dto.note.response.NoteEachSearchInBookmarkResponseDto;
+import com.example.teampandanback.utils.CustomPageImpl;
 import com.example.teampandanback.utils.PandanUtils;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
@@ -52,28 +53,27 @@ public class BookmarkRepositoryImpl implements BookmarkRepositoryQuerydsl {
     }
 
     @Override
-    public List<NoteEachBookmarkedResponseDto> findNoteByUserIdInBookmark(Long userId, Pageable pageable) {
-        List<Long> noteIdList = queryFactory
-                .select(bookmark.note.noteId)
-                .from(bookmark)
-                .where(bookmark.user.userId.eq(userId))
-                .fetch();
+    public CustomPageImpl<NoteEachBookmarkedResponseDto> findNoteByUserIdInBookmark(Long userId, Pageable pageable) {
 
-
-        List<NoteEachBookmarkedResponseDto> results =
+        QueryResults<NoteEachBookmarkedResponseDto> results =
                 queryFactory
                         .select(Projections.constructor(NoteEachBookmarkedResponseDto.class,
                                 note.noteId, note.title, note.step, project.projectId, project.title, user.name))
-                        .from(note)
-                        .where(note.noteId.in(noteIdList))
+                        .from(bookmark)
+                        .where(bookmark.note.noteId.in(JPAExpressions
+                                .select(bookmark.note.noteId)
+                                .from(bookmark)
+                                .where(bookmark.user.userId.eq(userId))
+                        ))
+                        .orderBy(bookmark.seq.desc())
+                        .offset(pageable.getOffset())
+                        .limit(pageable.getPageSize())
+                        .join(bookmark.note, note)
                         .join(note.project, project)
                         .join(note.user, user)
-                        .orderBy(note.createdAt.desc())
-                        .offset(pageable.getOffset())
-                        .limit(pageable.getPageSize() + 1)
-                        .fetch();
+                        .fetchResults();
 
-        return results;
+        return new CustomPageImpl<NoteEachBookmarkedResponseDto>(results.getResults(), pageable, results.getTotal());
     }
 
     // Note 에 연관된 북마크 삭제

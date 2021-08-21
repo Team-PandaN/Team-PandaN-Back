@@ -86,8 +86,21 @@ public class ProjectService {
         User user = userRepository.findById(currentUser.getUserId())
                 .orElseThrow(() -> new ApiRequestException("유저가 아니므로 프로젝트를 생성할 수 없습니다."));
 
+
+        //프로젝트에 참여한 총 갯수
+        Long theNumberOfCrewInvitedToProjects = userProjectMappingRepository.countByUser(user);
+
+        Long upperBound = 10L;
+        if(theNumberOfCrewInvitedToProjects >= upperBound){
+            throw new ApiRequestException("프로젝트에 이미 "+upperBound+"개 참여하였습니다.");
+        }
+
+
+
         // 프로젝트 생성하고 저장
         Project project = projectRepository.save(Project.toEntity(requestDto));
+
+
 
         // 유저-프로젝트 테이블에도 저장
         UserProjectMapping userProjectMapping = UserProjectMapping.builder()
@@ -205,13 +218,20 @@ public class ProjectService {
                 () -> new ApiRequestException("생성되지 않은 프로젝트입니다.")
         );
 
+        //프로젝트에 참여한 총 갯수
+        Long theNumberOfCrewInvitedToProjects = userProjectMappingRepository.countByUser(newCrew);
+
+        Long upperBound = 10L;
+        if(theNumberOfCrewInvitedToProjects >= upperBound){
+            throw new ApiRequestException("프로젝트에 이미 "+upperBound+"개 참여하였습니다.");
+        }
+
         UserProjectMapping newCrewRecord = userProjectMappingRepository.findByUserAndProject(newCrew, invitedProject)
                 .orElseGet(() -> UserProjectMapping.builder()
                         .userProjectRole(UserProjectRole.CREW)
                         .user(newCrew)
                         .project(invitedProject)
                         .build());
-
         userProjectMappingRepository.save(newCrewRecord);
 
         return ProjectInvitedResponseDto.builder()
@@ -267,4 +287,19 @@ public class ProjectService {
 
         return userProjectMappingRepository.findProjectListTopSize(currentUser.getUserId(), sidebarSize);
     }
+
+//    //프로젝트 탈퇴
+//    public void unInviteProject(Long projectId, User user) {
+//        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUserIdAndProjectId(user.getUserId(), projectId).orElseThrow(
+//                () -> new ApiRequestException("참여하지 않은 프로젝트에서 탈퇴하려 합니다.")
+//        );
+//
+//        Long countedUserAtThisProject = userProjectMappingRepository.countByProjectId(projectId);
+//
+//        if(countedUserAtThisProject <= 1L){
+//
+//        }
+//
+//        userProjectMappingRepository.delete(userProjectMapping);
+//    }
 }

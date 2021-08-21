@@ -35,4 +35,6 @@ public interface UserProjectMappingRepositoryQuerydsl {
 
     // 주어진 프로젝트에 참여하고 있는 크루 정보 조회
     List<CrewDetailForProjectListDto> findCrewDetailForProjectList(List<Long> projectIdList);
+
+    Long countByProjectId(Long projectId);
 }
