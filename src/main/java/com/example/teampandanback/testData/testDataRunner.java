@@ -26,7 +26,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -68,12 +67,13 @@ public class testDataRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
 
         //Initial Value
-        int userCount = 100; //
-        int projectCount = userCount+25;
+        int userCount = 10; //
+        int projectCount = (int)(userCount * 1.25);
 
+
+
+        int userInvitedToProjectCountLowerBound = 3;
         int userInvitedToProjectCountUpperBound = 10; // 유저는 프로젝트 N개에만 참여 가능하다.
-        int userInvitedToProjectCountLowerBound = 7;
-
         int noteWroteAtProjectCountUpperBound = 100;
 
 
@@ -245,10 +245,10 @@ public class testDataRunner implements ApplicationRunner {
                             step = Step.DONE;
                         }
 
-                        // 임의로  파일을 넣어 둔거예요. 태강님 확인 부탁드려요
+                        // 임의로  파일을 넣어 둔거예요. 태강님 확인 부탁드려요 // 확인했습니다. 파일이 너무 많이 들어가서 2로 좀 낮췄어요.
                         List<FileDetailRequestDto> files = new ArrayList<>();
 
-                        for (int j = 0; j < (int)(Math.random() * 4 +1); j++) {
+                        for (int j = 0; j < (int)(Math.random() * 2 +1); j++) {
                             files.add(FileDetailRequestDto.builder()
                                     .fileName("나 파일")
                                     .fileUrl("http://s3.com")
@@ -286,7 +286,7 @@ public class testDataRunner implements ApplicationRunner {
             Long curNoteId = (long)(i+1);
             for(UserProjectMapping each : userProjectMappingList){
                 if(each.getProject().getProjectId().equals(noteList.get(i).getProject().getProjectId())){
-                    if((int)(Math.random()*3)==0){ // 각 노트에 대해서 이 유저가 북마크 확률 33%
+                    if((int)(Math.random()*5)==0){ // 각 노트에 대해서 이 유저가 북마크 확률 20%
                         bookmarkService.bookmarkNote(curNoteId, each.getUser());
                     }
                 }

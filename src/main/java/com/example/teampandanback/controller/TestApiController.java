@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Api(tags = {"테스트"})
 @Slf4j
 @RequiredArgsConstructor
@@ -27,6 +30,13 @@ public class TestApiController {
     private final UserRepository userRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
     private final ProjectRepository projectRepository;
+
+    @GetMapping("/api/test/not-logged-in")
+    public Map<String,String> notLoggedIn(){
+        Map<String,String> map = new HashMap<>();
+        map.put("name","taegang");
+        return map;
+    }
 
     @ApiOperation(value = "로그인 테스트", notes = "토큰을 주면, 현재 로그인 되어있는 유저의 이름을 반환합니다.")
     @GetMapping("/api/test")
