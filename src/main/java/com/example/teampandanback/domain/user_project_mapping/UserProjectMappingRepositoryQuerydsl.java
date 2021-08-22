@@ -28,6 +28,9 @@ public interface UserProjectMappingRepositoryQuerydsl {
     //x 유저가 참여해있는 모든 유저-프로젝트를 호출
     List<UserProjectMapping> findByUserId(Long userId);
 
+    // x 유저가 참여해 있는 모든 프로젝트들의 ID 목록을 조회
+    List<Long> findProjectIdListByUserId(Long userId);
+
     UserProjectMapping findByUserIdAndProjectIdJoin(Long userId, Long projectId);
 
     @Modifying(clearAutomatically = true)
