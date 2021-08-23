@@ -1,5 +1,6 @@
 package com.example.teampandanback.domain.user_project_mapping;
 
+import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.dto.project.request.ProjectResponseDto;
 import com.example.teampandanback.dto.project.response.ProjectDetailResponseDto;
 import com.example.teampandanback.dto.project.response.ProjectSidebarResponseDto;
@@ -142,5 +143,34 @@ public class UserProjectMappingRepositoryImpl implements UserProjectMappingRepos
                 .selectFrom(userProjectMapping)
                 .where(userProjectMapping.project.projectId.eq(projectId))
                 .fetchCount();
+    }
+
+    // 유저가 참여해 있는 모든 프로젝트들의 ID 목록을 조회
+    @Override
+    public List<Long> findProjectIdListByUserId(Long userId) {
+
+        return queryFactory
+                .select(userProjectMapping.project.projectId)
+                .from(userProjectMapping)
+                .where(userProjectMapping.user.userId.eq(userId))
+                .fetch();
+    }
+
+    @Override
+    public Long getCountOfUserInvitedToProject(Long userId) {
+        return queryFactory
+                .select(userProjectMapping)
+                .from(userProjectMapping)
+                .where(userProjectMapping.user.userId.eq(userId))
+                .fetchCount();
+    }
+
+    @Override
+    public List<User> getUsersByProjectId(Long projectId) {
+        return queryFactory
+                .select(userProjectMapping.user)
+                .from(userProjectMapping)
+                .where(userProjectMapping.project.projectId.eq(projectId))
+                .fetch();
     }
 }

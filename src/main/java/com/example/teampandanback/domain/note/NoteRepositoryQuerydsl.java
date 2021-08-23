@@ -19,20 +19,22 @@ public interface NoteRepositoryQuerydsl {
     Optional<NoteResponseDto> findByNoteId(Long noteId);
 
     // 전체 프로젝트에서 해당 유저가 작성한 노트 조회
-    CustomPageImpl<NoteEachMineInTotalResponseDto> findUserNoteInTotalProject(Long userId, Pageable pageable); // findByUserId()
+    CustomPageImpl<NoteEachMineInTotalResponseDto> findUserNoteInTotalProject(Long userId, Pageable pageable, List<Long> projectIdList); // findByUserId()
 
     @Modifying(clearAutomatically = true)
     void deleteByProjectId(Long projectId);
 
+    // 해당 Project 에서 유저가 작성한 Note 조회
     CustomPageImpl<Note> findAllNoteByProjectAndUserOrderByCreatedAtDesc(Long projectId, Long userId, Pageable pageable);
 
-    List<noteEachSearchInTotalResponseDto> findNotesByUserIdAndKeywordInTotal(Long userId, List<String> kewordList);
+    List<noteEachSearchInTotalResponseDto> findNotesByUserIdAndKeywordInTotal(Long userId, List<String> keywordList);
 
-    List<NoteEachSearchInMineResponseDto> findNotesByUserIdAndKeywordInMine(Long userId, List<String> kewordList);
+    // 내가 작성한 문서들 중에서 제목으로 노트 검색
+    List<NoteEachSearchInMineResponseDto> findNotesByUserIdAndKeywordInMine(Long userId, List<String> keywordList, List<Long> projectIdList);
 
     List<Note> findNotesByNoteIdList(List<Long> noteIdList);
 
-    CustomPageImpl<Note> findAllByProjectOrderByModifiedAtDesc(Project project, Pageable pageable);
+    CustomPageImpl<Note> findAllByProjectOrderByCreatedAtDesc(Project project, Pageable pageable);
 
     List<Note> findAllByProjectId(Long projectId);
 

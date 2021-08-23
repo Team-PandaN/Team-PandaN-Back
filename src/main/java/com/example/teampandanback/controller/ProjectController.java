@@ -86,7 +86,7 @@ public class ProjectController {
         return projectService.readCrewList(projectId);
     }
 
-    //프로젝트 참여
+    // Project 참여
     @ApiOperation(value = "프로젝트 참여" , notes = "회원초대코드로 참여하게 됨")
     @PostMapping("/invites")
     public ProjectInvitedResponseDto invited(@RequestBody ProjectInvitedRequestDto projectInvitedRequestDto,
@@ -94,12 +94,16 @@ public class ProjectController {
         return projectService.invitedProject(projectInvitedRequestDto,userDetails.getUser());
     }
 
-    //프로젝트 탈퇴
-//    @ApiOperation(value = "프로젝트 탈퇴")
-//    @PostMapping("/un-invite/{projectId}")
-//    public void unInvite(@PathVariable("projectId") Long projectId, @AuthenticationPrincipal UserDetailsImpl userDetails){
-//        projectService.unInviteProject(projectId,userDetails.getUser());
-//    }
+    // Project 탈퇴
+    @ApiOperation(value = "프로젝트 탈퇴", notes = "프로젝트의 CREW만 나갈 수 있습니다. OWNER는 나가지 못합니다.")
+    @PutMapping("/leave/{projectId}")
+    public ProjectLeaveResponseDto unInvite(@PathVariable("projectId") Long projectId, @AuthenticationPrincipal UserDetailsImpl userDetails){
+        projectService.leaveProject(projectId,userDetails.getUser());
+
+        return ProjectLeaveResponseDto.builder()
+                .projectId(projectId)
+                .build();
+    }
 
 
 }

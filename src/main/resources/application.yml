@@ -15,8 +15,8 @@ spring:
 
 
 ##Switching
-#  datasource:
-#    driverClassName: org.h2.Driver
-#    hikari:
-#      jdbc-url: jdbc:h2:./testDB;AUTO_SERVER=TRUE
-#      username: sa
+  datasource:
+    driverClassName: org.h2.Driver
+    hikari:
+      jdbc-url: jdbc:h2:./testDB;AUTO_SERVER=TRUE
+      username: sa

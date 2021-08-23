@@ -26,4 +26,9 @@ public interface BookmarkRepositoryQuerydsl {
 
     // 유저가 가진 프로젝트들의 북마크 정보 조회
     List<BookmarkDetailForProjectListDto> findBookmarkCountByProject(List<Long> projectIdList, Long userId);
+
+    // 해당 프로젝트내에서 유저가 북마크 했던 기록 삭제
+    @Modifying(clearAutomatically = true)
+    void deleteByProjectIdAndUserId(Long projectId, Long userId);
+
 }

@@ -69,7 +69,9 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl {
 
     // 전체 프로젝트 중 해당 유저가 작성한 노트 조회
     @Override
-    public CustomPageImpl<NoteEachMineInTotalResponseDto> findUserNoteInTotalProject(Long userId, Pageable pageable) {
+    public CustomPageImpl<NoteEachMineInTotalResponseDto> findUserNoteInTotalProject(
+            Long userId, Pageable pageable, List<Long> projectIdList) {
+
         QueryResults<NoteEachMineInTotalResponseDto> results =
                 queryFactory
                         .select(
@@ -78,8 +80,8 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl {
                                 ))
                         .from(note)
                         .join(note.project, project)
-                        .where(note.user.userId.eq(userId))
-                        .orderBy(note.modifiedAt.desc())
+                        .where(note.user.userId.eq(userId), note.project.projectId.in(projectIdList))
+                        .orderBy(note.createdAt.desc())
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize())
                         .fetchResults();
@@ -94,6 +96,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl {
                 .execute();
     }
 
+    // 해당 Project 에서 유저가 작성한 Note 조회
     @Override
     public CustomPageImpl<Note> findAllNoteByProjectAndUserOrderByCreatedAtDesc(Long projectId, Long userId,
                                                                                 Pageable pageable) {
@@ -102,7 +105,7 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl {
                         .select(note)
                         .from(note)
                         .where(note.project.projectId.eq(projectId).and(note.user.userId.eq(userId)))
-                        .orderBy(note.modifiedAt.desc())
+                        .orderBy(note.createdAt.desc())
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize())
                         .fetchResults();
@@ -127,33 +130,36 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl {
                 .join(note.project, project)
                 .join(note.user, user)
                 .where(note.project.projectId.in(projectIdList).and(builder))
-                .orderBy(note.modifiedAt.desc())
+                .orderBy(note.createdAt.desc())
                 .fetch();
     }
 
     // keyword로 내가 쓴 문서 안에서 노트 검색, 제목으로만 검색합니다.
+    // 내가 썼고, 지금 내가 참여하고 있는 프로젝트 안에 있는 노트를 대상으로 검색합니다.
     @Override
-    public List<NoteEachSearchInMineResponseDto> findNotesByUserIdAndKeywordInMine(Long userId, List<String> keywordList) {
+    public List<NoteEachSearchInMineResponseDto> findNotesByUserIdAndKeywordInMine(Long userId, List<String> keywordList, List<Long> projectIdList) {
         BooleanBuilder builder = pandanUtils.searchByTitleBooleanBuilder(keywordList);
 
         return queryFactory
                 .select(Projections.constructor(NoteEachSearchInMineResponseDto.class,
                         note.noteId, note.title, note.step, project.projectId, project.title, note.createdAt))
                 .from(note)
-                .where(note.user.userId.eq(userId).and(builder))
-                .orderBy(note.modifiedAt.desc())
+                .where(note.user.userId.eq(userId)
+                        .and(note.project.projectId.in(projectIdList)
+                        .and(builder)))
+                .orderBy(note.createdAt.desc())
                 .join(note.project, project)
                 .fetch();
     }
 
     @Override
-    public CustomPageImpl<Note> findAllByProjectOrderByModifiedAtDesc(Project project, Pageable pageable) {
+    public CustomPageImpl<Note> findAllByProjectOrderByCreatedAtDesc(Project project, Pageable pageable) {
         QueryResults<Note> results =
                 queryFactory
                         .select(note)
                         .from(note)
                         .where(note.project.eq(project))
-                        .orderBy(note.modifiedAt.desc())
+                        .orderBy(note.createdAt.desc())
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize())
                         .fetchResults();

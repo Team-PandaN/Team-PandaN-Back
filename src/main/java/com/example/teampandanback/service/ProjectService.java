@@ -290,18 +290,26 @@ public class ProjectService {
         return userProjectMappingRepository.findProjectListTopSize(currentUser.getUserId(), SIDEBAR_SIZE);
     }
 
-//    //프로젝트 탈퇴
-//    public void unInviteProject(Long projectId, User user) {
-//        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUserIdAndProjectId(user.getUserId(), projectId).orElseThrow(
-//                () -> new ApiRequestException("참여하지 않은 프로젝트에서 탈퇴하려 합니다.")
-//        );
-//
-//        Long countedUserAtThisProject = userProjectMappingRepository.countByProjectId(projectId);
-//
-//        if(countedUserAtThisProject <= 1L){
-//
-//        }
-//
-//        userProjectMappingRepository.delete(userProjectMapping);
-//    }
+
+    // Project 에서 탈퇴하기
+    @Transactional
+    public void leaveProject(Long projectId, User user) {
+        UserProjectMapping userProjectMapping = userProjectMappingRepository.findByUserIdAndProjectId(user.getUserId(), projectId).orElseThrow(
+                () -> new ApiRequestException("참여하지 않은 프로젝트에서 탈퇴하려 합니다.")
+        );
+        // 해당 유저가 OWNER 라면 탈퇴할 수 없다
+        if(userProjectMapping.getRole().equals(UserProjectRole.OWNER)){
+            throw new ApiRequestException("프로젝트의 OWNER 는 프로젝트를 탈퇴할 수 없습니다!");
+        }
+        // 해당 프로젝트내에서 유저가 북마크 했던 기록 삭제
+        bookmarkRepository.deleteByProjectIdAndUserId(projectId, user.getUserId());
+
+        userProjectMappingRepository.deleteById(userProjectMapping.getSeq());
+    }
+
+
+
+
+
+
 }
