@@ -1,6 +1,6 @@
 package com.example.teampandanback.dto.note.request;
 
-import com.example.teampandanback.dto.file.request.FileDetailRequestDto;
+import com.example.teampandanback.dto.file.request.FileUpdateDetailRequestDto;
 import lombok.Getter;
 
 import java.util.List;
@@ -10,5 +10,5 @@ public class NoteUpdateRequestDto {
     private String title;
     private String content;
     private String deadline;
-    private List<FileDetailRequestDto> files;
+    private List<FileUpdateDetailRequestDto> files;
 }
