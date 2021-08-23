@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.List;
 
 //Switching
-@Component
+//@Component
 public class testDataRunner implements ApplicationRunner {
 
     @Autowired
@@ -80,7 +80,7 @@ public class testDataRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         //Initial Value
-        int userCount = 10; //
+        int userCount = 5; //
         int projectCount = (int) (userCount * 1.25); // projectCount는 userCount * userInvitedToProjectCountUpperBound < projectCount여야 한다.
 
         int userInvitedToProjectCountLowerBound = 5;

@@ -417,7 +417,7 @@ public class NoteService {
                 ()-> new ApiRequestException("잠금 여부를 알아볼 노트가 없습니다.")
         );
 
-        if(note.getLock()){
+        if(note.getLocked()){
             return true;
         }else{
             return false;
@@ -425,20 +425,33 @@ public class NoteService {
     }
 
     @Transactional
-    public void using(Long noteId) {
+    public void writing(Long noteId) {
         Note note = noteRepository.findById(noteId).orElseThrow(
                 ()->new ApiRequestException("해당 게시글이 없습니다.")
         );
-        note.setUsing(true);
+        note.setWriting(true);
     }
 
     public void initLockManager(Long noteId) throws InterruptedException {
+        Note note = noteRepository.findById(noteId).orElseThrow(
+                ()-> new ApiRequestException("해당 노트가 없습니다.")
+        );
+
+        if(note.getLocked() == Boolean.TRUE){
+            throw new ApiRequestException("잠겨있는 노트입니다.");
+        }
+
+        System.out.println("락매니저 시작");
         lockManagerService.preProcess(noteId);
         while(true){
-            Thread.sleep(10000);
+            System.out.println("자러감");
+            Thread.sleep(7000);
+            System.out.println("일어남");
             if(lockManagerService.isAnyoneWriting(noteId)){
+                System.out.println("자고일어나서도?");
                 lockManagerService.assumeThatNobodyIsWriting(noteId);
             }else{
+                System.out.println("delock");
                 lockManagerService.deLock(noteId);
                 break;
             }

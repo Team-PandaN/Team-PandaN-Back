@@ -50,11 +50,11 @@ public class Note extends Timestamped {
     @Column(name = "NEXT")
     private Long nextId;
 
-    @Column(name = "LOCK")
-    private Boolean lock;
+    @Column(name = "LOCKED")
+    private Boolean locked;
 
-    @Column(name = "USING")
-    private Boolean using;
+    @Column(name = "WRITING")
+    private Boolean writing;
 
 
     @Builder
@@ -67,8 +67,8 @@ public class Note extends Timestamped {
         this.project = project;
         this.previousId = previousId;
         this.nextId = nextId;
-        this.lock = false;
-        this.using = false;
+        this.locked = false;
+        this.writing = false;
     }
 
     public void update(NoteUpdateRequestDto noteUpdateRequestDto, LocalDate updateLocalDate) {
@@ -108,11 +108,11 @@ public class Note extends Timestamped {
                 .build();
     }
 
-    public void setLock(Boolean lock) {
-        this.lock = lock;
+    public void setLocked(Boolean locked) {
+        this.locked = locked;
     }
 
-    public void setUsing(Boolean using) {
-        this.using = using;
+    public void setWriting(Boolean writing) {
+        this.writing = writing;
     }
 }

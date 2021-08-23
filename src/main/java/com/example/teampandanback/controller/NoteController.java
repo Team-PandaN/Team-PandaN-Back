@@ -119,9 +119,10 @@ public class NoteController {
     }
 
     @ApiOperation(value = "현재 노트를 수정중임을 주기적으로 알림")
-    @PostMapping("/notes/using/{noteId}")
-    public void using(@PathVariable Long noteId){
-        noteService.using(noteId);
+    @PostMapping("/notes/writing/{noteId}")
+    public void writing(@PathVariable Long noteId){
+        System.out.println("===im-writing 요청 ===");
+        noteService.writing(noteId);
     }
 
     @ApiOperation(value = "해당 문서의 잠금 매니저를 시작함")

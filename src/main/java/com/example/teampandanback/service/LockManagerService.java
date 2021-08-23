@@ -24,8 +24,8 @@ public class LockManagerService {
         Note note = noteRepository.findById(noteId).orElseThrow(
                 () -> new ApiRequestException("해당 노트가 없습니다.")
         );
-        note.setLock(true);
-        note.setUsing(true);
+        note.setLocked(true);
+        note.setWriting(true);
     }
 
     @Transactional
@@ -34,8 +34,8 @@ public class LockManagerService {
         Note note = noteRepository.findById(noteId).orElseThrow(
                 ()-> new ApiRequestException("해당 노트가 없습니다.")
         );
-        note.setLock(true);
-        note.setUsing(true);
+        note.setLocked(false);
+        note.setWriting(false);
     }
 
     @Transactional
@@ -44,7 +44,7 @@ public class LockManagerService {
         Note note = noteRepository.findById(noteId).orElseThrow(
                 ()-> new ApiRequestException("해당 노트가 없습니다.")
         );
-        if(note.getUsing() == true){
+        if(note.getWriting() == true){
             return true;
         }else{
             return false;
@@ -57,6 +57,6 @@ public class LockManagerService {
         Note note = noteRepository.findById(noteId).orElseThrow(
                 ()-> new ApiRequestException("해당 노트가 없습니다.")
         );
-        note.setUsing(false);
+        note.setWriting(false);
     }
 }
