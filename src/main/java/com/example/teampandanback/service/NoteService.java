@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 public class NoteService {
     private final NoteRepository noteRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
-    private final ProjectRepository projectRepository;
     private final BookmarkRepository bookmarkRepository;
     private final CommentRepository commentRepository;
     private final FileRepository fileRepository;
@@ -459,5 +458,14 @@ public class NoteService {
                 noteRepository.findNotesByUserIdAndKeywordInMine(currentUser.getUserId(), keywordList, projectIdList);
 
         return NoteSearchInMineResponseDto.builder().noteList(resultList).build();
+    }
+
+    // 해당 유저가 참여하고 있는 Project 인지 확인
+    private UserProjectMapping checkUserProject(Long userId, Long projectId){
+
+        // 유저가 참여하고 있는 Project 인지 확인, 해당 Project 가 실제 존재하는지도 함께 확인 가능
+        return userProjectMappingRepository
+                .findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(() -> new ApiRequestException("해당 프로젝트에 소속된 유저가 아닙니다."));
     }
 }
