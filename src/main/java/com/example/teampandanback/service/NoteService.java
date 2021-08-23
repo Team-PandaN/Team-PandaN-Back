@@ -10,6 +10,7 @@ import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.domain.note.Step;
 import com.example.teampandanback.domain.project.Project;
+import com.example.teampandanback.domain.project.ProjectRepository;
 import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
@@ -37,10 +38,12 @@ import java.util.stream.Collectors;
 public class NoteService {
     private final NoteRepository noteRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
+    private final ProjectRepository projectRepository;
     private final BookmarkRepository bookmarkRepository;
     private final CommentRepository commentRepository;
     private final FileRepository fileRepository;
     private final PandanUtils pandanUtils;
+    private final LockManagerService lockManagerService;
 
     // Note 상세 조회
     @Transactional
@@ -408,4 +411,38 @@ public class NoteService {
                 .findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new ApiRequestException("해당 프로젝트에 소속된 유저가 아닙니다."));
     }
+
+    public Boolean isLock(Long noteId) {
+        Note note = noteRepository.findById(noteId).orElseThrow(
+                ()-> new ApiRequestException("잠금 여부를 알아볼 노트가 없습니다.")
+        );
+
+        if(note.getLock()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    @Transactional
+    public void using(Long noteId) {
+        Note note = noteRepository.findById(noteId).orElseThrow(
+                ()->new ApiRequestException("해당 게시글이 없습니다.")
+        );
+        note.setUsing(true);
+    }
+
+    public void initLockManager(Long noteId) throws InterruptedException {
+        lockManagerService.preProcess(noteId);
+        while(true){
+            Thread.sleep(10000);
+            if(lockManagerService.isAnyoneWriting(noteId)){
+                lockManagerService.assumeThatNobodyIsWriting(noteId);
+            }else{
+                lockManagerService.deLock(noteId);
+                break;
+            }
+        }
+    }
+
 }
