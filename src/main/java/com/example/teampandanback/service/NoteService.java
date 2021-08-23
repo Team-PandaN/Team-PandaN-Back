@@ -74,29 +74,63 @@ public class NoteService {
         List<File> preFileList = fileRepository.findFilesByNoteId(noteId);
         List<FileUpdateDetailRequestDto> preFiles = new ArrayList<>(noteUpdateRequestDto.getFiles());
 
-        List<FileUpdateDetailRequestDto> fileIds = preFiles.stream()
-                .filter(file -> !file.getFileId().equals(0L))
-                .collect(Collectors.toList());
-
-        if (fileIds.size() == 0) {
-            fileRepository.deleteFileByNoteId(noteId);
+        // DB에서 찾은 해당 노트가 가지고 있는 현재 파일의 ID값을 모운 리스트
+        List<Long> preFilesIdList = new ArrayList<>();
+        for (File preFile : preFileList) {
+            preFilesIdList.add(preFile.getFileId());
         }
 
-        if (fileIds.size() > 0) {
-            for (FileUpdateDetailRequestDto fileUnit : fileIds) {
-                preFileList.stream()
-                        .filter(f -> !f.getFileId().equals(fileUnit.getFileId()))
-                        .forEach(fileRepository::delete);
+        // 프론트에서 받아온 파일의 Id값만을 포함한 리스트
+        List<Long> fileIdList = new ArrayList<>();
+        for (FileUpdateDetailRequestDto filesDto : preFiles) {
+            fileIdList.add(filesDto.getFileId());
+        }
+        // 요청에 새로운 파일이 추가되지 않았다면(기존의 파일들을 유지 또는 한개이상을 삭제, 단 모두 삭제된경우는 이경우에서 제외)
+        if (!fileIdList.contains(0L)) {
+            // 현재 저장된 파일 중 무언가 삭제되었을때
+            if (preFiles.size() != preFileList.size()){
+                for (Long fileDto : fileIdList) {
+                    // 사라진 파일을 DB에서 삭제
+                    if (!preFilesIdList.contains(fileDto)){
+                        fileRepository.deleteById(fileDto);
+                        em.flush();
+                        em.clear();
+                    }
+                }
             }
-        }
-        em.flush();
-        em.clear();
+        }else {
+            // 프론트에서 받아온 요청중 기존에 있는 파일의 아이디값
+            List<FileUpdateDetailRequestDto> fileIds = preFiles.stream()
+                    .filter(file -> !file.getFileId().equals(0L))
+                    .collect(Collectors.toList());
+            // 모두 새롭게 추가된 파일
+            if (fileIds.size() == 0) {
+                fileRepository.deleteFileByNoteId(noteId);
+            }
+            // DB에서 가져온 값과 프론트에서 받아온 0을 제외한 Id 값들 비교했을때, 프론트에서 값이 들어오지않은 Id 값에 해당하는 file을 삭제함
+            if (fileIds.size() > 0) {
+                for (FileUpdateDetailRequestDto fileUnit : fileIds) {
+                    preFileList.stream()
+                            .filter(f -> !f.getFileId().equals(fileUnit.getFileId()))
+                            .forEach(fileRepository::delete);
 
-        List<FileUpdateDetailRequestDto> postFiles = new ArrayList<>(noteUpdateRequestDto.getFiles());
-        postFiles.stream()
-                .filter(file -> file.getFileId().equals(0L))
-                .map(file -> new File(file.getFileName(), file.getFileUrl(), currentUser, note))
-                .forEach(fileRepository::save);
+                }
+            }
+
+            // transactional 이 끝났을때 삭제에 대한 요청이 들어가게된다면, insert이후 delete가 일어나,5개 이상의 파일이 저장되는 사태가 발생할수 있으므로,
+            // 꼭 강제 flush하고, clear하여야 이후에 작업을 할수있다. clear는 이후 이루어질 파일조회를 영속성컨텍스트에서 가지고오는것이 아니라 실제 DB의 상태를 가져와야
+            // 하는것이므로, 그에 대한 처리이다.
+            em.flush();
+            em.clear();
+
+            // 새롭게 들어온 파일들을 저장해준다.
+            List<FileUpdateDetailRequestDto> postFiles = new ArrayList<>(noteUpdateRequestDto.getFiles());
+            postFiles.stream()
+                    .filter(file -> file.getFileId().equals(0L))
+                    .map(file -> new File(file.getFileName(), file.getFileUrl(), currentUser, note))
+                    .forEach(fileRepository::save);
+        }
+
 
 
 //        fileRepository.deleteFileByNoteId(noteId);
@@ -106,7 +140,9 @@ public class NoteService {
 //                .forEach(fileRepository::save);
 
 
+        // flush 되어 저장된 최신의 DB 에서 값을 가져온다.
         List<File> afterfileList = fileRepository.findFilesByNoteId(noteId);
+        // file수 제한된 값이상 저장 될 수 없음을 확인하는 예외처리
         if (afterfileList.size() > pandanUtils.getLimitOfFile()) {
             throw new ApiRequestException(pandanUtils.messageForLimitOfFile());
         }
