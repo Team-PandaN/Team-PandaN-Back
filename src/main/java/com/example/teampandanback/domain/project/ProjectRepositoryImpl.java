@@ -7,9 +7,11 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import javax.persistence.EntityManager;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.example.teampandanback.domain.note.QNote.note;
 import static com.example.teampandanback.domain.project.QProject.project;
+import static com.example.teampandanback.domain.user.QUser.user;
 
 public class ProjectRepositoryImpl implements ProjectRepositoryQuerydsl{
     private final JPAQueryFactory queryFactory;
@@ -33,5 +35,23 @@ public class ProjectRepositoryImpl implements ProjectRepositoryQuerydsl{
                 .groupBy(project.projectId)
                 .orderBy(note.modifiedAt.max().desc())
                 .fetch();
+    }
+
+    @Override
+    public Long getCountOfNote(Long projectId) {
+        return queryFactory
+                .select(note)
+                .from(note)
+                .where(note.project.projectId.eq(projectId))
+                .fetchCount();
+    }
+
+    @Override
+    public Project getLastProject() {
+        return queryFactory
+                .select(project)
+                .from(project)
+                .orderBy(project.projectId.desc())
+                .fetchFirst();
     }
 }

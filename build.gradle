@@ -30,9 +30,9 @@ dependencies {
     //Switching
     //database
     //h2
-//    implementation('com.h2database:h2')
+    implementation('com.h2database:h2')
     //mysql
-    implementation 'mysql:mysql-connector-java'
+//    implementation 'mysql:mysql-connector-java'
 
     // spring-security
     testImplementation("org.springframework.security:spring-security-test")
