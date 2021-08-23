@@ -34,7 +34,7 @@ public interface NoteRepositoryQuerydsl {
 
     List<Note> findNotesByNoteIdList(List<Long> noteIdList);
 
-    CustomPageImpl<Note> findAllByProjectOrderByModifiedAtDesc(Project project, Pageable pageable);
+    CustomPageImpl<Note> findAllByProjectOrderByCreatedAtDesc(Project project, Pageable pageable);
 
     List<Note> findAllByProjectId(Long projectId);
 

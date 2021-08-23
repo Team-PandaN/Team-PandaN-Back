@@ -10,7 +10,6 @@ import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.domain.note.Step;
 import com.example.teampandanback.domain.project.Project;
-import com.example.teampandanback.domain.project.ProjectRepository;
 import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
@@ -38,7 +37,6 @@ import java.util.stream.Collectors;
 public class NoteService {
     private final NoteRepository noteRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
-    private final ProjectRepository projectRepository;
     private final BookmarkRepository bookmarkRepository;
     private final CommentRepository commentRepository;
     private final FileRepository fileRepository;
@@ -52,9 +50,7 @@ public class NoteService {
                 .orElseThrow(() -> new ApiRequestException("작성된 노트가 없습니다."));
 
         // 노트가 유저가 참여하고 있는 Project 에 있는지 확인
-        userProjectMappingRepository
-                .findByUserIdAndProjectId(currentUser.getUserId(), noteResponseDto.getProjectId())
-                .orElseThrow(() -> new ApiRequestException("노트가 있는 프로젝트에 소속된 유저가 아닙니다."));
+        checkUserProject(currentUser.getUserId(), noteResponseDto.getProjectId());
 
         // 유저가 노트를 북마크 했는지 여부
         Optional<Bookmark> bookmark = bookmarkRepository.findByUserIdAndNoteId(currentUser.getUserId(), noteId);
@@ -186,11 +182,8 @@ public class NoteService {
         if(theNumberOfNoteWroteToProject >= theNumberOfNoteWroteToProjectUpperBound){
             throw new ApiRequestException("프로젝트에 이미 "+theNumberOfNoteWroteToProjectUpperBound+"개의 노트가 작성되어있습니다.");
         }
-
-
-        UserProjectMapping userProjectMapping = userProjectMappingRepository
-                .findByUserIdAndProjectId(currentUser.getUserId(), projectId)
-                .orElseThrow(() -> new ApiRequestException("해당 프로젝트에 소속된 유저가 아닙니다."));
+        // 유저가 해당 프로젝트에 참여하고 있는지 확인
+        UserProjectMapping userProjectMapping = checkUserProject(currentUser.getUserId(), projectId);
 
         LocalDate deadline = pandanUtils.changeType(noteCreateRequestDto.getDeadline());
         Step step = Step.valueOf(noteCreateRequestDto.getStep());
@@ -243,10 +236,8 @@ public class NoteService {
     // 해당 Project 에서 내가 작성한 Note 조회
     public NoteMineInProjectResponseDto readNotesMineOnly(Long projectId, User currentUser, int page, int size) {
 
-        // 유저가 참여하고 있는 Project 인지 확인, 해당 Project 가 실제 존재하는지도 함께 확인 가능
-        userProjectMappingRepository
-                .findByUserIdAndProjectId(currentUser.getUserId(), projectId)
-                .orElseThrow(() -> new ApiRequestException("해당 프로젝트에 소속된 유저가 아닙니다."));
+        // 유저가 참여하고 있는 Project 인지 확인
+        checkUserProject(currentUser.getUserId(), projectId);
 
         // 해당 Project 에서 내가 작성한 Note 조회
         CustomPageImpl<Note> noteCustomPage = noteRepository.findAllNoteByProjectAndUserOrderByCreatedAtDesc(
@@ -326,10 +317,8 @@ public class NoteService {
     @Transactional
     public KanbanNoteSearchResponseDto readKanbanNote(Long projectId, User currentUser) {
 
-        // 유저가 참여하고 있는 Project 인지 확인, 해당 Project 가 실제 존재하는지도 함께 확인 가능
-        UserProjectMapping userProjectMapping = userProjectMappingRepository
-                .findByUserIdAndProjectId(currentUser.getUserId(), projectId)
-                .orElseThrow(() -> new ApiRequestException("해당 프로젝트에 소속된 유저가 아닙니다."));
+        // 유저가 참여하고 있는 Project 인지 확인
+        UserProjectMapping userProjectMapping = checkUserProject(currentUser.getUserId(), projectId);
 
         // Project로 전체 노트 리스트 가져오기
         List<Note> rawNoteList = noteRepository.findByProject(userProjectMapping.getProject());
@@ -362,12 +351,10 @@ public class NoteService {
     public NoteSearchResponseDto readOrdinaryNote(Long projectId, int page, int size, User currentUser) {
         List<OrdinaryNoteEachResponseDto> ordinaryNoteEachResponseDtoList = new ArrayList<>();
 
-        // 유저가 참여하고 있는 Project 인지 확인, 해당 Project 가 실제 존재하는지도 함께 확인 가능
-        UserProjectMapping userProjectMapping = userProjectMappingRepository
-                .findByUserIdAndProjectId(currentUser.getUserId(), projectId)
-                .orElseThrow(() -> new ApiRequestException("해당 프로젝트에 소속된 유저가 아닙니다."));
+        // 유저가 참여하고 있는 Project 인지 확인
+        UserProjectMapping userProjectMapping = checkUserProject(currentUser.getUserId(), projectId);
 
-        CustomPageImpl<Note> ordinaryNoteCustomPage = noteRepository.findAllByProjectOrderByModifiedAtDesc(
+        CustomPageImpl<Note> ordinaryNoteCustomPage = noteRepository.findAllByProjectOrderByCreatedAtDesc(
                 userProjectMapping.getProject(), pandanUtils.dealWithPageRequestParam(page, size));
 
         for (Note note : ordinaryNoteCustomPage.toList()) {
@@ -411,5 +398,14 @@ public class NoteService {
                 noteRepository.findNotesByUserIdAndKeywordInMine(currentUser.getUserId(), keywordList, projectIdList);
 
         return NoteSearchInMineResponseDto.builder().noteList(resultList).build();
+    }
+
+    // 해당 유저가 참여하고 있는 Project 인지 확인
+    private UserProjectMapping checkUserProject(Long userId, Long projectId){
+
+        // 유저가 참여하고 있는 Project 인지 확인, 해당 Project 가 실제 존재하는지도 함께 확인 가능
+        return userProjectMappingRepository
+                .findByUserIdAndProjectId(userId, projectId)
+                .orElseThrow(() -> new ApiRequestException("해당 프로젝트에 소속된 유저가 아닙니다."));
     }
 }

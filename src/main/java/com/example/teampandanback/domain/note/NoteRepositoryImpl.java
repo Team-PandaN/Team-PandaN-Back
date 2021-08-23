@@ -153,13 +153,13 @@ public class NoteRepositoryImpl implements NoteRepositoryQuerydsl {
     }
 
     @Override
-    public CustomPageImpl<Note> findAllByProjectOrderByModifiedAtDesc(Project project, Pageable pageable) {
+    public CustomPageImpl<Note> findAllByProjectOrderByCreatedAtDesc(Project project, Pageable pageable) {
         QueryResults<Note> results =
                 queryFactory
                         .select(note)
                         .from(note)
                         .where(note.project.eq(project))
-                        .orderBy(note.modifiedAt.desc())
+                        .orderBy(note.createdAt.desc())
                         .offset(pageable.getOffset())
                         .limit(pageable.getPageSize())
                         .fetchResults();
