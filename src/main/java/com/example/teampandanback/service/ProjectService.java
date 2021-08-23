@@ -3,7 +3,6 @@ package com.example.teampandanback.service;
 import com.example.teampandanback.domain.Comment.CommentRepository;
 import com.example.teampandanback.domain.bookmark.BookmarkRepository;
 import com.example.teampandanback.domain.file.FileRepository;
-import com.example.teampandanback.domain.note.Note;
 import com.example.teampandanback.domain.note.NoteRepository;
 import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.project.ProjectRepository;
@@ -24,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,7 +42,7 @@ public class ProjectService {
     private final AESEncryptor aesEncryptor;
 
     // 사이드바에 들어갈 Project 최대 갯수
-    private static final int sidebarSize = 5;
+    private final int SIDEBAR_SIZE = 5;
 
 
     // Project 목록 조회
@@ -53,8 +52,8 @@ public class ProjectService {
         List<UserProjectMapping> userProjectList = userProjectMappingRepository.findByUserId(currentUser.getUserId());
         // 유저가 참여하고 있는 프로젝트 id의 목록
         List<Long> projectIdList = userProjectList.stream()
-                                                    .map(userProjectMapping-> userProjectMapping.getProject().getProjectId())
-                                                    .collect(Collectors.toList());
+                .map(userProjectMapping -> userProjectMapping.getProject().getProjectId())
+                .collect(Collectors.toList());
         // 유저가 참여하고 있는 프로젝트들의 세부정보 조회
         List<ProjectDetailForProjectListDto> projectDetail = projectRepository.findProjectDetailForProjectList(projectIdList);
 
@@ -64,21 +63,21 @@ public class ProjectService {
 
         // 유저가 참여하고 있는 프로젝트들의 크루정보 정렬
         Map<Long, ArrayList<CrewDetailForProjectListDto>> crewMap = new HashMap<>();
-        projectIdList.forEach(projectId-> crewMap.put(projectId, new ArrayList<>()));
+        projectIdList.forEach(projectId -> crewMap.put(projectId, new ArrayList<>()));
 
-        for (CrewDetailForProjectListDto crew:rawCrewList){
+        for (CrewDetailForProjectListDto crew : rawCrewList) {
             crewMap.get(crew.getProjectId()).add(crew);
         }
 
         // 유저가 참여하고 있는 프로젝트들의 북마크 정보 조회
         List<BookmarkDetailForProjectListDto> bookmarkCountList = bookmarkRepository.findBookmarkCountByProject(projectIdList, currentUser.getUserId());
         Map<Long, Long> bookmarkMap = new HashMap<>();
-        bookmarkCountList.forEach(bookmark-> bookmarkMap.put(bookmark.getProjectId(), bookmark.getBookmarkCount()));
+        bookmarkCountList.forEach(bookmark -> bookmarkMap.put(bookmark.getProjectId(), bookmark.getBookmarkCount()));
 
         return projectDetail.stream()
-                .map(project->
-                    ProjectEachResponseDto
-                            .of(project, userProjectList, crewMap.get(project.getProjectId()), bookmarkMap.get(project.getProjectId()))
+                .map(project ->
+                        ProjectEachResponseDto
+                                .of(project, userProjectList, crewMap.get(project.getProjectId()), bookmarkMap.get(project.getProjectId()))
                 ).collect(Collectors.toList());
     }
 
@@ -94,10 +93,9 @@ public class ProjectService {
         Long theNumberOfCrewInvitedToProjects = userProjectMappingRepository.countByUser(user);
 
         Long upperBound = 10L;
-        if(theNumberOfCrewInvitedToProjects >= upperBound){
-            throw new ApiRequestException("프로젝트에 이미 "+upperBound+"개 참여하였습니다.");
+        if (theNumberOfCrewInvitedToProjects >= upperBound) {
+            throw new ApiRequestException("프로젝트에 이미 " + upperBound + "개 참여하였습니다.");
         }
-
 
 
         // 프로젝트 생성하고 저장
@@ -226,8 +224,8 @@ public class ProjectService {
         Long theNumberOfCrewInvitedToProjects = userProjectMappingRepository.countByUser(newCrew);
 
         Long upperBound = 10L;
-        if(theNumberOfCrewInvitedToProjects >= upperBound){
-            throw new ApiRequestException("프로젝트에 이미 "+upperBound+"개 참여하였습니다.");
+        if (theNumberOfCrewInvitedToProjects >= upperBound) {
+            throw new ApiRequestException("프로젝트에 이미 " + upperBound + "개 참여하였습니다.");
         }
 
         UserProjectMapping newCrewRecord = userProjectMappingRepository.findByUserAndProject(newCrew, invitedProject)
@@ -289,7 +287,7 @@ public class ProjectService {
     @Transactional(readOnly = true)
     public List<ProjectSidebarResponseDto> readProjectListSidebar(User currentUser) {
 
-        return userProjectMappingRepository.findProjectListTopSize(currentUser.getUserId(), sidebarSize);
+        return userProjectMappingRepository.findProjectListTopSize(currentUser.getUserId(), SIDEBAR_SIZE);
     }
 
 //    //프로젝트 탈퇴

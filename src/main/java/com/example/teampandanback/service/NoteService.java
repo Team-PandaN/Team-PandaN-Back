@@ -15,6 +15,7 @@ import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.dto.file.request.FileDetailRequestDto;
+import com.example.teampandanback.dto.file.request.FileUpdateDetailRequestDto;
 import com.example.teampandanback.dto.file.response.FileDetailResponseDto;
 import com.example.teampandanback.dto.note.request.NoteCreateRequestDto;
 import com.example.teampandanback.dto.note.request.NoteMoveRequestDto;
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.*;
@@ -42,6 +44,7 @@ public class NoteService {
     private final BookmarkRepository bookmarkRepository;
     private final CommentRepository commentRepository;
     private final FileRepository fileRepository;
+    private final EntityManager em;
     private final PandanUtils pandanUtils;
 
     // Note 상세 조회
@@ -68,18 +71,48 @@ public class NoteService {
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
 
-        List<FileDetailRequestDto> files = new ArrayList<>(noteUpdateRequestDto.getFiles());
-        files.stream()
+        List<File> preFileList = fileRepository.findFilesByNoteId(noteId);
+        List<FileUpdateDetailRequestDto> preFiles = new ArrayList<>(noteUpdateRequestDto.getFiles());
+
+        List<FileUpdateDetailRequestDto> fileIds = preFiles.stream()
+                .filter(file -> !file.getFileId().equals(0L))
+                .collect(Collectors.toList());
+
+        if (fileIds.size() == 0) {
+            fileRepository.deleteFileByNoteId(noteId);
+        }
+
+        if (fileIds.size() > 0) {
+            for (FileUpdateDetailRequestDto fileUnit : fileIds) {
+                preFileList.stream()
+                        .filter(f -> !f.getFileId().equals(fileUnit.getFileId()))
+                        .forEach(fileRepository::delete);
+            }
+        }
+        em.flush();
+        em.clear();
+
+        List<FileUpdateDetailRequestDto> postFiles = new ArrayList<>(noteUpdateRequestDto.getFiles());
+        postFiles.stream()
+                .filter(file -> file.getFileId().equals(0L))
                 .map(file -> new File(file.getFileName(), file.getFileUrl(), currentUser, note))
                 .forEach(fileRepository::save);
 
-        List<File> fileList = fileRepository.findFilesByNoteId(noteId);
-        if (fileList.size() > pandanUtils.limitOfFile()) {
+
+//        fileRepository.deleteFileByNoteId(noteId);
+//        List<FileUpdateDetailRequestDto> files = new ArrayList<>(noteUpdateRequestDto.getFiles());
+//        files.stream()
+//                .map(file -> new File(file.getFileName(), file.getFileUrl(), currentUser, note))
+//                .forEach(fileRepository::save);
+
+
+        List<File> afterfileList = fileRepository.findFilesByNoteId(noteId);
+        if (afterfileList.size() > pandanUtils.getLimitOfFile()) {
             throw new ApiRequestException(pandanUtils.messageForLimitOfFile());
         }
 
         List<FileDetailResponseDto> fileDetailResponseDtoList = new ArrayList<>();
-        for (File file : fileList) {
+        for (File file : afterfileList) {
             fileDetailResponseDtoList.add(FileDetailResponseDto.fromEntity(file));
         }
 
@@ -165,8 +198,8 @@ public class NoteService {
         Long theNumberOfNoteWroteToProject = noteRepository.countByProjectId(projectId);
 
         Long theNumberOfNoteWroteToProjectUpperBound = 100L;
-        if(theNumberOfNoteWroteToProject >= theNumberOfNoteWroteToProjectUpperBound){
-            throw new ApiRequestException("프로젝트에 이미 "+theNumberOfNoteWroteToProjectUpperBound+"개의 노트가 작성되어있습니다.");
+        if (theNumberOfNoteWroteToProject >= theNumberOfNoteWroteToProjectUpperBound) {
+            throw new ApiRequestException("프로젝트에 이미 " + theNumberOfNoteWroteToProjectUpperBound + "개의 노트가 작성되어있습니다.");
         }
 
 
@@ -199,7 +232,7 @@ public class NoteService {
             files.stream()
                     .map(file -> new File(file.getFileName(), file.getFileUrl(), user, savedNote))
                     .forEach(fileRepository::save);
-            if (files.size() > pandanUtils.limitOfFile()) {
+            if (files.size() > pandanUtils.getLimitOfFile()) {
                 throw new ApiRequestException(pandanUtils.messageForLimitOfFile());
             }
             noteCreateResponseDto.uploadFile(files);
@@ -214,7 +247,7 @@ public class NoteService {
             files.stream()
                     .map(file -> new File(file.getFileName(), file.getFileUrl(), user, savedNote))
                     .forEach(fileRepository::save);
-            if (files.size() > pandanUtils.limitOfFile()) {
+            if (files.size() > pandanUtils.getLimitOfFile()) {
                 throw new ApiRequestException(pandanUtils.messageForLimitOfFile());
             }
             noteCreateResponseDto.uploadFile(files);

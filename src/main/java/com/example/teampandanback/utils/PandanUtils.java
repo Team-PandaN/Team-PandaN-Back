@@ -19,6 +19,8 @@ import static com.example.teampandanback.domain.note.QNote.note;
 @Component
 public class PandanUtils {
 
+    private final int LIMIT_OF_FILES = 5;
+
     // 성경:
     public PageRequest dealWithPageRequestParam(int page, int size) {
         PageRequest pageRequest = PageRequest
@@ -207,11 +209,11 @@ public class PandanUtils {
         }
     }
 
-    public int limitOfFile() {
-        return 5;
+    public int getLimitOfFile() {
+        return LIMIT_OF_FILES;
     }
 
     public String messageForLimitOfFile() {
-        return "파일을 " + limitOfFile() + "개 이상 생성할수 없습니다";
+        return "파일을 " + getLimitOfFile() + "개 이상 생성할수 없습니다";
     }
 }
