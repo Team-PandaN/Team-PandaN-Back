@@ -5,6 +5,8 @@ import com.example.teampandanback.OAuth2.Kakao.KakaoUserInfo;
 import com.example.teampandanback.OAuth2.UserDetailsImpl;
 import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.domain.user.UserRepository;
+import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
+import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.dto.user.HeaderDto;
 import com.example.teampandanback.dto.user.SignupRequestDto;
 import com.example.teampandanback.exception.ApiRequestException;
@@ -18,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -27,6 +30,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
+    private final UserProjectMappingRepository userProjectMappingRepository;
 
     @Value("${app.auth.tokenSecret}")
     private String secretKey;
@@ -91,5 +95,33 @@ public class UserService {
             throw new IllegalArgumentException("잘못된 비밀번호입니다.");
         }
         return jwtTokenProvider.createToken(Long.toString(user.getUserId()), "", user.getName(), "");
+    }
+
+    //마지막 유저의 id
+    @Transactional
+    public Long getLastUserId(){
+        User lastUser = userRepository.getLastUser().orElseThrow(
+                ()-> new ApiRequestException("유저가 하나도 없습니다.")
+        );
+
+        return lastUser.getUserId();
+    }
+
+    // 이 유저는 얼마나 많은 프로젝트에 참여하였는가?
+    @Transactional
+    public Long getCountOfUserInvitedToProject(Long userId){
+        return userProjectMappingRepository.getCountOfUserInvitedToProject(userId);
+    }
+
+    // 이 유저가 이 프로젝트에 참여 하였는가?
+    @Transactional
+    public Boolean isUserInvitedToProject(Long userId, Long projectId) {
+        Optional<UserProjectMapping> optUserProjectMapping = userProjectMappingRepository.findByUserIdAndProjectId(userId, projectId);
+
+        if (optUserProjectMapping.isPresent()) {
+            return Boolean.TRUE;
+        } else {
+            return Boolean.FALSE;
+        }
     }
 }

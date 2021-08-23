@@ -50,8 +50,7 @@ public class TestApiController {
         boolean isFinish = false;
         Long projectId = null;
         while(!isFinish) {
-            //upperBound 125
-            projectId = (long) (Math.random() * 125 + 1);
+            projectId = (long) (Math.random() * projectRepository.getLastProject().getProjectId() + 1);
             User user = userDetails.getUser();
             Project project = projectRepository.findById(projectId).orElseThrow(
                     () -> new ApiRequestException("뭔가 문제가 발생함..")

@@ -1,5 +1,6 @@
 package com.example.teampandanback.domain.user_project_mapping;
 
+import com.example.teampandanback.domain.user.User;
 import com.example.teampandanback.dto.project.request.ProjectResponseDto;
 import com.example.teampandanback.dto.project.response.ProjectDetailResponseDto;
 import com.example.teampandanback.dto.project.response.ProjectSidebarResponseDto;
@@ -22,7 +23,7 @@ public interface UserProjectMappingRepositoryQuerydsl {
     // 사이드 바에 들어갈 프로젝트의 목록 (최대 readSize 개)
     List<ProjectSidebarResponseDto> findProjectListTopSize(long userId, int readSize);
 
-    //x 유저가 y 프로젝트에 속해 있는지 여부를 판단, fetchOne()
+    //x 유저가 y 프로젝트에 속해 있는지 여부를 판단, fetchFirst()
     Optional<UserProjectMapping> findByUserIdAndProjectId(Long userId, Long projectId);
 
     //x 유저가 참여해있는 모든 유저-프로젝트를 호출
@@ -40,4 +41,9 @@ public interface UserProjectMappingRepositoryQuerydsl {
     List<CrewDetailForProjectListDto> findCrewDetailForProjectList(List<Long> projectIdList);
 
     Long countByProjectId(Long projectId);
+
+    Long getCountOfUserInvitedToProject(Long userId);
+
+    //y 프로젝트에 참여해있는 모든 유저를 호출
+    List<User> getUsersByProjectId(Long projectId);
 }
