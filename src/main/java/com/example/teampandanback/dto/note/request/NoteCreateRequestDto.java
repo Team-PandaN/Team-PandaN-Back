@@ -3,10 +3,12 @@ package com.example.teampandanback.dto.note.request;
 import com.example.teampandanback.dto.file.request.FileDetailRequestDto;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
+@NoArgsConstructor
 public class NoteCreateRequestDto {
     private String title;
     private String content;
