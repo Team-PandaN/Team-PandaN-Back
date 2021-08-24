@@ -80,76 +80,78 @@ public class NoteService {
                 .findByUserIdAndProjectId(currentUser.getUserId(), note.getProject().getProjectId())
                 .orElseThrow(() -> new ApiRequestException("노트가 있는 프로젝트에 소속된 유저가 아니여서 노트를 수정하실 수 없습니다."));
 
-        List<File> preFileList = fileRepository.findFilesByNoteId(noteId);
-        List<FileUpdateDetailRequestDto> preFiles = new ArrayList<>(noteUpdateRequestDto.getFiles());
 
         // DB에서 찾은 해당 노트가 가지고 있는 현재 파일의 ID값을 모운 리스트
-        List<Long> preFilesIdList = new ArrayList<>();
-        for (File preFile : preFileList) {
-            preFilesIdList.add(preFile.getFileId());
-        }
+        List<Long> presentFileIdsList = fileRepository.findFileIdsByNoteId(noteId);
+        // 프론트의 요청에서 files에 대한 값을 모운 리스트
+        List<FileUpdateDetailRequestDto> requestFileList = new ArrayList<>(noteUpdateRequestDto.getFiles());
 
         // 프론트에서 받아온 파일의 Id값만을 포함한 리스트
-        List<Long> fileIdList = new ArrayList<>();
-        for (FileUpdateDetailRequestDto filesDto : preFiles) {
-            fileIdList.add(filesDto.getFileId());
+        List<Long> requestFileIdsList = new ArrayList<>();
+        for (FileUpdateDetailRequestDto requestFile : requestFileList) {
+            // 프론트에 요청이 들어온 0이 아닌 fileId 값중에, 현재 DB의 해당 노트가 가지지 않은 fileId에 대한 요청이 들어왔을때 예외처리
+            if (!requestFile.getFileId().equals(0L)) {
+                if (!presentFileIdsList.contains(requestFile.getFileId())) {
+                    throw new ApiRequestException("올바른 요청이 아닙니다.");
+                }
+            }
+            requestFileIdsList.add(requestFile.getFileId());
         }
+        
         // 요청에 새로운 파일이 추가되지 않았다면(기존의 파일들을 유지 또는 한개이상을 삭제, 단 모두 삭제된경우는 이경우에서 제외)
-        if (!fileIdList.contains(0L)) {
-            // 현재 저장된 파일 중 무언가 삭제되었을때
-            if (preFiles.size() != preFileList.size()){
-                for (Long fileDto : preFilesIdList) {
-                    // 사라진 파일을 DB에서 삭제
-                    if (!fileIdList.contains(fileDto)){
-                        fileRepository.deleteById(fileDto);
-                        em.flush();
-                        em.clear();
+        if (!requestFileIdsList.contains(0L)) {
+            if (requestFileIdsList.size() == 0) {
+                // 모두 삭제된 경우
+                fileRepository.deleteFileByNoteId(noteId);
+            } else {
+                // 현재 저장된 파일 중 무언가 삭제되었을때
+                if (requestFileIdsList.size() != presentFileIdsList.size()) {
+                    for (Long presentFileId : presentFileIdsList) {
+                        // 사라진 파일을 DB에서 삭제
+                        if (!requestFileIdsList.contains(presentFileId)) {
+                            fileRepository.deleteById(presentFileId);
+                        }
                     }
                 }
             }
-        }else {
+        } else {
             // 프론트에서 받아온 요청중 기존에 있는 파일의 아이디값
-            List<FileUpdateDetailRequestDto> fileIds = preFiles.stream()
+            List<FileUpdateDetailRequestDto> matchFileList = requestFileList.stream()
                     .filter(file -> !file.getFileId().equals(0L))
                     .collect(Collectors.toList());
             // 모두 새롭게 추가된 파일
-            if (fileIds.size() == 0) {
+            if (matchFileList.size() == 0) {
                 fileRepository.deleteFileByNoteId(noteId);
-            }
-            // DB에서 가져온 값과 프론트에서 받아온 0을 제외한 Id 값들 비교했을때, 프론트에서 값이 들어오지않은 Id 값에 해당하는 file을 삭제함
-            if (fileIds.size() > 0) {
-                List<Long> fL = preFilesIdList;
-                for (FileUpdateDetailRequestDto fileUnit : fileIds) {
-
-                        fL.remove(Long.valueOf(fileUnit.getFileId()));
+            } else {
+                // DB에서 가져온 값과 프론트에서 받아온 0을 제외한 Id 값들 비교했을때, 프론트에서 값이 들어오지않은 Id 값에 해당하는 file을 삭제함
+                List<Long> deletableFileIdsList = presentFileIdsList;
+                for (FileUpdateDetailRequestDto matchFile : matchFileList) {
+                    deletableFileIdsList.remove(matchFile.getFileId());
                 }
-                fL.forEach(fileRepository::deleteById);
+                deletableFileIdsList.forEach(fileRepository::deleteById);
             }
-
-            // transactional 이 끝났을때 삭제에 대한 요청이 들어가게된다면, insert이후 delete가 일어나,5개 이상의 파일이 저장되는 사태가 발생할수 있으므로,
-            // 꼭 강제 flush하고, clear하여야 이후에 작업을 할수있다. clear는 이후 이루어질 파일조회를 영속성컨텍스트에서 가지고오는것이 아니라 실제 DB의 상태를 가져와야
-            // 하는것이므로, 그에 대한 처리이다.
-            em.flush();
-            em.clear();
-
-
         }
+        // transactional 이 끝났을때 삭제에 대한 요청이 들어가게된다면, insert이후 delete가 일어나,5개 이상의 파일이 저장되는 사태가 발생할수 있으므로,
+        // 꼭 강제 flush하고, clear하여야 이후에 작업을 할수있다. clear는 이후 이루어질 파일조회를 영속성컨텍스트에서 가지고오는것이 아니라 실제 DB의 상태를 가져와야
+        // 하는것이므로, 그에 대한 처리이다.
+        em.flush();
+        em.clear();
+
         // 새롭게 들어온 파일들을 저장해준다.
-        List<FileUpdateDetailRequestDto> postFiles = new ArrayList<>(noteUpdateRequestDto.getFiles());
-        postFiles.stream()
+        requestFileList.stream()
                 .filter(file -> file.getFileId().equals(0L))
                 .map(file -> new File(file.getFileName(), file.getFileUrl(), currentUser, note))
                 .forEach(fileRepository::save);
 
         // flush 되어 저장된 최신의 DB 에서 값을 가져온다.
-        List<File> fileList = fileRepository.findFilesByNoteId(noteId);
+        List<File> changedFileList  = fileRepository.findFilesByNoteId(noteId);
         // file수 제한된 값이상 저장 될 수 없음을 확인하는 예외처리
-        if (fileList.size() > pandanUtils.getLimitOfFile()) {
+        if (changedFileList .size() > pandanUtils.getLimitOfFile()) {
             throw new ApiRequestException(pandanUtils.messageForLimitOfFile());
         }
 
         List<FileDetailResponseDto> fileDetailResponseDtoList = new ArrayList<>();
-        for (File file : fileList) {
+        for (File file : changedFileList ) {
             fileDetailResponseDtoList.add(FileDetailResponseDto.fromEntity(file));
         }
 
@@ -160,6 +162,8 @@ public class NoteService {
 
         return noteUpdateResponseDto;
     }
+
+
     // Note 칸반 이동 시 순서 업데이트
     @Transactional
     public NoteUpdateResponseDto moveNote(Long noteId, NoteMoveRequestDto noteMoveRequestDto, User currentUser) {
@@ -461,7 +465,7 @@ public class NoteService {
     }
 
     // 해당 유저가 참여하고 있는 Project 인지 확인
-    private UserProjectMapping checkUserProject(Long userId, Long projectId){
+    private UserProjectMapping checkUserProject(Long userId, Long projectId) {
 
         // 유저가 참여하고 있는 Project 인지 확인, 해당 Project 가 실제 존재하는지도 함께 확인 가능
         return userProjectMappingRepository

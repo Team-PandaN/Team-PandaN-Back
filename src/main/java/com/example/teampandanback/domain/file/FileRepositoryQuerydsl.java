@@ -13,4 +13,6 @@ public interface FileRepositoryQuerydsl {
     void deleteFileByProjectId(Long projectId);
 
     List<File> findFilesByNoteId(Long noteId);
+
+    List<Long> findFileIdsByNoteId(Long noteId);
 }
