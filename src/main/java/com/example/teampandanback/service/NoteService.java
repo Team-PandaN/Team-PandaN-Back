@@ -12,6 +12,7 @@ import com.example.teampandanback.domain.note.Step;
 import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.project.ProjectRepository;
 import com.example.teampandanback.domain.user.User;
+import com.example.teampandanback.domain.user.UserRepository;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.dto.file.request.FileDetailRequestDto;
@@ -47,6 +48,7 @@ public class NoteService {
     private final EntityManager em;
     private final PandanUtils pandanUtils;
     private final LockManagerService lockManagerService;
+    private final UserRepository userRepository;
 
     // Note 상세 조회
     @Transactional
@@ -471,15 +473,39 @@ public class NoteService {
                 .orElseThrow(() -> new ApiRequestException("해당 프로젝트에 소속된 유저가 아닙니다."));
     }
 
-    public Boolean isLock(Long noteId) {
+    @Transactional
+    public isLockResponseDTO isLock(Long noteId, User currentUser) {
         Note note = noteRepository.findById(noteId).orElseThrow(
                 ()-> new ApiRequestException("잠금 여부를 알아볼 노트가 없습니다.")
         );
 
         if(note.getLocked()){
-            return true;
+            Boolean sameUser;
+            String writer = null;
+            if(note.getWriterId().equals(currentUser.getUserId())){
+                sameUser = Boolean.TRUE;
+            }else{
+                sameUser = Boolean.FALSE;
+                User currentWritingUser = userRepository.findById(note.getWriterId()).orElse(null);
+                if(currentWritingUser != null) {
+                    writer = currentWritingUser.getName();
+                }
+            }
+
+            return isLockResponseDTO.builder()
+                    .sameUser(sameUser)
+                    .writer(writer)
+                    .locked(Boolean.TRUE)
+                    .build();
         }else{
-            return false;
+            note.setLocked(true);
+            note.setWriterId(currentUser.getUserId());
+
+            return isLockResponseDTO.builder()
+                    .sameUser(null)
+                    .writer(null)
+                    .locked(Boolean.FALSE)
+                    .build();
         }
     }
 
@@ -496,12 +522,9 @@ public class NoteService {
                 ()-> new ApiRequestException("해당 노트가 없습니다.")
         );
 
-        if(note.getLocked() == Boolean.TRUE){
-            throw new ApiRequestException("잠겨있는 노트입니다.");
-        }
+        System.out.println(">>>락 매니저 시작<<<");
+//        lockManagerService.preProcess(noteId);
 
-        System.out.println("락매니저 시작");
-        lockManagerService.preProcess(noteId);
         while(true){
             System.out.println("자러감");
             Thread.sleep(7000);
@@ -510,7 +533,7 @@ public class NoteService {
                 System.out.println("자고일어나서도?");
                 lockManagerService.assumeThatNobodyIsWriting(noteId);
             }else{
-                System.out.println("delock");
+                System.out.println(">>>DeLock<<<");
                 lockManagerService.deLock(noteId);
                 break;
             }

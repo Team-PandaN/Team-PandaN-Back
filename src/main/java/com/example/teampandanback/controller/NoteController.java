@@ -114,8 +114,8 @@ public class NoteController {
 
     @ApiOperation(value = "현재 수정하려 하는 노트가 잠겨있는가")
     @GetMapping("/notes/is-lock/{noteId}")
-    public Boolean isLock(@PathVariable Long noteId){
-        return noteService.isLock(noteId);
+    public isLockResponseDTO isLock(@PathVariable Long noteId, @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return noteService.isLock(noteId, userDetails.getUser());
     }
 
     @ApiOperation(value = "현재 노트를 수정중임을 주기적으로 알림")

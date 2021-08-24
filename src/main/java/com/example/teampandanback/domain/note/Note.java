@@ -56,6 +56,9 @@ public class Note extends Timestamped {
     @Column(name = "WRITING")
     private Boolean writing;
 
+    @Column(name = "WRITER_ID")
+    private Long writerId;
+
 
     @Builder
     public Note(String title, String content, LocalDate deadline, Step step, User user, Project project, Long previousId, Long nextId) {
@@ -69,6 +72,7 @@ public class Note extends Timestamped {
         this.nextId = nextId;
         this.locked = false;
         this.writing = false;
+        this.writerId = null;
     }
 
     public void update(NoteUpdateRequestDto noteUpdateRequestDto, LocalDate updateLocalDate) {
@@ -115,4 +119,6 @@ public class Note extends Timestamped {
     public void setWriting(Boolean writing) {
         this.writing = writing;
     }
+
+    public void setWriterId(Long writerId){this.writerId = writerId;}
 }

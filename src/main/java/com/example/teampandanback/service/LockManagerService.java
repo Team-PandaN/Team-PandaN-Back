@@ -24,7 +24,7 @@ public class LockManagerService {
         Note note = noteRepository.findById(noteId).orElseThrow(
                 () -> new ApiRequestException("해당 노트가 없습니다.")
         );
-        note.setLocked(true);
+//        note.setLocked(true);
         note.setWriting(true);
     }
 
@@ -36,6 +36,7 @@ public class LockManagerService {
         );
         note.setLocked(false);
         note.setWriting(false);
+        note.setWriterId(null);
     }
 
     @Transactional
