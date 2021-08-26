@@ -105,5 +105,12 @@ public class ProjectController {
                 .build();
     }
 
+    //Guide 프로젝트 생성
+    @ApiOperation(value = "Guide 프로젝트 생성")
+    @PostMapping("/guide")
+    public ProjectResponseDto createGuideProject(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return projectService.createGuideProject(userDetails.getUser());
+    }
+
 
 }

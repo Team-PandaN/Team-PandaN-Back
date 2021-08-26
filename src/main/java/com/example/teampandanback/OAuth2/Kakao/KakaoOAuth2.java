@@ -40,10 +40,10 @@ public class KakaoOAuth2 {
         //에서의 redirect_uri를 의미합니다. 보낸것과, 여기서 사용하는것이 같아야합니다.
 
         //프론트 로컬 용
-//        params.add("redirect_uri", "http://localhost:3000/user/kakao/callback");
+        params.add("redirect_uri", "http://localhost:3000/user/kakao/callback");
 
         //최종 배포용
-        params.add("redirect_uri", "http://front.blossomwhale.shop/user/kakao/callback");
+//        params.add("redirect_uri", "http://front.blossomwhale.shop/user/kakao/callback");
 
         //백엔드 로컬 테스트용
 //        params.add("redirect_uri", "http://localhost:8080/user/kakao/callback");
