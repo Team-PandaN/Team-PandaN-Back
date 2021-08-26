@@ -77,14 +77,6 @@ public class NoteService {
     // Note 상세 조회에서 내용 업데이트
     @Transactional
     public NoteUpdateResponseDto updateNoteDetail(Long noteId, User currentUser, NoteUpdateRequestDto noteUpdateRequestDto) {
-        Note note = noteRepository.findById(noteId)
-                .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
-        // 수정하려는 노트가 유저가 참여하고 있는 Project 에 있는지 확인
-        userProjectMappingRepository
-                .findByUserIdAndProjectId(currentUser.getUserId(), note.getProject().getProjectId())
-                .orElseThrow(() -> new ApiRequestException("노트가 있는 프로젝트에 소속된 유저가 아니여서 노트를 수정하실 수 없습니다."));
-
-
         // DB에서 찾은 해당 노트가 가지고 있는 현재 파일의 ID값을 모운 리스트
         List<Long> presentFileIdsList = fileRepository.findFileIdsByNoteId(noteId);
         // 프론트의 요청에서 files에 대한 값을 모운 리스트
@@ -141,6 +133,13 @@ public class NoteService {
         em.flush();
         em.clear();
 
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
+        // 수정하려는 노트가 유저가 참여하고 있는 Project 에 있는지 확인
+        userProjectMappingRepository
+                .findByUserIdAndProjectId(currentUser.getUserId(), note.getProject().getProjectId())
+                .orElseThrow(() -> new ApiRequestException("노트가 있는 프로젝트에 소속된 유저가 아니여서 노트를 수정하실 수 없습니다."));
+
         // 새롭게 들어온 파일들을 저장해준다.
         requestFileList.stream()
                 .filter(file -> file.getFileId().equals(0L))
@@ -158,6 +157,7 @@ public class NoteService {
         for (File file : changedFileList ) {
             fileDetailResponseDtoList.add(FileDetailResponseDto.fromEntity(file));
         }
+
 
         note.update(noteUpdateRequestDto, pandanUtils.changeType(noteUpdateRequestDto.getDeadline()));
 
