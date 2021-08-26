@@ -12,6 +12,7 @@ import com.example.teampandanback.domain.note.Step;
 import com.example.teampandanback.domain.project.Project;
 import com.example.teampandanback.domain.project.ProjectRepository;
 import com.example.teampandanback.domain.user.User;
+import com.example.teampandanback.domain.user.UserRepository;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMapping;
 import com.example.teampandanback.domain.user_project_mapping.UserProjectMappingRepository;
 import com.example.teampandanback.dto.file.request.FileDetailRequestDto;
@@ -40,11 +41,14 @@ import java.util.stream.Collectors;
 public class NoteService {
     private final NoteRepository noteRepository;
     private final UserProjectMappingRepository userProjectMappingRepository;
+    private final ProjectRepository projectRepository;
     private final BookmarkRepository bookmarkRepository;
     private final CommentRepository commentRepository;
     private final FileRepository fileRepository;
     private final EntityManager em;
     private final PandanUtils pandanUtils;
+    private final LockManagerService lockManagerService;
+    private final UserRepository userRepository;
 
     // Note 상세 조회
     @Transactional
@@ -73,14 +77,6 @@ public class NoteService {
     // Note 상세 조회에서 내용 업데이트
     @Transactional
     public NoteUpdateResponseDto updateNoteDetail(Long noteId, User currentUser, NoteUpdateRequestDto noteUpdateRequestDto) {
-        Note note = noteRepository.findById(noteId)
-                .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
-        // 수정하려는 노트가 유저가 참여하고 있는 Project 에 있는지 확인
-        userProjectMappingRepository
-                .findByUserIdAndProjectId(currentUser.getUserId(), note.getProject().getProjectId())
-                .orElseThrow(() -> new ApiRequestException("노트가 있는 프로젝트에 소속된 유저가 아니여서 노트를 수정하실 수 없습니다."));
-
-
         // DB에서 찾은 해당 노트가 가지고 있는 현재 파일의 ID값을 모운 리스트
         List<Long> presentFileIdsList = fileRepository.findFileIdsByNoteId(noteId);
         // 프론트의 요청에서 files에 대한 값을 모운 리스트
@@ -137,6 +133,13 @@ public class NoteService {
         em.flush();
         em.clear();
 
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new ApiRequestException("수정 할 노트가 없습니다."));
+        // 수정하려는 노트가 유저가 참여하고 있는 Project 에 있는지 확인
+        userProjectMappingRepository
+                .findByUserIdAndProjectId(currentUser.getUserId(), note.getProject().getProjectId())
+                .orElseThrow(() -> new ApiRequestException("노트가 있는 프로젝트에 소속된 유저가 아니여서 노트를 수정하실 수 없습니다."));
+
         // 새롭게 들어온 파일들을 저장해준다.
         requestFileList.stream()
                 .filter(file -> file.getFileId().equals(0L))
@@ -154,6 +157,7 @@ public class NoteService {
         for (File file : changedFileList ) {
             fileDetailResponseDtoList.add(FileDetailResponseDto.fromEntity(file));
         }
+
 
         note.update(noteUpdateRequestDto, pandanUtils.changeType(noteUpdateRequestDto.getDeadline()));
 
@@ -472,4 +476,72 @@ public class NoteService {
                 .findByUserIdAndProjectId(userId, projectId)
                 .orElseThrow(() -> new ApiRequestException("해당 프로젝트에 소속된 유저가 아닙니다."));
     }
+
+    @Transactional
+    public isLockResponseDTO isLock(Long noteId, User currentUser) {
+        Note note = noteRepository.findById(noteId).orElseThrow(
+                ()-> new ApiRequestException("잠금 여부를 알아볼 노트가 없습니다.")
+        );
+
+        if(note.getLocked()){
+            Boolean sameUser;
+            String writer = null;
+            if(note.getWriterId().equals(currentUser.getUserId())){
+                sameUser = Boolean.TRUE;
+            }else{
+                sameUser = Boolean.FALSE;
+                User currentWritingUser = userRepository.findById(note.getWriterId()).orElse(null);
+                if(currentWritingUser != null) {
+                    writer = currentWritingUser.getName();
+                }
+            }
+
+            return isLockResponseDTO.builder()
+                    .sameUser(sameUser)
+                    .writer(writer)
+                    .locked(Boolean.TRUE)
+                    .build();
+        }else{
+            note.setLocked(true);
+            note.setWriterId(currentUser.getUserId());
+
+            return isLockResponseDTO.builder()
+                    .sameUser(null)
+                    .writer(null)
+                    .locked(Boolean.FALSE)
+                    .build();
+        }
+    }
+
+    @Transactional
+    public void writing(Long noteId) {
+        Note note = noteRepository.findById(noteId).orElseThrow(
+                ()->new ApiRequestException("해당 게시글이 없습니다.")
+        );
+        note.setWriting(true);
+    }
+
+    public void initLockManager(Long noteId) throws InterruptedException {
+        Note note = noteRepository.findById(noteId).orElseThrow(
+                ()-> new ApiRequestException("해당 노트가 없습니다.")
+        );
+
+        System.out.println(">>>락 매니저 시작<<<");
+//        lockManagerService.preProcess(noteId);
+
+        while(true){
+            System.out.println("자러감");
+            Thread.sleep(7000);
+            System.out.println("일어남");
+            if(lockManagerService.isAnyoneWriting(noteId)){
+                System.out.println("자고일어나서도?");
+                lockManagerService.assumeThatNobodyIsWriting(noteId);
+            }else{
+                System.out.println(">>>DeLock<<<");
+                lockManagerService.deLock(noteId);
+                break;
+            }
+        }
+    }
+
 }

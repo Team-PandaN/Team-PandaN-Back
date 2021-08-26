@@ -1,8 +1,10 @@
 package com.example.teampandanback.dto.user;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class CrewDetailForProjectListDto {
     // 프로젝트 목록 조회시 사용되는 크루(유저) 정보
 

@@ -50,8 +50,18 @@ public class Note extends Timestamped {
     @Column(name = "NEXT")
     private Long nextId;
 
+    @Column(name = "LOCKED")
+    private Boolean locked;
+
+    @Column(name = "WRITING")
+    private Boolean writing;
+
+    @Column(name = "WRITER_ID")
+    private Long writerId;
+
+
     @Builder
-    public Note(String title, String content, LocalDate deadline, Step step, User user, Project project, Long previousId, Long nextId){
+    public Note(String title, String content, LocalDate deadline, Step step, User user, Project project, Long previousId, Long nextId) {
         this.title = title;
         this.content = content;
         this.deadline = deadline;
@@ -60,6 +70,9 @@ public class Note extends Timestamped {
         this.project = project;
         this.previousId = previousId;
         this.nextId = nextId;
+        this.locked = false;
+        this.writing = false;
+        this.writerId = null;
     }
 
     public void update(NoteUpdateRequestDto noteUpdateRequestDto, LocalDate updateLocalDate) {
@@ -68,25 +81,25 @@ public class Note extends Timestamped {
         this.deadline = updateLocalDate;
     }
 
-    public void updatePreviousIdAndNextId(Long previousId, Long nextId){
+    public void updatePreviousIdAndNextId(Long previousId, Long nextId) {
         this.previousId = previousId;
         this.nextId = nextId;
     }
 
-    public void updatePreviousId(Long previousId){
+    public void updatePreviousId(Long previousId) {
         this.previousId = previousId;
     }
 
-    public void updateNextId(Long nextId){
+    public void updateNextId(Long nextId) {
         this.nextId = nextId;
     }
 
-    public void updateStepWhileMoveNote(Step step){
+    public void updateStepWhileMoveNote(Step step) {
         this.step = step;
     }
 
 
-        public static Note of(NoteCreateRequestDto noteCreateRequestDto, LocalDate deadline, Step step, User user, Project project, Long previousId, Long nextId) {
+    public static Note of(NoteCreateRequestDto noteCreateRequestDto, LocalDate deadline, Step step, User user, Project project, Long previousId, Long nextId) {
         return Note.builder()
                 .title(noteCreateRequestDto.getTitle())
                 .content(noteCreateRequestDto.getContent())
@@ -98,4 +111,14 @@ public class Note extends Timestamped {
                 .nextId(nextId)
                 .build();
     }
+
+    public void setLocked(Boolean locked) {
+        this.locked = locked;
+    }
+
+    public void setWriting(Boolean writing) {
+        this.writing = writing;
+    }
+
+    public void setWriterId(Long writerId){this.writerId = writerId;}
 }
