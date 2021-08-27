@@ -337,7 +337,7 @@ public class ProjectService {
         //=====================================================================================================================================================
         //프로젝트 2 생성
         Project project2 = projectRepository.save(Project.builder()
-                .title("[샘플] 기초공학설계 조별 과제")
+                .title("[샘플]공학설계 조별 과제")
                 .detail("한국대학교 2학년 소프트웨어학과")
                 .build()
         );
@@ -353,7 +353,7 @@ public class ProjectService {
                 .content("틀에 박힌걸 만들어도 좋으니 뎁스를 깊게 하는 것을 좋아한다는 소문이 있음 \uD83D\uDE02 \n\n" +
                         "홍길동 선배가 작년 공모전 수상자이니 물어보자 !")
                 .deadline(LocalDate.now().plusDays(2).toString())
-                .step(Step.PROCESSING.toString())
+                .step(Step.STORAGE.toString())
                 .title("교수님 성향 파악하기 - by 홍길동 선배")
                 .build(), currentUser).getNoteId();
         commentService.createComment(targetId, currentUser, CommentCreateRequestDto.builder()
@@ -364,7 +364,7 @@ public class ProjectService {
         noteService.createNote(project2.getProjectId(), NoteCreateRequestDto.builder()
                 .files(new ArrayList<>())
                 .content("아이디어를 다같이 생각해와서, 취합 할 예정입니다 !")
-                .deadline(LocalDate.now().plusDays(2).toString())
+                .deadline(LocalDate.now().minusDays(1).toString())
                 .step(Step.PROCESSING.toString())
                 .title("아이디어 브레인스토밍 \uD83E\uDD28")
                 .build(), currentUser);
@@ -372,8 +372,8 @@ public class ProjectService {
         noteService.createNote(project2.getProjectId(), NoteCreateRequestDto.builder()
                 .files(new ArrayList<>())
                 .content("기간, 분업 등등 어떤 식으로 조별 과제를 차근차근 해결할지, 고민해 봅시다.")
-                .deadline(LocalDate.now().plusDays(1).toString())
-                .step(Step.PROCESSING.toString())
+                .deadline(LocalDate.now().minusDays(2).toString())
+                .step(Step.DONE.toString())
                 .title("로드맵 짜기 \uD83D\uDDFA️")
                 .build(), currentUser);
 
@@ -381,7 +381,7 @@ public class ProjectService {
                 .files(new ArrayList<>())
                 .content("사이즈 6X가 3개 필요합니다. 근데 2개밖에 없고, 고무는 벗겨져있음.")
                 .deadline(LocalDate.now().plusDays(1).toString())
-                .step(Step.PROCESSING.toString())
+                .step(Step.STORAGE.toString())
                 .title("로봇 키드 불량 - 교환")
                 .build(), currentUser);
         //=====TOD
@@ -389,7 +389,7 @@ public class ProjectService {
                 .files(new ArrayList<>())
                 .content("우리가 배운 것을 따라간다는 것을 어필하면서 사고하면 좋을 것 같습니다.")
                 .deadline(LocalDate.now().plusDays(3).toString())
-                .step(Step.TODO.toString())
+                .step(Step.STORAGE.toString())
                 .title("공학적 사고")
                 .build(), currentUser);
 
@@ -426,14 +426,14 @@ public class ProjectService {
                 .files(new ArrayList<>())
                 .content("수업중에 설명하신 교재 p.132를 참고하여 수식을 만들면 좋아보임.")
                 .deadline(LocalDate.now().plusDays(4).toString())
-                .step(Step.PROCESSING.toString())
+                .step(Step.STORAGE.toString())
                 .title("무계 계산")
                 .build(), currentUser);
         noteService.createNote(project2.getProjectId(), NoteCreateRequestDto.builder()
                 .files(new ArrayList<>())
                 .content("많을수록 만들기 어렵다고 생각됩니다. 접합 부위를 최대한 줄여주세요.")
                 .deadline(LocalDate.now().plusDays(4).toString())
-                .step(Step.PROCESSING.toString())
+                .step(Step.STORAGE.toString())
                 .title("접합 부위 적을 수록 좋다")
                 .build(), currentUser);
 
@@ -456,7 +456,7 @@ public class ProjectService {
                 .files(new ArrayList<>())
                 .content("휴가 신청 꼭 미리 확정 짓기!!! \n\n" +
                         "그때가서 못가면,,, 환불따윈 없다.")
-                .deadline(LocalDate.now().plusDays(1).toString())
+                .deadline(LocalDate.now().minusDays(1).toString())
                 .step(Step.DONE.toString())
                 .title("\uD83D\uDED1휴가 신청")
                 .build(), currentUser).getNoteId();
