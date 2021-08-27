@@ -10,8 +10,8 @@ spring:
         format_sql: true
         use_sql_comments: false
 
-  profiles:
-    include: secret
+#  profiles:
+#    include: secret
 
 
 ##Switching
