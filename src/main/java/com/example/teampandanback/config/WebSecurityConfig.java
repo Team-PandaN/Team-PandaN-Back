@@ -53,7 +53,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/swagger-resources/**").permitAll()
                 .antMatchers("/v2/**").permitAll()
 //                .antMatchers("/**").permitAll()
-                //
+                // 실행중인 프로젝트의 Profile 확인 용도
+                .antMatchers("/profile").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
