@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -352,7 +352,7 @@ public class ProjectService {
         noteService.createNote(project.getProjectId(), NoteCreateRequestDto.builder()
                 .files(new ArrayList<>())
                 .content("해당 프로젝트 상단에서 [칸반] 버튼 옆의 [전체 문서] 버튼을 누르면 프로젝트에 속한 노트들을 게시판 형태로 볼 수 있습니다.")
-                .deadline(LocalDateTime.now().toString())
+                .deadline(LocalDate.now().toString())
                 .step(Step.PROCESSING.toString())
                 .title("[전체 문서] 탭이란?")
                 .build(), currentUser);
@@ -360,7 +360,7 @@ public class ProjectService {
         noteService.createNote(project.getProjectId(), NoteCreateRequestDto.builder()
                 .files(new ArrayList<>())
                 .content("해당 프로젝트 상단에서 [칸반] 버튼을 누르면 프로젝트에 속한 노트들을 칸반 형태로 볼 수 있습니다.")
-                .deadline(LocalDateTime.now().toString())
+                .deadline(LocalDate.now().toString())
                 .step(Step.PROCESSING.toString())
                 .title("[칸반] 탭이란?")
                 .build(), currentUser);
@@ -369,7 +369,7 @@ public class ProjectService {
                 .files(new ArrayList<>())
                 .content("해당 프로젝트 상단 [칸반] 버튼 옆의 [내가 작성한 문서] 버튼을 누르면 해당 프로젝트에 속한, 내가 작성한 노트들을 게시판 형태로 볼 수 있습니다.\n\n" +
                         "좌측 탭의 [내가 작성한 문서]와는 내가 참여한 '모든' 프로젝트에서 내가 작성한 노트를 확인 할 수 있다는 점이 다릅니다.")
-                .deadline(LocalDateTime.now().toString())
+                .deadline(LocalDate.now().toString())
                 .step(Step.PROCESSING.toString())
                 .title("상단 [내가 작성한 문서] 탭이란?")
                 .build(), currentUser);
@@ -379,7 +379,7 @@ public class ProjectService {
                 .content(" [내가 작성한 문서] 탭은 내가 작성한 노트들을 게시판 형태로 볼 수 있습니다.\n\n" +
                         " 상단 탭의 [내가 작성한 문서]는 '해당' 프로젝트에서 내가 작성한 노트를 모아보고, \n\n" +
                         " 좌측 탭의 [내가 작성한 문서]는 '모든' 프로젝트에서 내가 작성한 노트를 모아본다는 점이 다릅니다.")
-                .deadline(LocalDateTime.now().toString())
+                .deadline(LocalDate.now().toString())
                 .step(Step.PROCESSING.toString())
                 .title("좌측 [내가 작성한 문서] 탭이란?")
                 .build(), currentUser);
@@ -389,7 +389,7 @@ public class ProjectService {
                 .content(" [북마크] 탭은 내가 북마크한 노트들에 대해서 모아보기를 제공합니다. \n\n" +
                         " 이 노트 우측 상단의 북마크 버튼을 눌러 \n\n 북마크를 하고 확인해볼까요? \n\n" +
                         " 이 모아보기는 내가 참여한 '모든' 프로젝트에서 북마크한 노트를 볼 수 있습니다.")
-                .deadline(LocalDateTime.now().toString())
+                .deadline(LocalDate.now().toString())
                 .step(Step.PROCESSING.toString())
                 .title("[북마크] 탭이란?")
                 .build(), currentUser);
@@ -403,7 +403,7 @@ public class ProjectService {
                         " 상단 [톱니바퀴] 버튼으로 프로젝트를 삭제할 수 있어요. \n\n" +
                         " 해당 프로젝트를 생성한 사람만 프로젝트 삭제가 가능하며,  \n\n" +
                         " 해당 프로젝트에 참여한 사람은 프로젝트 탈퇴만 가능합니다 !")
-                .deadline(LocalDateTime.now().toString())
+                .deadline(LocalDate.now().toString())
                 .step(Step.TODO.toString())
                 .title("프로젝트 삭제/탈퇴하기")
                 .build(), currentUser);
@@ -414,7 +414,7 @@ public class ProjectService {
                         " 우측 상단의 [멤버 초대] 버튼으로 초대코드를 발급받아, \n\n" +
                         " 친구에게 건네주세요 ! \n\n" +
                         " 친구는 좌측 하단의 [프로젝트 초대코드 등록]으로 언제 어디서나 프로젝트에 참여할 수 있습니다 !")
-                .deadline(LocalDateTime.now().toString())
+                .deadline(LocalDate.now().toString())
                 .step(Step.TODO.toString())
                 .title("프로젝트에 친구 초대하기")
                 .build(), currentUser);
@@ -428,7 +428,7 @@ public class ProjectService {
                         " (프로젝트를 탈퇴하면 더 이상 해당 노트는 볼 수 없어요 ㅠㅠ) \n\n" +
                         " 3. [내가 작성한 문서 검색] 조건은, 내가 참여한 모든 프로젝트에서, 내가 작성한 문서를 기준으로, '제목'으로 검색합니다 ! \n\n" +
                         " (마찬가지로 탈퇴를 하게되면 더 이상 해당 노트는 볼 수 없어요")
-                .deadline(LocalDateTime.now().toString())
+                .deadline(LocalDate.now().toString())
                 .step(Step.TODO.toString())
                 .title("노트 검색하기")
                 .build(), currentUser);
@@ -449,16 +449,16 @@ public class ProjectService {
                         " 드래그-드롭으로 노트의 위치를 수정해보세요! \n\n" +
                         " 노트의 상태 수정이 즉시 반영됩니다! \n\n" +
                         " 또한, 같은 상태 내에서도 상하 위치를 바꿀 수 있어요!")
-                .deadline(LocalDateTime.now().toString())
-                .step(Step.TODO.toString())
+                .deadline(LocalDate.now().toString())
+                .step(Step.STORAGE.toString())
                 .title("칸반에서 문서 이동하기")
                 .build(), currentUser);
 
         Long commentExplainNoteId = noteService.createNote(project.getProjectId(), NoteCreateRequestDto.builder()
                 .files(new ArrayList<>())
                 .content(" 우측 상단의 [댓글] 버튼을 눌러 댓글을 확인하고 작성해 보세요! ")
-                .deadline(LocalDateTime.now().toString())
-                .step(Step.TODO.toString())
+                .deadline(LocalDate.now().toString())
+                .step(Step.STORAGE.toString())
                 .title("댓글 작성 해보기")
                 .build(), currentUser).getNoteId();
         commentService.createComment(commentExplainNoteId, currentUser, CommentCreateRequestDto.builder()
@@ -471,8 +471,8 @@ public class ProjectService {
                 .files(new ArrayList<>())
                 .content(" 우측 상단의 [연필] 버튼을 눌러 문서를 수정해 보세요! \n\n" +
                         " 수정하러 들어가면 다른 사람은 해당 노트를 수정하러 들어올 수 없어요!")
-                .deadline(LocalDateTime.now().toString())
-                .step(Step.TODO.toString())
+                .deadline(LocalDate.now().toString())
+                .step(Step.STORAGE.toString())
                 .title("노트 수정 해보기")
                 .build(), currentUser);
 
@@ -482,8 +482,8 @@ public class ProjectService {
                         " 1. 상단 칸반 탭에서 + 버튼을 눌러 노트를 생성합니다 ! \n\n" +
                         " 2. 우측 상단 [+ 할 일 만들기]를 눌러 노트를 생성합니다 ! \n\n" +
                         " 마감일이 지난 노트는 빨간색으로 표시되니, 마감일이 지난 노트를 생성해 다른점을 확인해보세요 !")
-                .deadline(LocalDateTime.now().toString())
-                .step(Step.TODO.toString())
+                .deadline(LocalDate.now().toString())
+                .step(Step.STORAGE.toString())
                 .title("노트 생성 해보기")
                 .build(), currentUser);
 
@@ -495,7 +495,7 @@ public class ProjectService {
                         " 서로의 의견을 모아, TODO를 완성하고, \n\n" +
                         " 서로가 생각하는 여행에서 가장 중요한 점들을 정리해서 \n\n" +
                         " 빠른 시간안에 원하는 계획을 완성해보세요 !")
-                .deadline(LocalDateTime.now().toString())
+                .deadline(LocalDate.now().toString())
                 .step(Step.DONE.toString())
                 .title("여행 계획도 PandaN에서")
                 .build(), currentUser);
@@ -506,7 +506,7 @@ public class ProjectService {
                         " 선생님은 숙제를 내주고, 완료하면 노트를 이동시켜 숙제 검사를 체계적으로 관리해 보세요 ! \n\n" +
                         " 설명이 필요한 자료는 해당 글에 링크나 파일을 올려 학생에게 알려주세요 ! \n\n" +
                         " 학생들은 해당 노트에 댓글로 궁금한 점을 남겨, 선생님께 원격으로 질문 해 보세요 !")
-                .deadline(LocalDateTime.now().toString())
+                .deadline(LocalDate.now().toString())
                 .step(Step.DONE.toString())
                 .title("숙제 검사는 PandaN에서")
                 .build(), currentUser);
@@ -517,7 +517,7 @@ public class ProjectService {
                         " 관련된 파일을 관리하고, \n\n" +
                         " 서로에게 도움이 되는 자료나 정보를 댓글을 통해 전달할 수 있습니다 ! \n\n" +
                         " 진행 사항을 한 눈에 보며, 부족한 부분을 서로 채워 조별과제를 완벽히 수행해보세요 !")
-                .deadline(LocalDateTime.now().toString())
+                .deadline(LocalDate.now().toString())
                 .step(Step.DONE.toString())
                 .title("조별 과제는 PandaN에서")
                .build(), currentUser);
