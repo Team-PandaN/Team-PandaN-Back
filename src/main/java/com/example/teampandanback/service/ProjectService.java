@@ -464,62 +464,65 @@ public class ProjectService {
                 .content("너희 못 가도 나는 간다!!\n" +
                         "휴가 신청 제대로 하고와!!").build());
 
-        noteService.createNote(project3.getProjectId(), NoteCreateRequestDto.builder()
+        Long targetId4 = noteService.createNote(project3.getProjectId(), NoteCreateRequestDto.builder()
                 .files(new ArrayList<>())
                 .content("편도기준 25000월 이하 가격이 오면 무조건 예약 ")
                 .deadline(LocalDate.now().plusDays(2).toString())
                 .step(Step.PROCESSING.toString())
                 .title("\uD83D\uDEEB비행기 특가  확인중")
-                .build(), currentUser);
+                .build(), currentUser).getNoteId();
 
-        noteService.createNote(project3.getProjectId(), NoteCreateRequestDto.builder()
+        commentService.createComment(targetId4, currentUser, CommentCreateRequestDto.builder()
+                .content("확인해라 매일매일!!!").build());
+
+        Long targetId5 = noteService.createNote(project3.getProjectId(), NoteCreateRequestDto.builder()
                 .files(new ArrayList<>())
                 .content("1. 숙박 비용 정하기\n" +
                         "2. 수영장 유무 정하기")
                 .deadline(LocalDate.now().plusDays(3).toString())
                 .step(Step.TODO.toString())
                 .title("\uD83C\uDFF0 숙소 예약")
-                .build(), currentUser);
+                .build(), currentUser).getNoteId();
 
-        noteService.createNote(project3.getProjectId(), NoteCreateRequestDto.builder()
+        commentService.createComment(targetId5, currentUser, CommentCreateRequestDto.builder()
+                .content("xx호텔 :  55만원/1박당\n" +
+                        "xxx 글래스 : 13만원 / 1박당\n" +
+                        "xx 게스트 하우스 : 프라이빗 2인실 6만원 /1박당").build());
+
+        Long targetId6 = noteService.createNote(project3.getProjectId(), NoteCreateRequestDto.builder()
                 .files(new ArrayList<>())
                 .content("1. 렌트카 업체 알아보기,\n" +
                         "2. 렌트카 차종 정하기 ( 세단, suv, 컨버터블)")
                 .deadline(LocalDate.now().plusDays(3).toString())
                 .step(Step.TODO.toString())
                 .title("\uD83D\uDE97 렌트카 예약")
-                .build(), currentUser);
+                .build(), currentUser).getNoteId();
 
-        //======================
+        commentService.createComment(targetId6, currentUser, CommentCreateRequestDto.builder()
+                .content("나는 오픈카 타고 싶다~❗❗").build());
 
+        //=================================================================
 
         noteService.createNote(project3.getProjectId(), NoteCreateRequestDto.builder()
                 .files(new ArrayList<>())
-                .content("고기국수 무조건..")
+                .content("수영복 쇼핑 하기 ")
                 .deadline(LocalDate.now().plusDays(4).toString())
                 .step(Step.STORAGE.toString())
-                .title("제주도")
+                .title("\uD83C\uDF0A  수영복 쇼핑")
                 .build(), currentUser);
         noteService.createNote(project3.getProjectId(), NoteCreateRequestDto.builder()
                 .files(new ArrayList<>())
-                .content("제주도 가면면 무조건..")
+                .content("바다구경 하러가자")
                 .deadline(LocalDate.now().plusDays(4).toString())
                 .step(Step.STORAGE.toString())
-                .title("고기국수")
-                .build(), currentUser);
-        noteService.createNote(project3.getProjectId(), NoteCreateRequestDto.builder()
-                .files(new ArrayList<>())
-                .content("산은 평소에 많이 보니까")
-                .deadline(LocalDate.now().plusDays(4).toString())
-                .step(Step.STORAGE.toString())
-                .title("바다")
+                .title("\uD83E\uDDDE\u200D♀️ 스킨스쿠버 할까?")
                 .build(), currentUser);
         noteService.createNote(project3.getProjectId(), NoteCreateRequestDto.builder()
                 .files(new ArrayList<>())
                 .content("자동차도 좋고, 뭐도 좋고")
                 .deadline(LocalDate.now().plusDays(4).toString())
                 .step(Step.STORAGE.toString())
-                .title("\uD83C\uDF5C고기국수 먹으러 가기")
+                .title("\uD83C\uDF5C고기국수는 무조건 먹어야지")
                 .build(), currentUser);
         noteService.createNote(project3.getProjectId(), NoteCreateRequestDto.builder()
                 .files(new ArrayList<>())
@@ -528,7 +531,7 @@ public class ProjectService {
                         "2. 칠돈가 - 공항 근처, 웨이팅이 많을 수 있다.")
                 .deadline(LocalDate.now().plusDays(4).toString())
                 .step(Step.STORAGE.toString())
-                .title("\uD83D\uDC37 흑돼지 먹으러 가기")
+                .title("\uD83D\uDC37 흑돼지 먹으러 가고 싶다")
                 .build(), currentUser);
         noteService.createNote(project3.getProjectId(), NoteCreateRequestDto.builder()
                 .files(new ArrayList<>())
@@ -537,6 +540,24 @@ public class ProjectService {
                 .step(Step.STORAGE.toString())
                 .title("\uD83D\uDC19돌문어볶음 먹으러 가는건 어때?")
                 .build(), currentUser);
+        noteService.createNote(project3.getProjectId(), NoteCreateRequestDto.builder()
+                .files(new ArrayList<>())
+                .content("한라산 백록담 찍고 오자!!!")
+                .deadline(LocalDate.now().plusDays(4).toString())
+                .step(Step.STORAGE.toString())
+                .title("\uD83D\uDDFB 한라산 등반 할까?")
+                .build(), currentUser);
+
+
+
+
+
+
+
+
+
+
+
 
         // 프로젝트 생성하고 저장
         Project project = projectRepository.save(Project.builder()
