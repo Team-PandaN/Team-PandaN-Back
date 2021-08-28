@@ -28,6 +28,7 @@ import com.example.teampandanback.utils.PandanUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -169,7 +170,7 @@ public class NoteService {
 
 
     // Note 칸반 이동 시 순서 업데이트
-    @Transactional
+    @org.springframework.transaction.annotation.Transactional(isolation = Isolation.SERIALIZABLE)
     public NoteUpdateResponseDto moveNote(Long noteId, NoteMoveRequestDto noteMoveRequestDto, User currentUser) {
 
         // 수정하려는 노트가 존재하지 않으면 Exception 반환.
