@@ -317,6 +317,7 @@ public class ProjectService {
 
 
     //Guide 프로젝트 생성
+    @Transactional
     public ProjectResponseDto createGuideProject(User currentUser) {
 
         // 사용자 조회
@@ -327,9 +328,9 @@ public class ProjectService {
         //프로젝트에 참여한 총 갯수
         Long theNumberOfCrewInvitedToProjects = userProjectMappingRepository.countByUser(user);
 
-        Long upperBound = 10L;
-        if (theNumberOfCrewInvitedToProjects >= upperBound) {
-            throw new ApiRequestException("프로젝트에 이미 " + upperBound + "개 참여하였습니다.");
+
+        if (theNumberOfCrewInvitedToProjects != 0L){
+            throw new ApiRequestException("유저가 이미 가이드 프로젝트나, 아무 프로젝트에 참여 했습니다.");
         }
 
 
