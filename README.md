@@ -82,8 +82,8 @@
 * 동시성 제어를 통한 DB 무결성 확보
   * [동시 수정 제어 - Lock Manager](https://pandan.notion.site/930f626a77f642ab8f49ceffe035e3dc)
   * [동시 이동 제어 - 비즈니스 로직과 격리 수준 차별화](https://pandan.notion.site/58f5dd7e7ab340e8bec32c720a2ccc12)
-* [Jenkins Pipeline을 사용하여 CI/CD 환경 구축](https://pandan.notion.site/Jenkins-Pipeline-624eedc79a8e4c4083a688d72f29094d)
-* [Docker를 이용하여 CD 구현](https://pandan.notion.site/Github-with-5a0d1647d897422ab8407aabad58f54d)
+* [Docker를 이용하여 서버 환경 구축](https://pandan.notion.site/Docker-7abd1f02b7b44883a85538bdaad56993)
+* [Jenkins Pipeline을 사용하여 CI/CD, 무중단 배포 환경 구축](https://www.notion.so/Jenkins-Pipeline-CI-CD-4415efcb1e3646e0a6c60132d9f6945e)
 * [Nginx의 Reversed-Proxy를 이용하여 로드밸런싱 및 Blue/Green 방식의 무중단 배포 적용](https://www.notion.so/Nginx-Blue-Green-fad34415851c42bd966a9a3d91b9f633)
 * [JMeter를 이용하여 스트레스 테스트](https://pandan.notion.site/Apache-JMeter-7866603a868748ad97ca7eda1f4d8cd3)
 
