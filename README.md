@@ -75,21 +75,21 @@
 ## 5. 개발 포인트
 > 자세한 내용은 링크를 참고해주세요.
 
-* [Git Flow를 따르는 협업 프로세스](https://pandan.notion.site/945341227bd64432a973d4294b89db37)
+* [Git Flow를 따르는 협업 프로세스](https://blossomwhale.notion.site/945341227bd64432a973d4294b89db37)
 * [만장일치 방식의 철저한 코드 리뷰](https://github.com/Team-PandaN/Team-PandaN-Back/pull/21)
-* [팀 자체 기술 블로그를 운영하여 문서화](https://pandan.notion.site/ab1407eab5154d108f562b84f8cef731)
-* [Mysql에서 실행계획 분석 후 쿼리 튜닝](https://www.notion.so/Mysql-0ca7bcd2a4b34333b3880693c7ed9e88)
+* [팀 자체 기술 블로그를 운영하여 문서화](https://blossomwhale.notion.site/ab1407eab5154d108f562b84f8cef731)
+* [Mysql에서 실행계획 분석 후 쿼리 튜닝](https://blossomwhale.notion.site/Mysql-0ca7bcd2a4b34333b3880693c7ed9e88)
 * 동시성 제어를 통한 DB 무결성 확보
-  * [동시 수정 제어 - Lock Manager](https://pandan.notion.site/930f626a77f642ab8f49ceffe035e3dc)
-  * [동시 이동 제어 - 비즈니스 로직과 격리 수준 차별화](https://pandan.notion.site/58f5dd7e7ab340e8bec32c720a2ccc12)
-* [Docker를 이용하여 서버 환경 구축](https://pandan.notion.site/Docker-7abd1f02b7b44883a85538bdaad56993)
-* [Jenkins Pipeline을 사용하여 CI/CD, 무중단 배포 환경 구축](https://www.notion.so/Jenkins-Pipeline-CI-CD-4415efcb1e3646e0a6c60132d9f6945e)
-* [Nginx의 Reversed-Proxy를 이용하여 로드밸런싱 및 Blue/Green 방식의 무중단 배포 적용](https://www.notion.so/Nginx-Blue-Green-fad34415851c42bd966a9a3d91b9f633)
-* [JMeter를 이용하여 스트레스 테스트](https://pandan.notion.site/Apache-JMeter-7866603a868748ad97ca7eda1f4d8cd3)
+  * [동시 수정 제어 - Lock Manager](https://blossomwhale.notion.site/930f626a77f642ab8f49ceffe035e3dc)
+  * [동시 이동 제어 - 비즈니스 로직과 격리 수준 차별화](https://blossomwhale.notion.site/58f5dd7e7ab340e8bec32c720a2ccc12)
+* [Docker를 이용하여 서버 환경 구축](https://blossomwhale.notion.site/Docker-7abd1f02b7b44883a85538bdaad56993)
+* [Jenkins Pipeline을 사용하여 CI/CD, 무중단 배포 환경 구축](https://blossomwhale.notion.site/Jenkins-Pipeline-CI-CD-4415efcb1e3646e0a6c60132d9f6945e)
+* [Nginx의 Reversed-Proxy를 이용하여 로드밸런싱 및 Blue/Green 방식의 무중단 배포 적용](https://blossomwhale.notion.site/Nginx-Blue-Green-fad34415851c42bd966a9a3d91b9f633)
+* [JMeter를 이용하여 스트레스 테스트](https://blossomwhale.notion.site/Apache-JMeter-7866603a868748ad97ca7eda1f4d8cd3)
 
 <br>
 
 ## 6. 설계
-* API 설계 - [노션 페이지](https://pandan.notion.site/98a6558c7da34f22b18a61e499ddb06d?v=732629e140434e29a74792f0c72a57d6)
+* API 설계 - [노션 페이지](https://blossomwhale.notion.site/98a6558c7da34f22b18a61e499ddb06d?v=732629e140434e29a74792f0c72a57d6)
 * ERD - [위키](https://github.com/Team-PandaN/Team-PandaN-Back/wiki/PandaN-ERD)
 * 유저 시나리오 - [Whimsical](https://whimsical.com/5xexH5xdKF2Ht6ruzf9FuH)
